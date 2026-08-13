@@ -11,6 +11,10 @@
     background:#111;
     border-bottom:1px solid #333;
   }
+  button {
+    background:#222; color:#0f0; border:1px solid #333;
+    padding:10px 20px; margin-top:10px; cursor:pointer;
+  }
 </style>
 
 <script type="module">
@@ -41,17 +45,15 @@ function stageEnter(mode){
     };
 }
 
-// 4. Startmodus
-let mode = "S";
-
-// 5. STAGE aktivieren
-loadStage().then(() => {
+// 4. Router erst starten, wenn du klickst
+function go(mode){
     const move = stageEnter(mode);
     console.log("STAGE‑MOVE:", move);
-
-    // 6. Weiterleitung in die funktionelle Szene
     window.location.href = STAGE_ROUTE[mode];
-});
+}
+
+// 5. STAGE aktivieren
+loadStage();
 
 </script>
 
@@ -62,6 +64,8 @@ loadStage().then(() => {
 <div id="stagePanel">
   Lade STAGE…
 </div>
+
+<button onclick="go('S')">Starten → Sonne</button>
 
 </body>
 </html>
