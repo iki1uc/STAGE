@@ -20,9 +20,10 @@
 <script type="module">
 
 /* -----------------------------------------
-   1. ALLXALL_LIGHT aus vec.html empfangen
+   1. VEC + AXIOM empfangen
 ------------------------------------------ */
-const ALLXALL = JSON.parse(localStorage.getItem("ALLXALL_LIGHT")) || null;
+const VEC   = JSON.parse(localStorage.getItem("ALLXALL_LIGHT")) || null;
+const AXIOM = JSON.parse(localStorage.getItem("AXIOM_VEC")) || null;
 
 /* -----------------------------------------
    2. STAGE laden
@@ -46,14 +47,15 @@ const NC = {
 };
 
 /* -----------------------------------------
-   4. STAGE‑Move erzeugen + VEC fusionieren
+   4. STAGE‑Move erzeugen
 ------------------------------------------ */
 function stageEnter(mode){
     const move = {
         XI: mode,
         IX: mode,
         x4: mode,
-        VEC: ALLXALL   // ← vec.html wird hier eingebunden
+        AXIOM,
+        VEC
     };
 
     localStorage.setItem("STAGE_MOVE", JSON.stringify(move));
@@ -63,21 +65,44 @@ function stageEnter(mode){
 }
 
 /* -----------------------------------------
-   5. Startmodus
+   5. FUSION erzeugen (VEC + AXIOM + STAGE)
+------------------------------------------ */
+function fusion(){
+    const STAGE = JSON.parse(localStorage.getItem("STAGE_MOVE")) || null;
+
+    const FUSION = {
+        TEAM: "Team² Work³",
+        VEC,
+        AXIOM,
+        STAGE,
+        MODE: localStorage.getItem("STAGE_MODE"),
+        TIME: Date.now()
+    };
+
+    localStorage.setItem("FUSION_UNIVERSUM", JSON.stringify(FUSION));
+    return FUSION;
+}
+
+/* -----------------------------------------
+   6. Startmodus
 ------------------------------------------ */
 let mode = "S";
 
 /* -----------------------------------------
-   6. STAGE laden
+   7. STAGE laden
 ------------------------------------------ */
 loadStage();
 
 /* -----------------------------------------
-   7. Start → Universum
+   8. Start → Universum
 ------------------------------------------ */
 function go(){
-    const move = stageEnter(mode);
+    const move   = stageEnter(mode);
+    const fusionData = fusion();
+
     console.log("STAGE‑MOVE:", move);
+    console.log("FUSION:", fusionData);
+
     window.location.href = NC[mode];
 }
 
