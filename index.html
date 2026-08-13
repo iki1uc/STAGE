@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>RESPO.ai · Universum Startpunkt</title>
+<title>RESPO.ai · NC‑Router</title>
 
 <style>
   body { background:#000; color:#0f0; font-family:Consolas; margin:0; }
@@ -19,41 +19,67 @@
 
 <script type="module">
 
-// 1. STAGE laden
+/* -----------------------------------------
+   1. ALLXALL_LIGHT aus vec.html empfangen
+------------------------------------------ */
+const ALLXALL = JSON.parse(localStorage.getItem("ALLXALL_LIGHT")) || null;
+
+/* -----------------------------------------
+   2. STAGE laden
+------------------------------------------ */
 async function loadStage(){
     const res = await fetch("./STAGE/index.html");
     const html = await res.text();
     document.getElementById("stagePanel").innerHTML = html;
 }
 
-// 2. NC‑Router (kosmetische Richtung)
-const STAGE_ROUTE = {
+/* -----------------------------------------
+   3. NC‑Router
+------------------------------------------ */
+const NC = {
     S: "./sys/index.html",
-    H: "./H/index.html",
-    B: "./B/index.html",
-    T: "./T/index.html",
     O: "./O/index.html",
-    D: "./D/index.html"
+    D: "./D/index.html",
+    T: "./T/index.html",
+    M: "./B/index.html",
+    H: "./H/index.html"
 };
 
-// 3. OPTA‑Move (operativ 9×9)
+/* -----------------------------------------
+   4. STAGE‑Move erzeugen + VEC fusionieren
+------------------------------------------ */
 function stageEnter(mode){
-    return {
-        XI: { in: mode },
-        IX: { out: mode },
-        x4: { move: mode }
+    const move = {
+        XI: mode,
+        IX: mode,
+        x4: mode,
+        VEC: ALLXALL   // ← vec.html wird hier eingebunden
     };
+
+    localStorage.setItem("STAGE_MOVE", JSON.stringify(move));
+    localStorage.setItem("STAGE_MODE", mode);
+
+    return move;
 }
 
-// 4. Router erst starten, wenn du klickst
-function go(mode){
+/* -----------------------------------------
+   5. Startmodus
+------------------------------------------ */
+let mode = "S";
+
+/* -----------------------------------------
+   6. STAGE laden
+------------------------------------------ */
+loadStage();
+
+/* -----------------------------------------
+   7. Start → Universum
+------------------------------------------ */
+function go(){
     const move = stageEnter(mode);
     console.log("STAGE‑MOVE:", move);
-    window.location.href = STAGE_ROUTE[mode];
+    window.location.href = NC[mode];
 }
-
-// 5. STAGE aktivieren
-loadStage();
 
 </script>
 
@@ -61,11 +87,9 @@ loadStage();
 
 <body>
 
-<div id="stagePanel">
-  Lade STAGE…
-</div>
+<div id="stagePanel">Lade STAGE…</div>
 
-<button onclick="go('S')">Starten → Sonne</button>
+<button onclick="go()">Starten → Universum</button>
 
 </body>
 </html>
