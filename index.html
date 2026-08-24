@@ -794,15 +794,13 @@ setTimeout(function() {
 
     <script>
 function pump(segment){
-    console.log("PUMPE: ", segment);
-
     const flow = {
-        "HY":   ["3","9","81","3"],
-        "PE":   ["9","81","◆","△","▣"],
-        "PER":  ["3","9","81","756","27","▣","3"],
-        "TRANS":["◎","81","◆","△"],
-        "WARB": ["81","◆","△","27"],
-        "KANAL":["756","27","▣"],
+        HY:   ["3","9","81","3"],
+        PE:   ["9","81","◆","△","▣"],
+        PER:  ["3","9","81","756","27","▣","3"],
+        TRANS:["◎","81","◆","△"],
+        WARB: ["81","◆","△","27"],
+        KANAL:["756","27","▣"],
         "TMP-alpha":["3","◎","27"],
         "TMP-beta":["9","81","▣"],
         "TMP-gamma":["◆","756","△"]
@@ -810,6 +808,7 @@ function pump(segment){
 
     return flow[segment];
 }
+
 </script>
 <style>
   #iki1uc-id.segment-matrix {
