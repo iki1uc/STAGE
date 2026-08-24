@@ -835,6 +835,15 @@ function pump(segment){
   }
 </style>
 
+<script type="module">
+    import { VEC9_729 } from "./vec9.js";
 
+    window.onload = () => {
+        const out = document.getElementById("output");
+        out.innerHTML = VEC9_729.slice(0,20).map(v => v.toString()).join("<br>");
+    };
+</script>
+
+    
 </body>
 </html>
