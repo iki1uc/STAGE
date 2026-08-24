@@ -811,6 +811,30 @@ function pump(segment){
     return flow[segment];
 }
 </script>
+<style>
+  #iki1uc-id.segment-matrix {
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:5px;
+    width:95%;
+    margin:auto;
+  }
+
+  .seg {
+    background:#000;
+    border:1px solid #0f0;
+    padding:10px;
+    font-size:14px;
+    line-height:1.4;
+    color:#0f0;
+  }
+
+  .seg[data-type]::before {
+    content: "[" attr(data-type) "] ";
+    color:#0f0;
+    font-weight:bold;
+  }
+</style>
 
 
 </body>
