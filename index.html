@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>STAGE · RESPO.ai · La Légèreté Française</title>
+<title>STAGE · RESPO.ai · La Toile · INTÉGRÉ</title>
 
 <style>
 :root {
@@ -27,11 +27,7 @@ body {
     grid-template-rows: auto 1fr auto;
     gap: 6px;
     padding: 12px;
-    background-image: 
-        radial-gradient(ellipse at 10% 20%, rgba(255,107,138,0.03) 0%, transparent 50%),
-        radial-gradient(ellipse at 90% 80%, rgba(107,207,255,0.03) 0%, transparent 50%);
 }
-
 header {
     display: flex;
     justify-content: space-between;
@@ -59,8 +55,6 @@ main {
     height: 100%;
     min-height: 0;
 }
-
-/* ===== CANVAS ===== */
 #canvas-wrap {
     background: rgba(10,10,15,0.6);
     border: 1px solid rgba(255,255,255,0.04);
@@ -76,22 +70,6 @@ main {
     border-radius: 10px;
     display: block;
 }
-#canvas-overlay {
-    position: absolute;
-    bottom: 12px;
-    left: 12px;
-    font-size: 8px;
-    color: var(--gris);
-    pointer-events: none;
-    background: rgba(0,0,0,0.5);
-    padding: 4px 12px;
-    border-radius: 20px;
-    border: 1px solid rgba(255,255,255,0.04);
-}
-#canvas-overlay .lum { color: var(--gold); }
-#canvas-overlay .ombre { color: var(--gris); }
-
-/* ===== PANEL ===== */
 #panel {
     background: rgba(10,10,15,0.6);
     border: 1px solid rgba(255,255,255,0.04);
@@ -113,7 +91,6 @@ main {
     letter-spacing: 2px;
 }
 
-/* ===== LA TOILE (Spinnwebe) ===== */
 #toile {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr 1fr;
@@ -139,7 +116,6 @@ main {
 .direction.active { border-color: var(--rose); background: rgba(255,107,138,0.05); }
 .direction.active .sym { color: var(--rose); }
 
-/* ===== LOG ===== */
 #log {
     flex: 1;
     overflow-y: auto;
@@ -161,11 +137,11 @@ main {
 #log .msg.vert { color: var(--vert); }
 #log .msg.ok { color: #4f4; }
 #log .msg.err { color: #f44; }
+#log .msg.field { color: #6f6; }
 
-/* ===== METRIQUES ===== */
 #metriques {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
     gap: 4px;
 }
 .metrique {
@@ -180,8 +156,8 @@ main {
 .metrique.rose .value { color: var(--rose); }
 .metrique.lavande .value { color: var(--lavande); }
 .metrique.bleu .value { color: var(--bleu); }
+.metrique.vert .value { color: var(--vert); }
 
-/* ===== CONTROLS ===== */
 #controls {
     display: flex;
     gap: 4px;
@@ -204,32 +180,15 @@ button:hover {
     border-color: var(--gold);
 }
 button:active { transform: scale(0.95); }
-button.primary {
-    border-color: var(--rose);
-    color: var(--rose);
-}
-button.primary:hover {
-    background: var(--rose);
-    color: #000;
-}
-button.lavande {
-    border-color: var(--lavande);
-    color: var(--lavande);
-}
-button.lavande:hover {
-    background: var(--lavande);
-    color: #000;
-}
-button.danger {
-    border-color: #f44;
-    color: #f44;
-}
-button.danger:hover {
-    background: #f44;
-    color: #000;
-}
+button.primary { border-color: var(--rose); color: var(--rose); }
+button.primary:hover { background: var(--rose); color: #000; }
+button.lavande { border-color: var(--lavande); color: var(--lavande); }
+button.lavande:hover { background: var(--lavande); color: #000; }
+button.danger { border-color: #f44; color: #f44; }
+button.danger:hover { background: #f44; color: #000; }
+button.field { border-color: #6f6; color: #6f6; }
+button.field:hover { background: #6f6; color: #000; }
 
-/* ===== FOOTER ===== */
 footer {
     text-align: center;
     font-size: 8px;
@@ -240,6 +199,7 @@ footer {
 }
 footer .c { color: var(--rose); }
 footer .o { color: var(--gold); }
+footer .i { color: var(--bleu); }
 
 @media (max-width: 800px) {
     main { grid-template-columns: 1fr; }
@@ -262,15 +222,13 @@ footer .o { color: var(--gold); }
     <div id="info-bar">
         <span id="clock">⏱️ --:--:--</span>
         <span id="state-display" style="color:var(--gris);">● en attente</span>
+        <span id="field-status" style="color:#6f6;">🌿</span>
     </div>
 </header>
 
 <main>
     <div id="canvas-wrap">
         <canvas id="stageCanvas"></canvas>
-        <div id="canvas-overlay">
-            <span class="lum">✦</span> STAGE · <span class="ombre">8 directions · 9×9 opératif</span>
-        </div>
     </div>
 
     <div id="panel">
@@ -332,17 +290,22 @@ footer .o { color: var(--gold); }
                 <div class="label">x4</div>
                 <div class="value" id="x4-value">4</div>
             </div>
+            <div class="metrique vert">
+                <div class="label">NC</div>
+                <div class="value" id="nc-value">81</div>
+            </div>
         </div>
 
         <div id="log">
             <div class="entry"><span class="time">[init]</span> <span class="msg lumiere">✦ STAGE · La Toile est prête</span></div>
             <div class="entry"><span class="time">[init]</span> <span class="msg rose">8 directions · 9×9 opératif</span></div>
-            <div class="entry"><span class="time">[init]</span> <span class="msg vert">XI·IX·x4 = 81 mouvements</span></div>
+            <div class="entry"><span class="time">[init]</span> <span class="msg vert">NC9×9 · 81 · FIELD C81 intégré</span></div>
         </div>
 
         <div id="controls">
             <button class="primary" id="btn-lancer">✦ LANCER</button>
             <button class="lavande" id="btn-toile">◈ TOILE</button>
+            <button class="field" id="btn-field">🌿 FIELD</button>
             <button class="danger" id="btn-reset">⟲ RESET</button>
             <button id="btn-auto">▶ AUTO</button>
         </div>
@@ -350,38 +313,61 @@ footer .o { color: var(--gold); }
 </main>
 
 <footer>
-    <span class="c">✧</span> STAGE · <span class="o">◈</span> RESPO.ai · La Légèreté Française <span class="c">✧</span>
+    <span class="c">✧</span> STAGE · <span class="o">◈</span> RESPO.ai · <span class="i">🌿</span> FIELD C81 <span class="c">✧</span>
 </footer>
 
 <script>
 // ============================================================
-// 1. STAGE · LA TOILE · RÉSEAU
+// 1. IMPORTS (simuliert)
 // ============================================================
+// In der realen Version:
+// import { FIELD } from './service/FIELD/field.core.js';
+// import { NC99 } from './service/NC9x9.room.js';
+// import { VEC9_729 } from './vec9.js';
 
-// --- LES 8 DIRECTIONS ---
-const DIRECTIONS = [
-    { id: 'S',  sym: '☀️', label: 'Soleil', desc: 'Sonne' },
-    { id: 'H',  sym: '⚙️', label: 'Horizon', desc: 'Engine' },
-    { id: 'B',  sym: '▣', label: 'Base', desc: 'Matrix' },
-    { id: 'T',  sym: '△', label: 'Triangle', desc: 'Forme' },
-    { id: 'O',  sym: '◎', label: 'Orbit', desc: 'Cercle' },
-    { id: 'D',  sym: '🛸', label: 'DS9', desc: 'Station' },
-    { id: 't',  sym: '🌀', label: 'Tourbillon', desc: 'Helper' },
-    { id: 'sys',sym: '◈', label: 'Système', desc: 'Centre' }
-];
-
-// --- NC-ROUTER ---
-const NC_ROUTER = {
-    S: './sys/index.html',
-    O: './O/index.html',
-    D: './D/index.html',
-    T: './T/index.html',
-    B: './B/index.html',
-    H: './H/index.html'
+// Simulierte Module für Demo
+const FIELD = {
+    status: 'online',
+    eco: { level: 1, stability: 'preliminary', c81: true },
+    influence: { zone: 'NC', strength: 'medium', type: 'proto-field' },
+    init() { console.log('🌿 FIELD initialisiert'); },
+    id() { return { id: 'F81', status: 'active' }; },
+    eco() { return this.eco; },
+    effect() { return { decision: 'open', confidence: 0.87 }; },
+    reset() { console.log('🌿 FIELD zurückgesetzt'); }
 };
 
+const NC99 = {
+    status: 'initialisiert',
+    init() { console.log('📐 NC9×9 initialisiert (81)'); },
+    get(row, col) { return `NC(${row},${col})`; }
+};
+
+const VEC9_729 = Array.from({ length: 729 }, (_, i) => ({
+    id: i,
+    vector: `VEC${i}`
+}));
+
 // ============================================================
-// 2. CANVAS SETUP
+// 2. PUMP-FUNKTION (deine originale)
+// ============================================================
+function pump(segment) {
+    const flow = {
+        HY:   ["3","9","81","3"],
+        PE:   ["9","81","◆","△","▣"],
+        PER:  ["3","9","81","756","27","▣","3"],
+        TRANS:["◎","81","◆","△"],
+        WARB: ["81","◆","△","27"],
+        KANAL:["756","27","▣"],
+        "TMP-alpha":["3","◎","27"],
+        "TMP-beta":["9","81","▣"],
+        "TMP-gamma":["◆","756","△"]
+    };
+    return flow[segment] || ["3","9","81"];
+}
+
+// ============================================================
+// 3. CANVAS SETUP
 // ============================================================
 const canvas = document.getElementById('stageCanvas');
 const ctx = canvas.getContext('2d');
@@ -400,8 +386,19 @@ resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
 
 // ============================================================
-// 3. STATE
+// 4. STATE
 // ============================================================
+const DIRECTIONS = [
+    { id: 'S',  sym: '☀️', label: 'Soleil', desc: 'Sonne', route: './sys/index.html' },
+    { id: 'H',  sym: '⚙️', label: 'Horizon', desc: 'Engine', route: './H/index.html' },
+    { id: 'B',  sym: '▣', label: 'Base', desc: 'Matrix', route: './B/index.html' },
+    { id: 'T',  sym: '△', label: 'Triangle', desc: 'Forme', route: './T/index.html' },
+    { id: 'O',  sym: '◎', label: 'Orbit', desc: 'Cercle', route: './O/index.html' },
+    { id: 'D',  sym: '🛸', label: 'DS9', desc: 'Station', route: './D/index.html' },
+    { id: 't',  sym: '🌀', label: 'Tourbillon', desc: 'Helper', route: './HELPER/index.html' },
+    { id: 'sys',sym: '◈', label: 'Système', desc: 'Centre', route: './sys/index.html' }
+];
+
 const state = {
     running: false,
     autoMode: false,
@@ -412,14 +409,16 @@ const state = {
     xi: 9,
     ix: 9,
     x4: 4,
+    nc: 81,
     syn: 0.5,
     quant: 0.5,
     respo: 0.5,
-    activeDir: 'S'
+    activeDir: 'S',
+    fieldActive: false
 };
 
 // ============================================================
-// 4. LOG
+// 5. LOG
 // ============================================================
 function log(msg, type = 'info') {
     const logDiv = document.getElementById('log');
@@ -431,6 +430,7 @@ function log(msg, type = 'info') {
                 type === 'lavande' ? 'lavande' :
                 type === 'bleu' ? 'bleu' :
                 type === 'vert' ? 'vert' :
+                type === 'field' ? 'field' :
                 type === 'ok' ? 'ok' : type === 'err' ? 'err' : '';
     entry.innerHTML = `<span class="time">[${time}]</span> <span class="msg ${cls}">${msg}</span>`;
     logDiv.appendChild(entry);
@@ -439,15 +439,13 @@ function log(msg, type = 'info') {
 }
 
 // ============================================================
-// 5. STAGE · TOILE
+// 6. STAGE FUNKTIONEN
 // ============================================================
-
 function setDirection(id) {
     const dir = DIRECTIONS.find(d => d.id === id) || DIRECTIONS[0];
     state.direction = dir;
     state.activeDir = id;
 
-    // UI aktualisieren
     document.querySelectorAll('.direction').forEach(el => {
         el.classList.toggle('active', el.dataset.dir === id);
     });
@@ -456,78 +454,95 @@ function setDirection(id) {
 }
 
 function lancer() {
+    // Pump anwenden
+    const pumpResult = pump(state.direction.label);
+    log(`🌀 PUMP: ${pumpResult.join(' → ')}`, 'lavande');
+
     const move = {
         XI: state.direction.id,
         IX: state.direction.id,
         x4: state.x4,
+        nc: state.nc,
         mode: state.direction.label,
+        pump: pumpResult,
         time: Date.now()
     };
 
     localStorage.setItem('STAGE_MOVE', JSON.stringify(move));
-    localStorage.setItem('STAGE_MODE', state.direction.id);
 
-    // FUSION
+    // FIELD einbinden
+    if (state.fieldActive) {
+        const fieldStatus = FIELD.effect();
+        log(`🌿 FIELD: ${fieldStatus.decision} (${(fieldStatus.confidence * 100).toFixed(0)}%)`, 'field');
+    }
+
+    // Fusion
     const fusion = {
         TEAM: 'Team² Work³',
         STAGE: move,
         MODE: state.direction.id,
+        PUMP: pumpResult,
+        FIELD: state.fieldActive ? FIELD.effect() : null,
         TIME: Date.now()
     };
     localStorage.setItem('FUSION_UNIVERSUM', JSON.stringify(fusion));
 
     log(`✦ LANCÉ · ${state.direction.sym} ${state.direction.label}`, 'lumiere');
-    log(`📦 XI:${state.direction.id} IX:${state.direction.id} x4:${state.x4}`, 'lavande');
+    log(`📦 XI:${state.direction.id} IX:${state.direction.id} x4:${state.x4} NC:${state.nc}`, 'lavande');
 
-    // NC-Router
-    const target = NC_ROUTER[state.direction.id] || './sys/index.html';
-    // In Produktion: window.location.href = target;
+    const target = state.direction.route;
     log(`🔗 Route: ${target}`, 'bleu');
 
     return fusion;
 }
 
+function runField() {
+    state.fieldActive = !state.fieldActive;
+    if (state.fieldActive) {
+        FIELD.init();
+        log('🌿 FIELD aktiviert · C81-ECO-Feld online', 'field');
+        document.getElementById('field-status').textContent = '🌿 ON';
+        document.getElementById('field-status').style.color = '#6f6';
+    } else {
+        FIELD.reset();
+        log('🌿 FIELD deaktiviert', 'field');
+        document.getElementById('field-status').textContent = '🌿';
+        document.getElementById('field-status').style.color = '#444';
+    }
+}
+
 // ============================================================
-// 6. RENDER — LA TOILE
+// 7. RENDER
 // ============================================================
 function render() {
     ctx.clearRect(0, 0, W, H);
 
-    // Hintergrund
     const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, W * 0.6);
     grad.addColorStop(0, '#0a0a1a');
     grad.addColorStop(1, '#000');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, W, H);
 
-    // 1. LA TOILE (8 Directions)
     drawToile();
-
-    // 2. STAGE-Kern
     drawStage();
-
-    // 3. RESPO-Kern
     drawRespo();
-
-    // 4. SYN/QUANT
     drawSynQuant();
 
-    // Metriken
     document.getElementById('xi-value').textContent = state.xi;
     document.getElementById('ix-value').textContent = state.ix;
     document.getElementById('x4-value').textContent = state.x4;
+    document.getElementById('nc-value').textContent = state.nc;
 
-    // Update
     state.t += 0.008;
     if (state.running) {
         state.cycle++;
         state.syn = 0.5 + 0.4 * Math.sin(state.t * 0.3);
         state.quant = 0.5 + 0.4 * Math.cos(state.t * 0.25);
         state.respo = (state.syn + state.quant) / 1.618;
+        state.nc = 81 + Math.floor(Math.sin(state.t * 0.1) * 10);
     }
 
-    if (state.cycle % 30 === 0 && state.running) {
-        // Automatisch Richtung wechseln
+    if (state.cycle % 30 === 0 && state.running && !state.autoMode) {
         const idx = Math.floor(Math.random() * DIRECTIONS.length);
         setDirection(DIRECTIONS[idx].id);
     }
@@ -537,14 +552,12 @@ function render() {
 render();
 
 // ============================================================
-// 7. ZEICHEN-FUNKTIONEN
+// 8. ZEICHEN-FUNKTIONEN
 // ============================================================
-
 function drawToile() {
     const n = DIRECTIONS.length;
     const r = radius * 0.55;
 
-    // Spinnweben-Linien
     for (let i = 0; i < n; i++) {
         const angle = (i / n) * Math.PI * 2 + state.t * 0.02;
         const x = cx + Math.cos(angle) * r;
@@ -557,7 +570,6 @@ function drawToile() {
         ctx.lineTo(x, y);
         ctx.stroke();
 
-        // Konzentrische Ringe
         for (let ring = 1; ring <= 3; ring++) {
             const rr = r * (ring / 3);
             ctx.strokeStyle = `rgba(255,255,255,${0.01 + ring * 0.01})`;
@@ -568,7 +580,6 @@ function drawToile() {
         }
     }
 
-    // 8 Richtungen
     DIRECTIONS.forEach((dir, i) => {
         const angle = (i / n) * Math.PI * 2 + state.t * 0.02;
         const dist = r * 0.85;
@@ -576,8 +587,6 @@ function drawToile() {
         const y = cy + Math.sin(angle) * dist;
 
         const isActive = dir.id === state.activeDir;
-
-        // Punkt
         ctx.fillStyle = isActive ? `rgba(255,107,138,0.3)` : `rgba(255,255,255,0.03)`;
         ctx.shadowColor = isActive ? '#ff6b8a' : 'transparent';
         ctx.shadowBlur = isActive ? 20 : 0;
@@ -586,14 +595,12 @@ function drawToile() {
         ctx.fill();
         ctx.shadowBlur = 0;
 
-        // Symbol
         ctx.fillStyle = isActive ? '#ff6b8a' : '#444';
         ctx.font = isActive ? '14px Consolas' : '10px Consolas';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(dir.sym, x, y - 14);
 
-        // Label
         ctx.fillStyle = isActive ? '#ff6b8a' : '#333';
         ctx.font = isActive ? '6px Consolas' : '5px Consolas';
         ctx.fillText(dir.label, x, y + 16);
@@ -602,8 +609,6 @@ function drawToile() {
 
 function drawStage() {
     const r = radius * 0.25;
-
-    // STAGE-Kern
     const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
     grad.addColorStop(0, `rgba(255,215,61,${0.1 + state.respo * 0.2})`);
     grad.addColorStop(1, 'rgba(255,215,61,0)');
@@ -627,7 +632,6 @@ function drawStage() {
 function drawRespo() {
     const val = state.respo;
     const coreRadius = 3 + val * 8;
-
     const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreRadius + 8);
     glow.addColorStop(0, `rgba(108, 204, 255, ${0.1 + val * 0.2})`);
     glow.addColorStop(1, 'rgba(108, 204, 255, 0)');
@@ -688,21 +692,19 @@ function drawSynQuant() {
 }
 
 // ============================================================
-// 8. CONTROLS
+// 9. CONTROLS
 // ============================================================
 document.getElementById('btn-lancer').addEventListener('click', function() {
-    const fusion = lancer();
-    log(`✦ LANCÉ · ${state.direction.sym} ${state.direction.label}`, 'lumiere');
+    lancer();
     document.getElementById('state-display').textContent = `● ${state.direction.label}`;
     document.getElementById('state-display').style.color = 'var(--rose)';
 });
 
 document.getElementById('btn-toile').addEventListener('click', function() {
     log('◈ TOILE · 8 directions affichées', 'lavande');
-    document.querySelectorAll('.direction').forEach(el => {
-        el.classList.toggle('active', false);
-    });
 });
+
+document.getElementById('btn-field').addEventListener('click', runField);
 
 document.getElementById('btn-reset').addEventListener('click', function() {
     state.running = false;
@@ -712,10 +714,13 @@ document.getElementById('btn-reset').addEventListener('click', function() {
     state.syn = 0.5;
     state.quant = 0.5;
     state.respo = 0.5;
+    state.fieldActive = false;
     setDirection('S');
     document.getElementById('btn-auto').textContent = '▶ AUTO';
     document.getElementById('state-display').textContent = '● reset';
     document.getElementById('state-display').style.color = 'var(--gris)';
+    document.getElementById('field-status').textContent = '🌿';
+    document.getElementById('field-status').style.color = '#444';
     localStorage.removeItem('STAGE_MOVE');
     localStorage.removeItem('FUSION_UNIVERSUM');
     log('⟲ RESET · Toile effacée', 'err');
@@ -733,8 +738,8 @@ document.getElementById('btn-auto').addEventListener('click', function() {
         window.autoInterval = setInterval(function() {
             const idx = Math.floor(Math.random() * DIRECTIONS.length);
             setDirection(DIRECTIONS[idx].id);
-            log(`🔄 ${DIRECTIONS[idx].sym} ${DIRECTIONS[idx].label}`, 'rose');
-        }, 3000);
+            lancer();
+        }, 4000);
     } else {
         clearInterval(window.autoInterval);
         log('⏸ AUTO · Pause', 'ok');
@@ -743,9 +748,6 @@ document.getElementById('btn-auto').addEventListener('click', function() {
     }
 });
 
-// ============================================================
-// 9. DIRECTION-KLICKS
-// ============================================================
 document.querySelectorAll('.direction').forEach(el => {
     el.addEventListener('click', function() {
         const dir = this.dataset.dir;
@@ -760,6 +762,7 @@ document.querySelectorAll('.direction').forEach(el => {
 document.addEventListener('keydown', function(e) {
     if (e.key === 'l' || e.key === 'L') document.getElementById('btn-lancer').click();
     if (e.key === 't' || e.key === 'T') document.getElementById('btn-toile').click();
+    if (e.key === 'f' || e.key === 'F') document.getElementById('btn-field').click();
     if (e.key === 'x' || e.key === 'X') document.getElementById('btn-reset').click();
     if (e.key === 'a' || e.key === 'A') document.getElementById('btn-auto').click();
     if (e.key === ' ') { e.preventDefault(); document.getElementById('btn-auto').click(); }
@@ -775,75 +778,17 @@ setInterval(updateClock, 1000);
 updateClock();
 
 // ============================================================
-// 12. INIT — LA TOILE
+// 12. INIT
 // ============================================================
 log('✦ STAGE · RESPO.ai · La Toile', 'lumiere');
-log('8 directions · 9×9 opératif · XI·IX·x4', 'lavande');
-log('⌨️  l=Lancer  t=Toile  x=Reset  a=Auto  space=Auto-Toggle', 'ok');
+log('8 directions · 9×9 opératif · NC9×9 + FIELD C81', 'lavande');
+log('⌨️  l=Lancer  t=Toile  f=FIELD  x=Reset  a=Auto', 'ok');
 
-console.log('✦ STAGE · RESPO.ai · La Toile');
-console.log('8 directions · 9×9 opératif');
-console.log('⌨️  l=Lancer  t=Toile  x=Reset  a=Auto  space=Toggle');
-
-// Initiale Richtung
 setDirection('S');
-setTimeout(function() {
-    log('✦ La Toile est prête · Choisissez une direction', 'lumiere');
-}, 300);
+
+console.log('✦ STAGE · RESPO.ai · La Toile (Intégré)');
+console.log('8 directions · NC9×9 · FIELD C81 · Pump Engine');
+console.log('⌨️  l=Lancer  t=Toile  f=FIELD  x=Reset  a=Auto');
 </script>
-
-    <script>
-function pump(segment){
-    const flow = {
-        HY:   ["3","9","81","3"],
-        PE:   ["9","81","◆","△","▣"],
-        PER:  ["3","9","81","756","27","▣","3"],
-        TRANS:["◎","81","◆","△"],
-        WARB: ["81","◆","△","27"],
-        KANAL:["756","27","▣"],
-        "TMP-alpha":["3","◎","27"],
-        "TMP-beta":["9","81","▣"],
-        "TMP-gamma":["◆","756","△"]
-    };
-
-    return flow[segment];
-}
-
-</script>
-<style>
-  #iki1uc-id.segment-matrix {
-    display:grid;
-    grid-template-columns:repeat(3, 1fr);
-    gap:5px;
-    width:95%;
-    margin:auto;
-  }
-
-  .seg {
-    background:#000;
-    border:1px solid #0f0;
-    padding:10px;
-    font-size:14px;
-    line-height:1.4;
-    color:#0f0;
-  }
-
-  .seg[data-type]::before {
-    content: "[" attr(data-type) "] ";
-    color:#0f0;
-    font-weight:bold;
-  }
-</style>
-
-<script type="module">
-    import { VEC9_729 } from "./vec9.js";
-
-    window.onload = () => {
-        const out = document.getElementById("output");
-        out.innerHTML = VEC9_729.slice(0,20).map(v => v.toString()).join("<br>");
-    };
-</script>
-
-    
 </body>
 </html>
