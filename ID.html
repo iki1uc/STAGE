@@ -2,29 +2,84 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>STAGE · Identität</title>
+<title>ALL · ID · Master-Sortierer · Segment-Matrix 6.0</title>
 
 <style>
-  body { background:#000; color:#0f0; font-family:Consolas; padding:20px; }
-  h1 { color:#6cf; }
-  pre { background:#111; padding:10px; border:1px solid #333; }
-</style>
+  body {
+    background:#000;
+    color:#0f0;
+    font-family:Consolas;
+    padding:20px;
+    text-align:center;
+  }
 
+  #iki1uc-id.segment-matrix {
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:20px;
+    width:90%;
+    margin:auto;
+  }
+
+  .seg {
+    border:1px solid #0f0;
+    padding:20px;
+    background:#111;
+    font-size:18px;
+    line-height:1.6;
+  }
+
+  .seg[data-type]::before {
+    content: attr(data-type) " · ";
+    color:#6cf;
+    font-weight:bold;
+  }
+</style>
 </head>
+
 <body>
 
-<h1>STAGE · Identität</h1>
+<h1>ALL · ID · Master-Sortierer · Segment-Matrix 6.0</h1>
 
-<pre>
-STAGE ist eine kosmetische Durchlassachse.
-Sie zeigt die aktive Richtung im RESPO.ai‑Universum.
+<div id="iki1uc-id" class="segment-matrix">
 
-Operativ arbeitet das System im 9×9‑Raster:
-XI · IX · x4
+  <div class="seg" data-type="HY">
+    ◉ → 3 → 9 → ◎ → 81 → 3 ↺
+  </div>
 
-STAGE ist die visuelle Spinnwebe,
-die alle 8 Richtungen verbindet.
-</pre>
+  <div class="seg" data-type="PE">
+    ◉ → 9 → ◎ → 81 → ◆ → △ → ▣
+  </div>
+
+  <div class="seg" data-type="PER">
+    3 → 9 → 81 → ◆ → 756 → △ → 27 → ▣ → 3
+  </div>
+
+  <div class="seg" data-type="TRANS">
+    ◎ → 81 → ◆ → △
+  </div>
+
+  <div class="seg" data-type="WARB">
+    81 → ◆ → △ → 27
+  </div>
+
+  <div class="seg" data-type="KANAL">
+    756 → △ → 27 → ▣
+  </div>
+
+  <div class="seg" data-type="TMP-alpha">
+    3 → ◎ → 27
+  </div>
+
+  <div class="seg" data-type="TMP-beta">
+    9 → 81 → ▣
+  </div>
+
+  <div class="seg" data-type="TMP-gamma">
+    ◆ → 756 → △
+  </div>
+
+</div>
 
 </body>
 </html>
