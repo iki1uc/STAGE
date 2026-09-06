@@ -1,1 +1,16 @@
+// NC.suite — bündelt alle NC-Module
+
+window.NC = {
+  figur: null,
+  kraft: null,
+  space: null,
+  time: null,
+
+  init() {
+    this.figur = window.NC_FIGUR || {};
+    this.kraft = window.NC_KRAFT || {};
+    this.space = window.NC_SPACE || {};
+    this.time  = window.NC_TIME  || {};
+  }
+};
 
