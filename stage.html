@@ -1,99 +1,190 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌀 Etage 1 · IKI1UC Axiom-Orbit-System</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b0b0b; color:#e0e0e0; font-family:Consolas, monospace; }
-  .content { max-width:700px; margin:0 auto; padding:20px; }
-  h1 { color:#6cf; font-size:20px; margin-bottom:14px; }
-  #orbitCanvas { background:#000; border:1px solid #333; display:block; margin-bottom:10px; }
-  .btn { padding:8px 14px; background:#222; color:#fff; border:1px solid #555; cursor:pointer; font-family:inherit; }
-  .btn:hover { border-color:#6cf; }
-  #log { background:#111; padding:10px; height:140px; overflow:auto; font-size:12px; margin-top:6px; }
-  h3 { color:#f0d080; margin-top:16px; font-size:13px; }
-  p.axis { color:#c0d0d0; }
-  .note {
-    background:#1a1400; border:1px solid #4a3a00; color:#f0d080;
-    padding:8px 12px; border-radius:6px; font-size:11px; margin-bottom:14px;
-  }
-</style>
-<!-- gemeinsames Aufzug-Skript: Navigation + geteilte Fähigkeiten/State -->
-<script src="../aufzug.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ETAGE · arg.sync · Brücke</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: #05070c;
+      font-family: 'Segoe UI', 'Consolas', monospace;
+      color: #c0d0d0;
+      padding: 4px;
+    }
+    #status {
+      font-size: 9px;
+      color: #5a7a8a;
+      border-bottom: 1px solid rgba(100,180,255,0.04);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    #status .modul-name { color: #b388ff; font-weight:bold; }
+    #status .sync-badge { color: #f0d080; }
+    iframe {
+      width: 100%;
+      height: calc(100vh - 60px);
+      border: 0;
+      background: #05070c;
+      border-radius: 8px;
+    }
+    .mini-controls {
+      display: flex;
+      gap: 6px;
+      margin-top: 4px;
+    }
+    .mini-controls button {
+      background: rgba(20,28,36,0.4);
+      border: 1px solid rgba(120,160,190,0.06);
+      color: #9ab0c0;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 8px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .mini-controls button:hover {
+      background: rgba(40,70,90,0.2);
+      border-color: rgba(160,200,240,0.1);
+      color: #d0e8f8;
+    }
+    .mini-controls button.sync {
+      border-color: rgba(179,136,255,0.1);
+      color: #b388ff;
+    }
+  </style>
 </head>
 <body>
-<div class="content">
-  <h1>IKI1UC · Axiom-Orbit-Matrix</h1>
 
-  <div class="note">
-    ℹ️ Die ursprünglichen &lt;script src="core.js"&gt;, "SYS.js", "axiom.js", "rawator*.js", "RESPO.room.js" usw. wurden entfernt,
-    da diese Dateien hier nicht vorliegen und die Seite sonst mit 404-Fehlern nicht läuft.
-    Falls du sie hast, leg sie einfach in diesen Ordner und binde sie oben wieder ein — der Orbit-Code unten läuft eigenständig.
+  <div id="status">
+    <span><span class="modul-name" id="modulLabel">ETAGE</span> · <span id="moduleStatus">bereit</span></span>
+    <span><span class="sync-badge">●</span> <span id="syncCount">0</span> SYNCs</span>
   </div>
 
-  <canvas id="orbitCanvas" width="600" height="300"></canvas>
-  <button class="btn" onclick="stepOrbit()">Orbit-Schritt</button>
-  <button class="btn" onclick="resetOrbit()">Reset</button>
+  <iframe id="childFrame" src="index.html"></iframe>
 
-  <h3>IQQ-Achse</h3>
-  <p class="axis">9 → 3 → 9 → 3</p>
-
-  <h3>OCTA-Orbit</h3>
-  <p class="axis">◎ ◉ ◆ △ ▣ ↺</p>
-
-  <h3>A81-Potenzen</h3>
-  <p class="axis">27 · 81 · 243 · 729</p>
-
-  <h3>Log (diese Etage)</h3>
-  <div id="log">System geladen.</div>
-</div>
+  <div class="mini-controls">
+    <button class="sync" id="btnSyncUp">🔄 SYNC an Root</button>
+    <button id="btnReload">⟲ Neuladen</button>
+    <button id="btnReset">↩️ Reset</button>
+  </div>
 
 <script>
-  const orbit = ["◉","↗","↘","3","9","↘","↗","◎","↗","↘","3","9","↘","↗","◎","↗","↘","81","◆","↘","↗","△","↗","↘","27","▣","↘","↗","3","↺"];
-  let index = 0;
+"use strict";
+/* ================================================================
+   ETAGE · arg.sync – Brücke zwischen Root und Modul-Index
+   Diese Seite liegt in jedem Unterordner (api.cntrl, cpu, gpu, ram, 3, NEWADA)
+   und lädt die dortige index.html in einem iframe.
+   Sie leitet arg.sync-Nachrichten von Root an das Kind weiter und umgekehrt.
+   ================================================================ */
 
-  function drawOrbit() {
-    const c = document.getElementById("orbitCanvas");
-    const ctx = c.getContext("2d");
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, c.width, c.height);
-    ctx.fillStyle = "#6cf";
-    ctx.font = "40px Consolas";
-    ctx.fillText(orbit[index], 280, 150);
-  }
+const modulName = document.getElementById('modulLabel');
+const moduleStatus = document.getElementById('moduleStatus');
+const syncCountSpan = document.getElementById('syncCount');
+const childFrame = document.getElementById('childFrame');
+let syncCounter = 0;
 
-  function stepOrbit() {
-    index++;
-    if (index >= orbit.length) {
-      index = orbit.length - 1; // sauberer Stopp statt Absturz am Ende der Matrix
-      log("Orbit-Ende erreicht — Index bleibt auf letzter Position.");
-    } else {
-      log("Orbit-Schritt: " + orbit[index]);
+// ─── Modul-Name aus Pfad extrahieren ──────────────────────────────
+// Nimmt den letzten Ordner der URL (z.B. .../api.cntrl/etage.html → api.cntrl)
+const pathParts = window.location.pathname.split('/');
+const folderName = pathParts[pathParts.length - 2] || 'ETAGE';
+modulName.textContent = folderName;
+
+// ─── Status-Update ──────────────────────────────────────────────
+function setStatus(text, color = '#5a7a8a') {
+  moduleStatus.textContent = text;
+  moduleStatus.style.color = color;
+}
+
+setStatus('geladen', '#8cf0d0');
+
+// ─── SYNC nach oben (Root) ──────────────────────────────────────
+function syncToRoot(payload) {
+  syncCounter++;
+  syncCountSpan.textContent = syncCounter;
+  const msg = {
+    type: 'arg.sync',
+    from: folderName,
+    payload: payload || 'sync:etage'
+  };
+  window.parent.postMessage(msg, '*');
+  setStatus(`SYNC → Root: ${msg.payload}`, '#b388ff');
+  log(`⬆ SYNC an Root: ${msg.payload}`);
+}
+
+// ─── SYNC von oben (Root) empfangen ──────────────────────────────
+function receiveFromRoot(event) {
+  const data = event.data;
+  if (data && data.type === 'arg.sync') {
+    syncCounter++;
+    syncCountSpan.textContent = syncCounter;
+    setStatus(`SYNC ← Root: ${data.payload}`, '#f0d080');
+    log(`⬇ SYNC von Root: ${data.payload}`);
+
+    // An das Kind (index.html) weiterleiten
+    try {
+      if (childFrame.contentWindow) {
+        childFrame.contentWindow.postMessage({
+          type: 'arg.sync',
+          payload: data.payload,
+          from: 'etage'
+        }, '*');
+      }
+    } catch(e) {
+      // Cross-Origin-Fehler ignorieren – Kind ist im selben Ordner, sollte gehen
     }
-    drawOrbit();
-    // Fähigkeit weiterreichen: aktueller Orbit-Index wird für andere Etagen/Root sichtbar
-    Aufzug.setSharedValue('orbitIndex', index);
-    Aufzug.log(`Orbit-Schritt ausgeführt (Index ${index}: "${orbit[index]}")`);
   }
+}
 
-  function resetOrbit() {
-    index = 0;
-    log("Orbit zurückgesetzt.");
-    drawOrbit();
-    Aufzug.setSharedValue('orbitIndex', index);
-    Aufzug.log('Orbit zurückgesetzt (Index 0)');
-  }
+// ─── LOG (in der Konsole und im Status) ──────────────────────────
+function log(msg) {
+  console.log(`[${folderName}] ${msg}`);
+}
 
-  function log(msg) {
-    const logBox = document.getElementById("log");
-    logBox.innerHTML += "<br>" + msg;
-    logBox.scrollTop = logBox.scrollHeight;
-  }
+// ─── EVENT-LISTENER ──────────────────────────────────────────────
+window.addEventListener('message', receiveFromRoot);
 
-  drawOrbit();
-  Aufzug.init({ currentId: 'etage-1-axiom-orbit', basePath: '../' });
+// ─── BUTTONS ──────────────────────────────────────────────────────
+document.getElementById('btnSyncUp').addEventListener('click', () => {
+  syncToRoot('sync:' + folderName);
+});
+
+document.getElementById('btnReload').addEventListener('click', () => {
+  childFrame.src = childFrame.src;
+  setStatus('neu geladen', '#8cf0d0');
+  log('⟲ Neugeladen');
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  // Reset-Signal an das Kind senden
+  try {
+    childFrame.contentWindow.postMessage({ type: 'reset', from: 'etage' }, '*');
+  } catch(e) {}
+  setStatus('Reset gesendet', '#ff6b6b');
+  log('↩️ Reset an Kind gesendet');
+});
+
+// ─── INIT ──────────────────────────────────────────────────────────
+log(`🧩 ETAGE · ${folderName} · arg.sync-Brücke bereit`);
+setStatus('bereit', '#8cf0d0');
+
+// Dem Root mitteilen, dass diese Etage bereit ist
+window.parent.postMessage({ type: 'etage.ready', from: folderName }, '*');
+
+// ─── Bei Fehler im Kind ──────────────────────────────────────────
+childFrame.addEventListener('load', () => {
+  setStatus('index.html geladen', '#8cf0d0');
+  log('📄 index.html geladen');
+});
+
+childFrame.addEventListener('error', () => {
+  setStatus('Fehler beim Laden von index.html', '#ff6b6b');
+  log('❌ index.html konnte nicht geladen werden');
+});
 </script>
+
 </body>
 </html>
