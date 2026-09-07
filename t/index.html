@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔺 Dreieck‑Raum · 120°‑Screens · 9×9‑Respo‑Mesh · Orbit</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:#06070e; color:#e0e8f0; font-family:'Consolas','Segoe UI',monospace;
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .container {
+    max-width:1300px; width:100%; background:rgba(12,16,28,0.7); backdrop-filter:blur(4px);
+    border-radius:28px; border:1px solid rgba(120,220,150,0.15); padding:24px 28px 32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.8);
+  }
+  header {
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    margin-bottom:16px; border-bottom:1px solid rgba(120,220,150,0.1); padding-bottom:12px;
+  }
+  header h1 {
+    font-size:20px; font-weight:300; letter-spacing:2px;
+    background:linear-gradient(135deg, #7ee0a0, #d8f0c0); -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  header .badge { background:rgba(120,220,150,0.08); border:1px solid rgba(120,220,150,0.15);
+    border-radius:100px; padding:4px 18px; font-size:12px; color:#a0d0a8; }
+
+  .note {
+    background:rgba(255,190,90,0.06); border:1px solid rgba(255,190,90,0.18);
+    border-radius:12px; padding:10px 14px; font-size:11.5px; line-height:1.6; color:#e8d8b8;
+    margin-bottom:14px;
+  }
+  .note b { color:#ffcf8c; }
+
+  .grid-2 { display:grid; grid-template-columns:1.3fr 0.7fr; gap:18px; }
+  @media (max-width:980px){ .grid-2 { grid-template-columns:1fr; } }
+
+  .stage-wrap {
+    background:#000; border-radius:16px; border:1px solid rgba(120,220,150,0.1);
+    overflow:hidden; aspect-ratio:4/3; position:relative; cursor:grab;
+    box-shadow:inset 0 0 70px rgba(20,60,30,0.25);
+  }
+  .stage-wrap:active { cursor:grabbing; }
+  .stage {
+    width:100%; height:100%; position:relative; perspective:1400px;
+  }
+  .orbit-inner {
+    width:100%; height:100%; position:relative; transform-style:preserve-3d;
+    transform: rotateX(-18deg) rotateY(25deg);
+  }
+
+  .axis { position:absolute; left:50%; top:50%; transform-style:preserve-3d; }
+  .axis-x { width:280px; height:1px; background:rgba(255,90,90,0.35); transform:translate(-140px,0,0); }
+  .axis-y { width:1px; height:220px; background:rgba(90,220,120,0.35); transform:translate(0,-220px,0) rotateX(0deg); }
+  .axis-z { width:1px; height:280px; background:rgba(90,150,255,0.35); transform:translate(0,0,-140px) rotateX(90deg); transform-origin: 0 0; }
+
+  .screen {
+    position:absolute; left:50%; top:50%; width:180px; height:260px; margin:-130px 0 0 -90px;
+    border:2px solid rgba(0,0,0,0.6); transition:transform 0.6s cubic-bezier(.2,.9,.25,1.05), background 0.4s;
+    display:flex; align-items:flex-end; justify-content:center; padding-bottom:6px;
+    font-size:10px; letter-spacing:1px; color:rgba(0,0,0,0.6);
+  }
+  #screen0 { background:linear-gradient(135deg,#12c2e9,#0057ff); box-shadow:0 0 30px rgba(20,150,255,0.4); }
+  #screen1 { background:linear-gradient(135deg,#ff2fa0,#b8006b); box-shadow:0 0 30px rgba(255,30,140,0.4); }
+  #screen2 { background:rgba(255,255,255,0.14); backdrop-filter:blur(3px); box-shadow:0 0 24px rgba(255,255,255,0.2); }
+
+  .mesh-point {
+    position:absolute; left:50%; top:50%; width:8px; height:8px; margin:-4px 0 0 -4px;
+    border-radius:50%; cursor:pointer;
+  }
+
+  .panel {
+    background:rgba(16,20,14,0.4); border:1px solid rgba(120,220,150,0.08);
+    border-radius:16px; padding:12px 14px; margin-bottom:12px;
+  }
+  .panel h2 { font-size:12px; color:#b0e8c0; border-bottom:1px solid rgba(120,220,150,0.1);
+    padding-bottom:6px; margin-bottom:8px; letter-spacing:1px; }
+
+  .limb-select { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+  .limb-select button { flex:1; min-width:60px; background:rgba(20,28,20,0.6); border:1px solid rgba(120,220,150,0.15);
+    border-radius:8px; padding:6px 4px; color:#c0d8c8; font-family:inherit; font-size:10.5px; cursor:pointer; }
+  .limb-select button.active { border-color:#7ee0a0; color:#7ee0a0; background:rgba(80,180,110,0.15); }
+
+  .slider-row { margin-bottom:6px; }
+  .slider-row label { display:flex; justify-content:space-between; font-size:10.5px; color:#9ab8a4; margin-bottom:2px; }
+  .slider-row input[type=range] { width:100%; }
+
+  .state-row, .scenario-grid { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .state-row button, .scenario-grid button {
+    flex:1; min-width:70px; background:rgba(20,28,20,0.6); border:1px solid rgba(120,220,150,0.15);
+    border-radius:8px; padding:7px 4px; color:#c0d8c8; font-family:inherit; font-size:10.5px; cursor:pointer;
+  }
+  .state-row button.lock { border-color:#ff6b6b; color:#ff6b6b; }
+  .scenario-grid button { border-color:rgba(255,190,90,0.2); color:#ffcf8c; }
+
+  .status-row { display:flex; flex-wrap:wrap; gap:10px 18px; font-size:11px; color:#9ab8a4; margin-bottom:10px; }
+  .status-row b { color:#a0e0b0; }
+
+  .log-box {
+    background:rgba(0,0,0,0.4); border-radius:12px; padding:8px 12px;
+    font-size:10.5px; color:#8a9aaa; height:80px; overflow-y:auto;
+    border:1px solid rgba(120,220,150,0.05); line-height:1.5; margin-top:6px;
+  }
+  .footer { text-align:center; color:#3a4a5a; font-size:10px; margin-top:14px;
+    border-top:1px solid rgba(120,220,150,0.05); padding-top:10px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>🔺 Dreieck‑Raum · 120°‑Screens · 9×9‑Respo‑Mesh · Orbit</h1>
+  <span class="badge">● Maus ziehen = Raum drehen</span>
+</header>
+
+<div class="note">
+  <b>Sachstand:</b> Die 3 Screens stehen jetzt geometrisch korrekt <b>120° zueinander versetzt</b> um eine
+  gemeinsame Mittelachse (echte Dreieckssymmetrie, kein Zufalls-Winkel). Das 9×9‑Respo‑Mesh liegt als
+  <b>achsenorientierte Bodenebene</b> (X = Spalte, Z = Zeile, Y = Messwert/Höhe) im Zentrum. Mit der Maus im
+  Bild ziehen dreht den <b>gesamten Raum</b> (Orbit) um den Mittelpunkt. Die vorherige
+  "RUN‑21‑Bewertung" mit den A+/A‑Noten war reine Fremdbewertung/Stil — hier zählt nur, ob das unten wirklich
+  läuft und du es bewegen kannst.
+</div>
+
+<div class="status-row">
+  <span>Ø MESH‑SCORE <b id="meshScoreDisplay">–</b></span>
+  <span>ORBIT <b id="orbitDisplay">rotY 25° · rotX −18°</b></span>
+  <span>AKTIVES SCREEN <b id="activeScreenDisplay">Screen 0</b></span>
+</div>
+
+<div class="grid-2">
+  <div>
+    <div class="stage-wrap" id="stageWrap">
+      <div class="stage">
+        <div class="orbit-inner" id="orbitInner">
+          <div class="axis axis-x"></div>
+          <div class="axis axis-y"></div>
+          <div class="axis axis-z"></div>
+          <div class="screen" id="screen0">SCREEN 0 · 0°</div>
+          <div class="screen" id="screen1">SCREEN 1 · 120°</div>
+          <div class="screen" id="screen2">SCREEN 2 · 240°</div>
+          <div id="meshLayer"></div>
+        </div>
+      </div>
+    </div>
+    <div class="log-box" id="logBox">[init] Dreieck‑Raum geladen …</div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>🎛️ Screen wählen &amp; bewegen</h2>
+      <div class="limb-select">
+        <button class="active" data-screen="0">Screen 0</button>
+        <button data-screen="1">Screen 1</button>
+        <button data-screen="2">Screen 2</button>
+      </div>
+      <div class="slider-row">
+        <label><span>Zusatz‑Rotation (relativ zur 120°‑Basis)</span><span id="rotYVal">0°</span></label>
+        <input type="range" id="rotY" min="-45" max="45" value="0">
+      </div>
+      <div class="slider-row">
+        <label><span>Kippung X</span><span id="rotXVal">0°</span></label>
+        <input type="range" id="rotX" min="-45" max="45" value="0">
+      </div>
+      <div class="slider-row">
+        <label><span>Radius (Abstand zur Mittelachse)</span><span id="radVal">150</span></label>
+        <input type="range" id="rad" min="60" max="260" value="150">
+      </div>
+      <div class="state-row">
+        <button id="btnHalten">✋ HALTEN</button>
+        <button id="btnBewegen">🔄 BEWEGEN</button>
+        <button class="lock" id="btnFixieren">🔒 FIXIEREN</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>⭐ Szenarien (alle 3 Screens gleichzeitig)</h2>
+      <div class="scenario-grid">
+        <button data-preset="neutral">120° Neutral</button>
+        <button data-preset="weit">Weit (Radius+)</button>
+        <button data-preset="eng">Eng (Radius−)</button>
+        <button data-preset="kill">Kill‑Bill‑Move</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>🧩 9×9‑Respo‑Mesh</h2>
+      <div class="scenario-grid">
+        <button id="btnMeshFit">📐 FIT (Referenzkurve)</button>
+        <button id="btnMeshRecall">⏪ RECALL</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">⚖️ iki1uc · Dreieck‑Raum · echte 120°‑Symmetrie, achsenorientiertes Mesh, reales Orbit‑Dragging</div>
+</div>
+
+<script>
+"use strict";
+
+// ================================================================
+//  DREIECK-RAUM · 120°-SCREENS · 9x9-RESPO-MESH · ORBIT
+//  - 3 Screens sitzen auf einem Kreis um die Y-Achse, exakt 120°
+//    auseinander (0°, 120°, 240°) -> echte Dreieckssymmetrie.
+//  - Das 9x9-Mesh liegt als Bodenebene im Zentrum: Spalte -> X,
+//    Zeile -> Z, Messwert -> Höhe Y. Klar achsenorientiert.
+//  - Orbit: Maus-Drag auf der Bühne dreht den gesamten orbit-inner
+//    Container (rotateX/rotateY), das ist die 360°-Rotation.
+// ================================================================
+
+const orbitInner = document.getElementById('orbitInner');
+let orbit = { rotY: 25, rotX: -18 };
+function applyOrbit() {
+  orbitInner.style.transform = `rotateX(${orbit.rotX}deg) rotateY(${orbit.rotY}deg)`;
+  document.getElementById('orbitDisplay').textContent = `rotY ${Math.round(orbit.rotY)}° · rotX ${Math.round(orbit.rotX)}°`;
+}
+applyOrbit();
+
+const stageWrap = document.getElementById('stageWrap');
+let dragging = false, lastX = 0, lastY = 0;
+stageWrap.addEventListener('mousedown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+window.addEventListener('mouseup', () => dragging = false);
+window.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  orbit.rotY += dx * 0.4;
+  orbit.rotX = Math.max(-70, Math.min(70, orbit.rotX - dy * 0.4));
+  lastX = e.clientX; lastY = e.clientY;
+  applyOrbit();
+});
+// Touch-Unterstützung
+stageWrap.addEventListener('touchstart', (e) => { dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }, {passive:true});
+window.addEventListener('touchend', () => dragging = false);
+window.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  const dx = e.touches[0].clientX - lastX, dy = e.touches[0].clientY - lastY;
+  orbit.rotY += dx * 0.4;
+  orbit.rotX = Math.max(-70, Math.min(70, orbit.rotX - dy * 0.4));
+  lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  applyOrbit();
+}, {passive:true});
+
+// ─── LOG ─────────────────────────────────────────────────────
+function log(msg) {
+  const box = document.getElementById('logBox');
+  const t = new Date().toLocaleTimeString();
+  const e = document.createElement('div');
+  e.textContent = `[${t}] ${msg}`;
+  box.appendChild(e); box.scrollTop = box.scrollHeight;
+  if (box.children.length > 40) box.removeChild(box.firstChild);
+}
+
+// ─── SCREENS: 3 Stück, Basiswinkel 0/120/240 ───────────────────
+const screens = {
+  0: { el: document.getElementById('screen0'), base: 0,   rotY:0, rotX:0, rad:150, locked:false },
+  1: { el: document.getElementById('screen1'), base: 120, rotY:0, rotX:0, rad:150, locked:false },
+  2: { el: document.getElementById('screen2'), base: 240, rotY:0, rotX:0, rad:150, locked:false },
+};
+let activeScreen = 0;
+
+function applyScreen(key) {
+  const s = screens[key];
+  const totalAngle = s.base + s.rotY;
+  // rotateY um Mittelachse auf den Basiswinkel + Zusatzrotation, dann nach außen verschieben
+  s.el.style.transform =
+    `rotateY(${totalAngle}deg) translateZ(${s.rad}px) rotateX(${s.rotX}deg)`;
+}
+Object.keys(screens).forEach(applyScreen);
+
+document.querySelectorAll('.limb-select button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.limb-select button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeScreen = Number(btn.dataset.screen);
+    const s = screens[activeScreen];
+    document.getElementById('rotY').value = s.rotY;
+    document.getElementById('rotX').value = s.rotX;
+    document.getElementById('rad').value = s.rad;
+    document.getElementById('rotYVal').textContent = s.rotY + '°';
+    document.getElementById('rotXVal').textContent = s.rotX + '°';
+    document.getElementById('radVal').textContent = s.rad;
+    document.getElementById('activeScreenDisplay').textContent = `Screen ${activeScreen} (Basis ${s.base}°)`;
+    log(`🎛️ Screen ${activeScreen} gewählt (Basiswinkel ${s.base}°)${s.locked ? ' — fixiert' : ''}`);
+  });
+});
+
+function bindSlider(id, prop, unit) {
+  document.getElementById(id).addEventListener('input', (e) => {
+    const s = screens[activeScreen];
+    if (s.locked) { log('🔒 Screen ist fixiert — erst BEWEGEN klicken'); e.target.value = s[prop]; return; }
+    s[prop] = Number(e.target.value);
+    document.getElementById(id + 'Val').textContent = s[prop] + (unit || '');
+    applyScreen(activeScreen);
+  });
+}
+bindSlider('rotY', 'rotY', '°');
+bindSlider('rotX', 'rotX', '°');
+bindSlider('rad', 'rad', '');
+
+document.getElementById('btnHalten').addEventListener('click', () => log(`✋ HALTEN → Screen ${activeScreen} bleibt stehen`));
+document.getElementById('btnBewegen').addEventListener('click', () => { screens[activeScreen].locked = false; log(`🔄 BEWEGEN → Screen ${activeScreen} wieder frei`); });
+document.getElementById('btnFixieren').addEventListener('click', () => { screens[activeScreen].locked = true; log(`🔒 FIXIEREN → Screen ${activeScreen} gesperrt`); });
+
+// ─── SZENARIEN (alle 3 Screens) ─────────────────────────────
+const scenarios = {
+  neutral: { rotY:0, rotX:0, rad:150 },
+  weit:    { rotY:0, rotX:6, rad:230 },
+  eng:     { rotY:0, rotX:-4, rad:80 },
+  kill:    { rotY:30, rotX:-10, rad:110 },
+};
+document.querySelectorAll('.scenario-grid button[data-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = scenarios[btn.dataset.preset];
+    let skipped = 0;
+    Object.keys(screens).forEach(k => {
+      if (screens[k].locked) { skipped++; return; }
+      Object.assign(screens[k], p);
+      applyScreen(k);
+    });
+    const s = screens[activeScreen];
+    document.getElementById('rotY').value = s.rotY;
+    document.getElementById('rotX').value = s.rotX;
+    document.getElementById('rad').value = s.rad;
+    document.getElementById('rotYVal').textContent = s.rotY + '°';
+    document.getElementById('rotXVal').textContent = s.rotX + '°';
+    document.getElementById('radVal').textContent = s.rad;
+    log(`⭐ Szenario "${btn.textContent}" angefahren${skipped ? ` (${skipped} fixiert übersprungen)` : ''}`);
+  });
+});
+
+// ─── 9x9 RESPO-MESH (achsenorientiert: Spalte=X, Zeile=Z, Wert=Y) ──
+const COLS = 9, ROWS = 9, SPACING = 26;
+const meshLayer = document.getElementById('meshLayer');
+let meshSlots = [];
+
+function meshInit() {
+  meshLayer.innerHTML = '';
+  meshSlots = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const idx = r * COLS + c;
+      const v = Math.sin(idx * 0.2 + 0.5);
+      const point = { value: v, targetValue: v, x: (c - 4) * SPACING, z: (r - 4) * SPACING, el: null };
+      const div = document.createElement('div');
+      div.className = 'mesh-point';
+      div.addEventListener('click', () => {
+        point.targetValue = point.targetValue > 0 ? -0.9 : 0.9;
+        log(`🧩 Slot [${r},${c}] umgeschaltet`);
+      });
+      meshLayer.appendChild(div);
+      point.el = div;
+      meshSlots.push(point);
+    }
+  }
+}
+meshInit();
+
+function meshColor(score01) {
+  const rC = Math.round(200 * (1 - score01) + 40 * score01);
+  const gC = Math.round(90 + score01 * 140);
+  return `rgba(${rC}, ${gC}, 60, 0.85)`;
+}
+
+function meshRender() {
+  let sum = 0;
+  for (const p of meshSlots) {
+    p.value += (p.targetValue - p.value) * 0.05;
+    const score01 = Math.max(0, 1 - Math.abs(p.value));
+    sum += score01;
+    const y = p.value * 24; // Höhe = Messwert
+    p.el.style.transform = `translate3d(${p.x}px, ${-y}px, ${p.z}px)`;
+    p.el.style.background = meshColor(score01);
+  }
+  document.getElementById('meshScoreDisplay').textContent = Math.round((sum / meshSlots.length) * 100) + '%';
+}
+
+document.getElementById('btnMeshFit').addEventListener('click', () => {
+  meshSlots.forEach((p, i) => { p.targetValue = Math.sin(i * 0.2) * 0.9; });
+  log('📐 MESH FIT → Referenzkurve auf 9×9‑Mesh angelegt');
+});
+document.getElementById('btnMeshRecall').addEventListener('click', () => {
+  meshInit();
+  log('⏪ MESH RECALL → Ausgangszustand wiederhergestellt');
+});
+
+// ─── LOOP ────────────────────────────────────────────────────
+function loop() { meshRender(); requestAnimationFrame(loop); }
+loop();
+
+log('🔺 Dreieck‑Raum bereit · 3 Screens bei 0°/120°/240°, Maus ziehen = Orbit');
+</script>
+</body>
+</html>
