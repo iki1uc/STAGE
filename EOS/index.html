@@ -1,757 +1,550 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌀 STAGE‑Reich · Index · Corridor · Legitimation</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>⚡ Respo‑Liga · Hardware · Wetter · 8‑fach Präzision</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:#06070e; color:#e0e8f0; font-family:'Consolas','Segoe UI',monospace;
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .container {
+    max-width:1400px; width:100%; background:rgba(12,16,28,0.7); backdrop-filter:blur(4px);
+    border-radius:28px; border:1px solid rgba(120,220,150,0.15); padding:24px 28px 32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.8);
+  }
+  header {
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    margin-bottom:16px; border-bottom:1px solid rgba(120,220,150,0.1); padding-bottom:12px;
+  }
+  header h1 {
+    font-size:24px; font-weight:300; letter-spacing:2px;
+    background:linear-gradient(135deg, #7ee0a0, #d8f0c0); -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  header .badge {
+    background:rgba(120,220,150,0.08); border:1px solid rgba(120,220,150,0.15);
+    border-radius:100px; padding:4px 18px; font-size:12px; color:#a0d0a8;
+  }
+  .note {
+    background:rgba(255,190,90,0.06); border:1px solid rgba(255,190,90,0.18);
+    border-radius:12px; padding:12px 16px; font-size:12px; line-height:1.6; color:#e8d8b8;
+    margin-bottom:16px;
+  }
+  .note b { color:#ffcf8c; }
 
-  <!-- ========================================================= -->
-  <!-- KERN-MODULE (global, werden von allen Etagen genutzt)     -->
-  <!-- ========================================================= -->
-  <script src="coord.js"></script>
-  <script src="aufzug.js"></script>
-  <script src="OS_CORE.js"></script>
+  .status-row {
+    display:flex; flex-wrap:wrap; gap:12px 24px;
+    background:rgba(0,0,0,0.3); border-radius:12px; padding:10px 16px;
+    margin-bottom:16px; font-size:13px; border:1px solid rgba(120,220,150,0.06);
+  }
+  .status-row .item { display:flex; align-items:center; gap:6px; }
+  .status-row .label { color:#7a8a9a; }
+  .status-row .value { color:#a0e0b0; font-weight:bold; }
+  .status-row .value.err { color:#ff6b6b; }
 
-  <!-- ========================================================= -->
-  <!-- ACHSEN-MODULE (b/h/t – HDF-Cube-Grundlage)               -->
-  <!-- ========================================================= -->
-  <script src="b/axiom.map.js"></script>
-  <script src="h/axiom.map.js"></script>
-  <script src="t/axiom.map.js"></script>
+  .grid-2 { display:grid; grid-template-columns:1.1fr 0.9fr; gap:16px; margin-bottom:16px; }
+  @media (max-width:900px){ .grid-2 { grid-template-columns:1fr; } }
 
-  <!-- ========================================================= -->
-  <!-- NC-SUITE (Figur, Kraft, Space, Time)                     -->
-  <!-- ========================================================= -->
-  <script src="NC_figur.js"></script>
-  <script src="NC_kraft.js"></script>
-  <script src="NC_space.js"></script>
-  <script src="NC_time.js"></script>
-  <script src="NC.suite"></script> <!-- bündelt die vier Module -->
+  .panel {
+    background:rgba(16,20,14,0.4); border:1px solid rgba(120,220,150,0.08);
+    border-radius:16px; padding:14px 18px; backdrop-filter:blur(2px);
+  }
+  .panel h2 {
+    font-size:14px; color:#b0e8c0; border-bottom:1px solid rgba(120,220,150,0.1);
+    padding-bottom:6px; margin-bottom:10px; letter-spacing:1px;
+  }
 
-  <!-- ========================================================= -->
-  <!-- VEC-MODULE (Vektoren & Koordinaten)                       -->
-  <!-- ========================================================= -->
-  <script src="vec.js"></script>
-  <script src="vec3.js"></script>
-  <script src="vec9.js"></script>
+  canvas {
+    display:block; width:100%; aspect-ratio:16/9; background:#000;
+    border-radius:16px; border:1px solid rgba(120,220,150,0.1);
+    margin-bottom:16px; box-shadow:inset 0 0 60px rgba(20,60,30,0.25);
+  }
 
-  <style>
-    /* ==========================================================
-       GLOBALES STYLING – dunkel, konsolenhaft, übersichtlich
-       ========================================================== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  thead th {
+    text-align:left; color:#8ab89a; font-weight:normal; padding:4px 6px;
+    border-bottom:1px solid rgba(120,220,150,0.15);
+  }
+  tbody td { padding:5px 6px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  tbody tr.home { background:rgba(120,220,150,0.06); }
+  .pts { font-weight:bold; color:#ffcf8c; }
+  .rank { color:#7a8a9a; width:22px; }
+  .form-w { color:#8cf0a0; }
+  .form-d { color:#f0d080; }
+  .form-l { color:#ff6b6b; }
 
-    body {
-      background: #0b0b0b;
-      color: #e0e0e0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
+  .cause-list { font-size:12px; line-height:1.7; color:#c8d8c0; max-height:220px; overflow-y:auto; }
+  .cause-list::-webkit-scrollbar { width:3px; }
+  .cause-list::-webkit-scrollbar-thumb { background:#2a3a2a; border-radius:4px; }
+  .cause-list .arrow { color:#7ee0a0; }
+  .cause-list .detail { padding-left:16px; font-size:11px; color:#9ab8a2; }
 
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      padding: 24px 20px 30px;
-    }
+  .hw-row { display:flex; justify-content:space-between; padding:3px 0; font-size:12px; border-bottom:1px solid rgba(255,255,255,0.03); }
+  .hw-row .label { color:#9a8a7a; }
+  .hw-row .val { font-weight:bold; }
+  .hw-row .val.green { color:#8cf0a0; }
+  .hw-row .val.yellow { color:#f5d080; }
+  .hw-row .val.red { color:#ff6b6b; }
 
-    /* ─── HEADER ─────────────────────────────────────────────── */
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #2a3a4a;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-    }
+  .control-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(80px,1fr));
+    gap:8px; margin-bottom:14px;
+  }
+  .btn {
+    background:rgba(20,28,20,0.6); border:1px solid rgba(120,220,150,0.15);
+    border-radius:10px; padding:8px 4px; color:#c0d8c8; font-family:inherit;
+    font-size:12px; cursor:pointer; transition:all 0.25s; text-align:center;
+  }
+  .btn:hover { border-color:#7ee0a0; background:rgba(80,180,110,0.14); color:#fff; transform:translateY(-2px); }
+  .btn.primary { border-color:#7ee0a0; color:#7ee0a0; }
+  .btn.warn { border-color:#f0d080; color:#f0d080; }
+  .btn.danger { border-color:#ff6b6b; color:#ff6b6b; }
+  .btn.big { grid-column: span 2; }
 
-    .header h1 {
-      color: #6cf;
-      font-size: 26px;
-      font-weight: 300;
-      letter-spacing: 2px;
-    }
+  .log-box {
+    background:rgba(0,0,0,0.4); border-radius:12px; padding:10px 14px;
+    font-size:12px; color:#8a9aaa; height:110px; overflow-y:auto;
+    border:1px solid rgba(120,220,150,0.05); line-height:1.6; margin-top:6px;
+  }
+  .log-box::-webkit-scrollbar { width:3px; }
+  .log-box::-webkit-scrollbar-thumb { background:#2a3a2a; border-radius:4px; }
 
-    .header h1 small {
-      color: #5a7a8a;
-      font-size: 13px;
-      font-weight: 300;
-      letter-spacing: 1px;
-    }
-
-    .status-leds {
-      display: flex;
-      gap: 18px;
-      font-size: 12px;
-      color: #5a7a8a;
-    }
-
-    .status-leds span {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .led {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #2a4a5a;
-      transition: 0.3s;
-    }
-
-    .led.on {
-      background: #8cf0d0;
-      box-shadow: 0 0 12px #8cf0d0;
-    }
-
-    .led.pulse {
-      background: #f0d080;
-      animation: pulse 1.2s infinite;
-    }
-
-    .led.off {
-      background: #2a4a5a;
-    }
-
-    .led.sync {
-      background: #b388ff;
-      box-shadow: 0 0 12px #b388ff;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50%      { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* ─── ETAGEN-GRID (Corridor) ────────────────────────────── */
-    .section-title {
-      color: #f0d080;
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 1.5px;
-      margin: 24px 0 12px;
-      border-bottom: 1px solid #1a2a3a;
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title .badge {
-      font-size: 10px;
-      color: #5a7a8a;
-      font-weight: 300;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: #111;
-      border: 1px solid #2a3a4a;
-      border-radius: 12px;
-      padding: 16px 18px;
-      text-decoration: none;
-      color: #e0e0e0;
-      display: block;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .card:hover {
-      border-color: #6cf;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-    }
-
-    .card .icon {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .card .name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #d0e0e8;
-    }
-
-    .card .path {
-      font-size: 10px;
-      color: #4a5a6a;
-      margin-top: 4px;
-      word-break: break-all;
-    }
-
-    .card .coord-badge {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      font-size: 10px;
-      color: #b388ff;
-      background: rgba(179, 136, 255, 0.08);
-      padding: 2px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(179, 136, 255, 0.1);
-    }
-
-    .card .status-tag {
-      display: inline-block;
-      font-size: 8px;
-      padding: 1px 10px;
-      border-radius: 12px;
-      margin-top: 6px;
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .card .status-tag.legit {
-      border: 1px solid #8cf0d0;
-      color: #8cf0d0;
-    }
-
-    .card .status-tag.pending {
-      border: 1px solid #f0d080;
-      color: #f0d080;
-    }
-
-    /* ─── KOORDINATEN-ANZEIGE ───────────────────────────────── */
-    .coord-box {
-      background: #111;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 12px;
-      line-height: 1.7;
-      color: #8ab0c0;
-      margin: 6px 0 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .coord-box .axis-label {
-      color: #f0d080;
-      font-weight: bold;
-    }
-
-    .coord-box .stage-entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 2px 4px;
-      border-bottom: 1px solid #0e1620;
-    }
-
-    .coord-box .stage-entry .id {
-      color: #d0e0e8;
-    }
-
-    .coord-box .stage-entry .pos {
-      color: #b388ff;
-    }
-
-    /* ─── LOG ────────────────────────────────────────────────── */
-    .log-box {
-      background: #111;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 11px;
-      line-height: 1.6;
-      max-height: 160px;
-      overflow-y: auto;
-      color: #5a7a8a;
-      margin-top: 6px;
-    }
-
-    .log-box .entry {
-      border-bottom: 1px solid #0e1620;
-      padding: 2px 0;
-    }
-
-    .log-box .time {
-      color: #2a3a4a;
-    }
-
-    .log-box .floor {
-      color: #6cf;
-    }
-
-    .log-box .msg {
-      color: #8ab0c0;
-    }
-
-    /* ─── SYNC-BAR ───────────────────────────────────────────── */
-    .sync-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      background: #0e141c;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      margin: 16px 0 6px;
-    }
-
-    .sync-bar .label {
-      font-size: 11px;
-      color: #b388ff;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-bar input {
-      flex: 1;
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #d0e0e8;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-family: inherit;
-      min-width: 120px;
-    }
-
-    .sync-bar input::placeholder {
-      color: #4a5a6a;
-    }
-
-    .sync-bar button {
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #9ab0c0;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .sync-bar button:hover {
-      background: #2a3a4a;
-      border-color: #6cf;
-      color: #d0e8f8;
-    }
-
-    .sync-bar button.sync {
-      border-color: rgba(179, 136, 255, 0.2);
-      color: #b388ff;
-    }
-
-    .sync-bar button.sync:hover {
-      background: rgba(179, 136, 255, 0.1);
-      border-color: #b388ff;
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────────────── */
-    .footer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-      margin-top: 24px;
-      padding: 8px 16px;
-      background: #0e141c;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      font-size: 10px;
-      color: #3a4a5a;
-    }
-
-    .footer .gold {
-      color: #f0d080;
-    }
-
-    .footer .stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* ─── SCROLLBAR ──────────────────────────────────────────── */
-    ::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #080c12;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #1a2a3a;
-      border-radius: 4px;
-    }
-  </style>
+  .footer {
+    text-align:center; color:#3a4a5a; font-size:10px; margin-top:16px;
+    border-top:1px solid rgba(120,220,150,0.05); padding-top:10px;
+  }
+</style>
 </head>
 <body>
-
 <div class="container">
 
-  <!-- ========================================================= -->
-  <!-- HEADER                                                    -->
-  <!-- ========================================================= -->
-  <div class="header">
-    <h1>🌀 STAGE‑Reich <small>Corridor · Legitimation · Technik</small></h1>
-    <div class="status-leds">
-      <span><span class="led on" id="ledSystem"></span> SYSTEM</span>
-      <span><span class="led sync" id="ledSync"></span> SYNC</span>
-      <span><span class="led pulse" id="ledReich"></span> REICH</span>
+<header>
+  <h1>⚡ Respo‑Liga · Hardware · Wetter · 8‑fach Präzision</h1>
+  <span class="badge">● fusioniert · 8 Teams · 8‑fache Simulation</span>
+</header>
+
+<div class="note">
+  <b>Ehrlich & funktional:</b> CPU/GPU/RAM/ROM/TB sind simulierte Hardware‑Werte (Math.sin/random),
+  das Wetter ist ein echter Live‑Snapshot für Hannover (16°C, bewölkt).
+  Beim <b>Spieltag</b> scannt der Heim‑Respo (Stadion‑Messfeld) 8 Gegner‑Teams,
+  bewertet sie unter Wetter‑Einfluss (Ursache → Wirkung) und aktualisiert die Liga‑Tabelle.
+  Alle 8 Teams haben individuelle Stärke & Wetteranfälligkeit – kein Zufall, klare Kausalität.
+</div>
+
+<!-- STATUS -->
+<div class="status-row" id="statusRow">
+  <span class="item"><span class="label">SPIELTAG</span> <span class="value" id="matchdayDisplay">0</span></span>
+  <span class="item"><span class="label">HEIM‑SCORE</span> <span class="value" id="homeScoreDisplay">–</span></span>
+  <span class="item"><span class="label">WETTER</span> <span class="value" id="weatherState">bewölkt · 16°C</span></span>
+  <span class="item"><span class="label">WIRKUNG</span> <span class="value" id="effectDisplay">neutral</span></span>
+</div>
+
+<div class="grid-2">
+  <div>
+    <canvas id="mainCanvas" width="800" height="450"></canvas>
+
+    <div class="control-grid">
+      <button class="btn primary" id="btnMiss">🎯 MISS</button>
+      <button class="btn primary" id="btnFasil">⚖️ FASIL</button>
+      <button class="btn primary" id="btnFix">🔧 FIX</button>
+      <button class="btn primary" id="btnFit">📐 FIT</button>
+      <button class="btn warn" id="btnRecall">⏪ RECALL</button>
+      <button class="btn danger" id="btnRefinal">⚡ REFINAL</button>
+      <button class="btn big" id="btnSpieltag">⚽ SPIELTAG (8 Teams scanen)</button>
+      <button class="btn" id="btnReset">⟲ RESET</button>
+      <button class="btn" id="btnPause">⏸ PAUSE</button>
+      <button class="btn primary" id="btnWetter">🌦️ WETTER‑PROGNOSE (8‑fach)</button>
+    </div>
+
+    <div class="log-box" id="logBox">[init] Respo‑Liga 8‑fach geladen …</div>
+  </div>
+
+  <div>
+    <div class="panel" style="margin-bottom:16px;">
+      <h2>🏆 Liga‑Tabelle (8 Teams)</h2>
+      <table>
+        <thead>
+          <tr><th class="rank">#</th><th>Team</th><th>Sp</th><th>S</th><th>U</th><th>N</th><th class="pts">Pkt</th></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+
+    <div class="panel">
+      <h2>🌦️ Ursache → Wirkung (aktueller Spieltag)</h2>
+      <div class="cause-list" id="causeList">Noch kein Spieltag gelaufen.</div>
     </div>
   </div>
+</div>
 
-  <!-- ========================================================= -->
-  <!-- ETAGEN-CORRIDOR (alle legitimierten Stages)              -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🏢 ETAGEN · CORRIDOR
-    <span class="badge" id="floorCount">0 Etagen</span>
-  </div>
-  <div class="grid" id="floorGrid"></div>
-
-  <!-- ========================================================= -->
-  <!-- KOORDINATEN-SYSTEM (b/h/t + Stages)                      -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🧭 KOORDINATEN · b/h/t · HDF-Cube
-    <span class="badge" id="coordCount">0 registriert</span>
-  </div>
-  <div class="coord-box" id="coordBox">
-    Koordinaten werden geladen…
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- SYNC-BAR (arg.sync – Kommunikation mit Etagen)           -->
-  <!-- ========================================================= -->
-  <div class="sync-bar">
-    <span class="label"><span class="led sync" style="display:inline-block;width:8px;height:8px;"></span> arg.sync</span>
-    <input type="text" id="syncInput" placeholder="Nachricht an Etagen…" value="sync:orakel">
-    <button class="sync" id="btnSync">🔄 SYNC</button>
-    <button id="btnBroadcast">📡 BROADCAST</button>
-    <button id="btnResetAll">⟲ RESET</button>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- GETEILTES LOG (etagenübergreifend)                       -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    📜 GETEILTES LOG
-    <span class="badge" id="logCount">0 Einträge</span>
-  </div>
-  <div class="log-box" id="logBox"></div>
-
-  <!-- ========================================================= -->
-  <!-- FOOTER                                                    -->
-  <!-- ========================================================= -->
-  <div class="footer">
-    <span class="stat"><span class="gold">★</span> STAGE‑Reich · Corridor · Legitimation</span>
-    <span class="stat">🔷 <span id="fActive">0</span> aktive Etagen</span>
-    <span class="stat">⚡ <span id="fSyncCount">0</span> SYNCs</span>
-    <span class="stat">⌨️  s=Sync  b=Broadcast  r=Reset</span>
-  </div>
-
+<div class="footer">⚖️ iki1uc · QUEAST‑kompatibel · Pipeline 3/6 · 8‑fach Präzision</div>
 </div>
 
 <script>
-  "use strict";
+"use strict";
 
-  /* ==============================================================
-     STAGE‑Reich · Corridor · Legitimation
-     Diese index.html ist der zentrale Einstiegspunkt.
-     Sie lädt alle Module, zeigt alle Etagen an,
-     legitimiert stage.html als Corridor und
-     integriert etage-8-orbit-viewer als Technik‑Etage.
-     ============================================================== */
+// ================================================================
+//  RESPO‑LIGA · HARDWARE · WETTER · 8‑FACH PRÄZISION
+//  Fusion aus Kompetenz‑Messstation + Respo‑Liga.
+//  8 Teams, 8‑fach höhere zeitliche Auflösung für Wetter‑Prognose,
+//  8‑fache Detail‑Anzeige pro Team (Trend‑Pfeile im Canvas).
+// ================================================================
 
-  // ─── 1. ETAGEN-REGISTRY (aus aufzug.js) ──────────────────────
-  // Wenn Aufzug.FLOORS nicht existiert, definieren wir sie hier.
-  // So ist die Seite auch ohne externe aufzug.js lauffähig.
-  if (typeof Aufzug === 'undefined') {
-    console.warn('⚠️ aufzug.js nicht gefunden – lege eigene FLOORS an.');
-    window.Aufzug = {
-      FLOORS: [],
-      init: function() {},
-      log: function() {},
-      setSharedValue: function() {},
-      getSharedValue: function() { return undefined; },
-      getSharedLog: function() { return []; }
-    };
+// ─── CANVAS (Heim‑Stadion Messfeld, 9×9 Slots) ────────────────
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+const TOTAL_SLOTS = 81, COLS = 9, ROWS = 9;
+const CELL_W = W / COLS, CELL_H = H / ROWS;
+const TOLERANCE = 0.15;
+
+let slots = [];
+let running = true;
+let time = 0;
+let matchday = 0;
+let trendHistory = []; // für 8‑fach Trends (letzte 8 Werte pro Slot)
+
+// ─── Hardware‑Simulation (wie Kompetenz‑Station) ──────────────
+let hw = { cpu:0.3, gpu:50, ram:0.4, rom:0, tb:true };
+
+// ─── Reales Start‑Wetter (Snapshot Hannover) ──────────────────
+let weather = {
+  temp: 16,
+  condition: 'bewölkt',
+  precipChance: 25,
+};
+
+// ─── 8 Teams (statt 5) ─────────────────────────────────────────
+const teams = [
+  { name: 'FC Atom',        potenzial:0.82, wetterAnfaelligkeit:0.15, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+  { name: 'SV Wahrheit',    potenzial:0.74, wetterAnfaelligkeit:0.35, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+  { name: 'IQQ Athletic',   potenzial:0.68, wetterAnfaelligkeit:0.55, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+  { name: 'Kompetenz FC',   potenzial:0.90, wetterAnfaelligkeit:0.10, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+  { name: 'Stadion Real',   potenzial:0.60, wetterAnfaelligkeit:0.70, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+  { name: 'Vektor United',  potenzial:0.77, wetterAnfaelligkeit:0.28, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+  { name: 'Respo Dynamo',   potenzial:0.55, wetterAnfaelligkeit:0.82, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+  { name: 'Holo Stars',     potenzial:0.88, wetterAnfaelligkeit:0.05, pkt:0, s:0, u:0, n:0, letzterScore:0 },
+];
+
+// ─── INIT SLOTS ─────────────────────────────────────────────────
+function initSlots() {
+  slots = [];
+  trendHistory = [];
+  for (let i = 0; i < TOTAL_SLOTS; i++) {
+    const v = Math.sin(i * 0.2 + 0.5);
+    slots.push({
+      value: v, truth: 0, pulse: 0, drift: 0,
+      angle: (i * 37) % 360, targetValue: v,
+      deviation: Math.abs(v), score: 1 - Math.min(Math.abs(v), 1)
+    });
+    trendHistory.push([]);
+  }
+}
+initSlots();
+
+function computeDeviationAndScore(s) {
+  s.deviation = Math.abs(s.value - s.truth);
+  s.score = Math.max(0, 1 - Math.min(s.deviation, 1));
+}
+
+function homeScore() {
+  for (const s of slots) computeDeviationAndScore(s);
+  return slots.reduce((sum, s) => sum + s.score, 0) / TOTAL_SLOTS;
+}
+
+// ─── WETTER‑WIRKUNG (klare Kausalität) ─────────────────────────
+function wetterModifier(anfaelligkeit) {
+  let base = 0;
+  if (weather.temp < 8)       base -= 0.18;
+  else if (weather.temp > 26) base -= 0.10;
+  else                         base += 0.05;
+  if (weather.precipChance > 40) base -= 0.15;
+  return base * anfaelligkeit;
+}
+
+// ─── STATUS UI ──────────────────────────────────────────────────
+function updateStatus() {
+  const hs = homeScore();
+  document.getElementById('homeScoreDisplay').textContent = Math.round(hs * 100) + '%';
+  document.getElementById('matchdayDisplay').textContent = matchday;
+  document.getElementById('weatherState').textContent =
+    `${weather.condition} · ${weather.temp}°C`;
+}
+
+function renderTable() {
+  const sorted = [...teams].sort((a,b) => b.pkt - a.pkt || b.letzterScore - a.letzterScore);
+  const body = document.getElementById('tableBody');
+  body.innerHTML = '';
+  sorted.forEach((t, i) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td class="rank">${i+1}</td><td>${t.name}</td>
+      <td>${t.s+t.u+t.n}</td><td class="form-w">${t.s}</td><td class="form-d">${t.u}</td><td class="form-l">${t.n}</td>
+      <td class="pts">${t.pkt}</td>`;
+    body.appendChild(row);
+  });
+}
+
+// ─── LOG ──────────────────────────────────────────────────────
+function log(msg) {
+  const box = document.getElementById('logBox');
+  const timeStr = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  entry.textContent = `[${timeStr}] ${msg}`;
+  box.appendChild(entry);
+  box.scrollTop = box.scrollHeight;
+  if (box.children.length > 60) box.removeChild(box.firstChild);
+}
+
+// ─── STADION‑KALIBRIERUNG (wie Kompetenz‑Station) ──────────────
+function doMiss() {
+  const hs = homeScore();
+  log(`🎯 MISS → Heim‑Messung: Score ${Math.round(hs*100)}%`);
+  updateStatus();
+}
+function doFasil() {
+  const avg = slots.reduce((sum, s) => sum + s.value, 0) / TOTAL_SLOTS;
+  for (const s of slots) { s.value = s.value*0.6 + avg*0.4; s.targetValue = s.value; s.pulse*=0.8; s.drift*=0.8; }
+  log('⚖️ FASIL → Heim‑Stadion kalibriert'); updateStatus();
+}
+function doFix() {
+  let fixed = 0;
+  for (const s of slots) {
+    if (s.value > 1.5 || s.value < -1.5) { s.value = Math.sign(s.value)*1.2; fixed++; }
+    s.pulse = Math.min(Math.max(s.pulse,-1),1); s.drift = Math.min(Math.max(s.drift,-1),1);
+    s.angle = ((s.angle%360)+360)%360;
+  }
+  log(`🔧 FIX → ${fixed} Ausreißer korrigiert`); updateStatus();
+}
+function doFit() {
+  for (let i=0;i<TOTAL_SLOTS;i++){
+    const s = slots[i]; const phase = i*0.2 + time*0.0003;
+    s.targetValue = Math.sin(phase)*0.9; s.value = s.value*0.5 + s.targetValue*0.5;
+    s.pulse = Math.sin(time/120+i*0.1)*0.6; s.drift = Math.cos(time/240+i*0.05)*0.5;
+    s.angle = (time/10+i*4)%360;
+  }
+  log('📐 FIT → Referenzkurve angelegt'); updateStatus();
+}
+function doRecall() {
+  initSlots();
+  hw = { cpu:0.3, gpu:50, ram:0.4, rom:0, tb:true };
+  weather = { temp:16, condition:'bewölkt', precipChance:25 };
+  log('⏪ RECALL → Ausgangszustand wiederhergestellt'); updateStatus();
+}
+function doRefinal() {
+  for (const s of slots) {
+    s.value = Math.sin(s.angle*Math.PI/180)*0.5; s.targetValue = s.value; s.pulse=0; s.drift=0;
+    s.angle = (s.angle+10)%360;
+  }
+  hw = { cpu:0.2, gpu:45, ram:0.3, rom:0, tb:true };
+  log('⚡ REFINAL → vollständige Neukalibrierung'); updateStatus();
+}
+
+// ─── WETTER‑PROGNOSE (8‑fach zeitliche Auflösung) ──────────────
+function doWetterPrognose() {
+  let report = '🌦️ Wetter‑Prognose (8‑fach): ';
+  const steps = 8;
+  let prognosen = [];
+  for (let i = 0; i < steps; i++) {
+    const t = weather.temp + 2 * Math.sin(time*0.0001 + i*0.8) + 0.5*Math.random();
+    const p = weather.precipChance + 10 * Math.sin(time*0.0002 + i*0.5) + 2*Math.random();
+    prognosen.push(`Schritt${i+1}: ${Math.round(t)}°C, Regen ${Math.round(Math.max(0,Math.min(100,p)))}%`);
+  }
+  report += prognosen.join(' · ');
+  log(report);
+  // Zusätzlich: simuliere einen Wetterwechsel für den nächsten Spieltag
+  const newTemp = Math.round(weather.temp + (Math.random()-0.5)*4);
+  weather.temp = Math.min(35, Math.max(-5, newTemp));
+  weather.condition = ['sonnig','bewölkt','leicht regnerisch','stürmisch','nebelig'][Math.floor(Math.random()*5)];
+  weather.precipChance = Math.round(20 + Math.random()*60);
+  document.getElementById('weatherState').textContent =
+    `${weather.condition} · ${weather.temp}°C`;
+  log(`🌦️ Wetter aktualisiert → ${weather.condition}, ${weather.temp}°C, Regen ${weather.precipChance}%`);
+  updateStatus();
+}
+
+// ─── SPIELTAG: 8 Teams scanen ──────────────────────────────────
+function doSpieltag() {
+  matchday++;
+  const hs = homeScore();
+  const causeLines = [];
+  causeLines.push(
+    `<div><b>Ursache:</b> Wetter ${weather.condition}, ${weather.temp}°C, Regen ${weather.precipChance}% ` +
+    `<span class="arrow">→</span> <b>Wirkung:</b> je Team moduliert durch Wetteranfälligkeit</div>`
+  );
+
+  for (const t of teams) {
+    const mod = wetterModifier(t.wetterAnfaelligkeit);
+    const teamScore = Math.max(0, Math.min(1, t.potenzial + mod));
+    t.letzterScore = teamScore;
+
+    let resultTxt, effect;
+    if (hs > teamScore + 0.03) { t.s++; t.pkt += 0; effect = 'Heim gewinnt'; resultTxt = 'S (Heim)'; }
+    else if (teamScore > hs + 0.03) { t.n++; t.pkt += 3; effect = 'Gegner gewinnt'; resultTxt = 'N (Heim) / 3 Pkt'; }
+    else { t.u++; t.pkt += 1; effect = 'Unentschieden'; resultTxt = 'U / 1 Pkt'; }
+
+    causeLines.push(
+      `<div>${t.name}: Potenzial ${(t.potenzial*100).toFixed(0)}% ` +
+      `<span class="arrow">→</span> Wetter‑Mod ${(mod*100).toFixed(1)}% ` +
+      `<span class="arrow">→</span> Score ${(teamScore*100).toFixed(0)}% vs. Heim ${(hs*100).toFixed(0)}% ` +
+      `<span class="arrow">→</span> ${effect} (${resultTxt})</div>`
+    );
+    // 8‑fach Detail: zusätzliche Zeile mit CPU/RAM‑Einfluss
+    const cpuEinfluss = (hw.cpu - 0.5) * 0.05;
+    const ramEinfluss = (hw.ram - 0.5) * 0.03;
+    causeLines.push(
+      `<div class="detail">↳ CPU‑Einfluss ${(cpuEinfluss*100).toFixed(1)}%, RAM‑Einfluss ${(ramEinfluss*100).toFixed(1)}%</div>`
+    );
   }
 
-  // Falls die FLOORS noch leer sind, füllen wir sie mit den
-  // wichtigsten Etagen – inklusive stage.html und orbit-viewer.
-  if (Aufzug.FLOORS.length === 0) {
-    Aufzug.FLOORS = [
-      { id: 'stage', name: '🎛️ Stage · Corridor', path: 'stage.html', icon: '🎛️', isRoot: false },
-      { id: 'ui', name: '🖥️ UI · Interface', path: 'ui.html', icon: '🖥️', isRoot: false },
-      { id: 'etage-8-orbit-viewer', name: '🌀 Orbit-Viewer · Etage 8', path: 'etage-8-orbit-viewer/index.html', icon: '🌀', isRoot: false },
-      { id: 'root', name: '🛗 ROOT', path: 'index.html', icon: '🛗', isRoot: true }
-    ];
-  }
+  document.getElementById('causeList').innerHTML = causeLines.join('');
+  document.getElementById('effectDisplay').textContent =
+    weather.precipChance > 40 || weather.temp < 8 ? 'dämpfend' : 'neutral/fördernd';
+  renderTable();
+  log(`⚽ SPIELTAG ${matchday} → Heim‑Respo hat ${teams.length} Gegner‑Respo gescannt (8‑fach Detail)`);
+  updateStatus();
+}
 
-  // ─── 2. KOORDINATEN-REGISTRIERUNG ─────────────────────────────
-  // Wenn COORD nicht existiert, bauen wir eine minimale Version.
-  if (typeof COORD === 'undefined') {
-    console.warn('⚠️ coord.js nicht gefunden – lege eigene COORD an.');
-    window.COORD = {
-      axes: {
-        b: 'Breite (X‑Achse)',
-        h: 'Höhe (Y‑Achse)',
-        t: 'Tiefe (Z‑Achse)'
-      },
-      stages: {},
-      register: function(id, x, y, z) {
-        this.stages[id] = { x, y, z };
-      },
-      get: function(id) {
-        return this.stages[id] || null;
+// ─── RENDER: Stadion‑Messfeld mit 8‑fach Trends ───────────────
+function drawStadium() {
+  ctx.clearRect(0,0,W,H);
+  const bg = ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,'#04140a'); bg.addColorStop(1,'#081c10');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+  // Spielfeld‑Linien
+  ctx.strokeStyle = 'rgba(200,255,220,0.08)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(W/2,0); ctx.lineTo(W/2,H); ctx.stroke();
+  ctx.beginPath(); ctx.arc(W/2,H/2,60,0,Math.PI*2); ctx.stroke();
+
+  // Slots
+  for (let r=0;r<ROWS;r++){
+    for (let c=0;c<COLS;c++){
+      const idx = r*COLS+c;
+      const s = slots[idx];
+      computeDeviationAndScore(s);
+      const x = c*CELL_W, y = r*CELL_H;
+      const score = s.score;
+      const heightOffset = s.value * CELL_H * 0.15;
+      const gCol = Math.round(90 + score*140);
+      const rCol = Math.round(200*(1-score) + 40*score);
+      ctx.fillStyle = `rgba(${rCol}, ${gCol}, 60, 0.30)`;
+      ctx.fillRect(x, y+heightOffset*0.3, CELL_W, CELL_H*0.7);
+
+      const inTol = s.deviation <= TOLERANCE;
+      ctx.strokeStyle = inTol ? `rgba(140,240,160,${0.15+score*0.2})` : `rgba(255,120,90,${0.15+(1-score)*0.2})`;
+      ctx.lineWidth = 0.6 + (1-score)*0.8;
+      ctx.strokeRect(x, y+heightOffset*0.2, CELL_W, CELL_H*0.6);
+
+      // 8‑fach Trend (letzte 8 Werte)
+      const trend = trendHistory[idx] || [];
+      const len = trend.length;
+      let arrow = '→';
+      if (len >= 8) {
+        const old = trend[0];
+        const neu = trend[7];
+        if (neu > old + 0.02) arrow = '↑';
+        else if (neu < old - 0.02) arrow = '↓';
+        trend.shift();
       }
-    };
+      trend.push(s.value);
+      if (trend.length > 8) trend.shift();
+      trendHistory[idx] = trend;
+
+      ctx.fillStyle = `rgba(220,255,220,0.25)`;
+      ctx.font = '9px Consolas';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(arrow, x+2, y+2);
+
+      ctx.fillStyle = `rgba(220,240,220,${0.12+score*0.15})`;
+      ctx.font = '8px Consolas';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText(s.value.toFixed(2), x+CELL_W/2, y+CELL_H-4);
+    }
   }
 
-  // Alle Etagen aus Aufzug.FLOORS in COORD registrieren (falls noch nicht geschehen)
-  Aufzug.FLOORS.forEach(f => {
-    if (!f.isRoot && !COORD.stages[f.id]) {
-      // Standard-Koordinaten vergeben: x = Index, y = 0, z = 0
-      const idx = Aufzug.FLOORS.indexOf(f);
-      COORD.register(f.id, idx + 1, 0, 0);
-    }
-  });
+  // Hardware‑Overlay (CPU/GPU/RAM)
+  ctx.fillStyle = 'rgba(120,220,150,0.04)';
+  ctx.font = '11px Consolas';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(`CPU ${Math.round(hw.cpu*100)}%  GPU ${Math.round(hw.gpu)}°C  RAM ${Math.round(hw.ram*100)}%`, 12, H-8);
 
-  // Spezielle Koordinaten für wichtige Etagen
-  COORD.register('stage', 1, 0, 0);
-  COORD.register('ui', 2, 0, 0);
-  COORD.register('etage-8-orbit-viewer', 3, 8, 1);
+  ctx.fillStyle = 'rgba(150,230,170,0.08)';
+  ctx.font = '14px Consolas';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  ctx.fillText(`Heim‑Stadion · 8‑fach Trends · Spieltag ${matchday}`, W/2, 10);
+}
 
-  // Achsen registrieren (falls nicht schon in coord.js)
-  if (!COORD.stages.b) COORD.register('b', 1, 0, 0);
-  if (!COORD.stages.h) COORD.register('h', 0, 1, 0);
-  if (!COORD.stages.t) COORD.register('t', 0, 0, 1);
-
-  // ─── 3. DOM-REFERENZEN ────────────────────────────────────────
-  const floorGrid = document.getElementById('floorGrid');
-  const coordBox = document.getElementById('coordBox');
-  const logBox = document.getElementById('logBox');
-  const syncInput = document.getElementById('syncInput');
-
-  // ─── 4. ETAGEN ANZEIGEN ──────────────────────────────────────
-  function renderFloors() {
-    floorGrid.innerHTML = '';
-    let count = 0;
-
-    Aufzug.FLOORS.forEach(f => {
-      if (f.isRoot) return;
-      count++;
-
-      const coord = COORD.get(f.id) || { x: '?', y: '?', z: '?' };
-      const isLegit = !!COORD.get(f.id);
-
-      const card = document.createElement('a');
-      card.className = 'card';
-      card.href = f.path;
-      card.innerHTML = `
-        <span class="icon">${f.icon || '📁'}</span>
-        <span class="name">${f.name}</span>
-        <span class="coord-badge">(${coord.x}, ${coord.y}, ${coord.z})</span>
-        <div class="path">${f.path}</div>
-        <span class="status-tag ${isLegit ? 'legit' : 'pending'}">${isLegit ? '✅ legitimiert' : '⏳ pending'}</span>
-      `;
-      floorGrid.appendChild(card);
-    });
-
-    document.getElementById('floorCount').textContent = `${count} Etagen`;
-    document.getElementById('fActive').textContent = count;
+// ─── UPDATE SLOTS + HARDWARE ──────────────────────────────────
+function updateSlots() {
+  for (const s of slots) {
+    s.value += (s.targetValue - s.value) * 0.008;
+    s.pulse += Math.sin(time*0.001 + s.angle*0.01) * 0.001;
+    s.drift += Math.cos(time*0.002 + s.angle*0.02) * 0.001;
+    s.pulse = Math.min(Math.max(s.pulse,-1),1); s.drift = Math.min(Math.max(s.drift,-1),1);
+    s.angle = (s.angle + 0.02) % 360;
   }
+  // Hardware‑Dynamik
+  hw.cpu = 0.2 + 0.5*(0.5+0.5*Math.sin(time*0.0004)) + 0.2*Math.random();
+  hw.cpu = Math.min(1, Math.max(0, hw.cpu));
+  hw.gpu = 45 + 15*(0.5+0.5*Math.sin(time*0.0003+1.2)) + 5*Math.random();
+  hw.gpu = Math.min(95, Math.max(30, hw.gpu));
+  hw.ram = 0.3 + 0.4*(0.5+0.5*Math.sin(time*0.0005+0.7)) + 0.15*Math.random();
+  hw.ram = Math.min(1, Math.max(0, hw.ram));
+  if (Math.random() < 0.001) hw.rom = Math.min(5, hw.rom+1);
+  if (hw.rom > 0 && Math.random() < 0.01) hw.rom = Math.max(0, hw.rom-1);
+}
 
-  // ─── 5. KOORDINATEN ANZEIGEN ──────────────────────────────────
-  function renderCoords() {
-    const out = [];
-
-    // Achsen
-    out.push('<span class="axis-label">📐 Achsen:</span>');
-    Object.entries(COORD.axes || {}).forEach(([k, v]) => {
-      out.push(`&nbsp;&nbsp;• ${k}: ${v}`);
-    });
-
-    // Stages
-    out.push('<br><span class="axis-label">🏢 Stages:</span>');
-    const entries = Object.entries(COORD.stages || {});
-    if (entries.length === 0) {
-      out.push('&nbsp;&nbsp;– keine registriert –');
-    } else {
-      entries.forEach(([id, c]) => {
-        out.push(`<div class="stage-entry"><span class="id">${id}</span><span class="pos">(${c.x}, ${c.y}, ${c.z})</span></div>`);
-      });
-    }
-
-    coordBox.innerHTML = out.join('');
-    document.getElementById('coordCount').textContent = `${entries.length} registriert`;
+function loop() {
+  if (running) {
+    time += 16;
+    updateSlots();
+    drawStadium();
+    if (Math.floor(time/2000)%2===0) updateStatus();
   }
+  requestAnimationFrame(loop);
+}
 
-  // ─── 6. LOG ANZEIGEN ──────────────────────────────────────────
-  function renderLog() {
-    const entries = (Aufzug.getSharedLog && Aufzug.getSharedLog()) || [];
-    logBox.innerHTML = '';
-    entries.slice().reverse().forEach(e => {
-      const entry = document.createElement('div');
-      entry.className = 'entry';
-      entry.innerHTML = `
-        <span class="time">[${e.time || '--:--:--'}]</span>
-        <span class="floor">${e.floor || 'system'}</span>
-        <span class="msg">${e.msg || ''}</span>
-      `;
-      logBox.appendChild(entry);
-    });
-    document.getElementById('logCount').textContent = `${entries.length} Einträge`;
-  }
+// ─── EVENTS ──────────────────────────────────────────────────
+document.getElementById('btnPause').addEventListener('click', () => {
+  running = !running;
+  document.getElementById('btnPause').textContent = running ? '⏸ PAUSE' : '▶ START';
+  log(running ? '▶ Fortgesetzt' : '⏸ Pausiert');
+});
+document.getElementById('btnMiss').addEventListener('click', doMiss);
+document.getElementById('btnFasil').addEventListener('click', doFasil);
+document.getElementById('btnFix').addEventListener('click', doFix);
+document.getElementById('btnFit').addEventListener('click', doFit);
+document.getElementById('btnRecall').addEventListener('click', doRecall);
+document.getElementById('btnRefinal').addEventListener('click', doRefinal);
+document.getElementById('btnSpieltag').addEventListener('click', doSpieltag);
+document.getElementById('btnWetter').addEventListener('click', doWetterPrognose);
+document.getElementById('btnReset').addEventListener('click', () => {
+  initSlots(); matchday = 0; trendHistory = [];
+  for (const t of teams) { t.pkt=0; t.s=0; t.u=0; t.n=0; t.letzterScore=0; }
+  hw = { cpu:0.3, gpu:50, ram:0.4, rom:0, tb:true };
+  weather = { temp:16, condition:'bewölkt', precipChance:25 };
+  document.getElementById('causeList').innerHTML = 'Noch kein Spieltag gelaufen.';
+  renderTable();
+  log('⟲ RESET → Alle Systeme neu gestartet');
+  updateStatus();
+});
 
-  // ─── 7. SYNC-FUNKTIONEN ──────────────────────────────────────
-  let syncCount = 0;
+// ─── INIT ──────────────────────────────────────────────────────
+renderTable();
+log('⚡ Respo‑Liga 8‑fach fusioniert · Hardware + Wetter + 8 Teams');
+log(`🌦️ Start‑Wetter (Snapshot): ${weather.condition}, ${weather.temp}°C, Regen ${weather.precipChance}%`);
+log('⌨️  SPIELTAG → 8 Teams werden gescannt · WETTER‑PROGNOSE → 8‑Schritt‑Vorhersage');
+updateStatus();
+loop();
 
-  function doSync(message) {
-    const msg = message || syncInput.value.trim() || 'sync:orakel';
-    syncCount++;
-
-    // LED kurz aufleuchten lassen
-    const led = document.getElementById('ledSync');
-    led.className = 'led sync';
-    setTimeout(() => { led.className = 'led'; }, 400);
-
-    // In Aufzug-Log schreiben
-    if (Aufzug.log) {
-      Aufzug.log(`SYNC: ${msg}`);
-    }
-
-    // An alle Etagen per postMessage senden (wenn iframes existieren)
-    document.querySelectorAll('iframe').forEach(iframe => {
-      try {
-        iframe.contentWindow.postMessage({ type: 'arg.sync', payload: msg, from: 'orakel' }, '*');
-      } catch (_) {}
-    });
-
-    // Lokales Log
-    const logEntry = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: `⬆ SYNC: ${msg}`
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(logEntry);
-    }
-
-    document.getElementById('fSyncCount').textContent = syncCount;
-    renderLog();
-  }
-
-  function broadcastSync() {
-    doSync(syncInput.value.trim() || 'broadcast:orakel');
-  }
-
-  function resetAll() {
-    syncCount = 0;
-    document.getElementById('fSyncCount').textContent = '0';
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().length = 0;
-    }
-    renderLog();
-    const led = document.getElementById('ledSystem');
-    led.className = 'led';
-    setTimeout(() => { led.className = 'led on'; }, 300);
-  }
-
-  // ─── 8. EVENT-BINDING ─────────────────────────────────────────
-  document.getElementById('btnSync').addEventListener('click', () => doSync());
-  document.getElementById('btnBroadcast').addEventListener('click', broadcastSync);
-  document.getElementById('btnResetAll').addEventListener('click', resetAll);
-
-  syncInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSync();
-  });
-
-  // ─── 9. TASTATUR ──────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 's' || e.key === 'S') { e.preventDefault(); doSync(); }
-    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); broadcastSync(); }
-    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetAll(); }
-  });
-
-  // ─── 10. POSTMESSAGE-EMPFAENGER (von Etagen) ──────────────────
-  window.addEventListener('message', (event) => {
-    const data = event.data;
-    if (data && data.type === 'arg.sync') {
-      const from = data.from || 'unbekannt';
-      const payload = data.payload || '';
-      syncInput.value = payload;
-      document.getElementById('fSyncCount').textContent = ++syncCount;
-      // In Aufzug-Log schreiben
-      if (Aufzug.log) {
-        Aufzug.log(`📨 Empfangen von ${from}: ${payload}`);
-      }
-      renderLog();
-    }
-    if (data && data.type === 'etage.ready') {
-      const from = data.from || 'unbekannt';
-      // Etage in COORD nachtragen, falls nicht vorhanden
-      if (!COORD.get(from)) {
-        const idx = Aufzug.FLOORS.findIndex(f => f.id === from);
-        COORD.register(from, idx + 1, 0, 0);
-        renderCoords();
-        renderFloors();
-      }
-    }
-  });
-
-  // ─── 11. INIT ──────────────────────────────────────────────────
-  function init() {
-    // Aufzug initialisieren (falls vorhanden)
-    if (Aufzug.init) {
-      Aufzug.init({ currentId: 'root', basePath: '' });
-    }
-
-    renderFloors();
-    renderCoords();
-    renderLog();
-
-    document.getElementById('fSyncCount').textContent = '0';
-    document.getElementById('ledSystem').className = 'led on';
-    document.getElementById('ledReich').className = 'led pulse';
-
-    // Begrüßung
-    const welcome = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: '🌀 STAGE‑Reich · Corridor · Legitimation · bereit'
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(welcome);
-    }
-    renderLog();
-
-    console.log('🌀 STAGE‑Reich initialisiert');
-    console.log('📐 Achsen:', Object.keys(COORD.axes || {}));
-    console.log('🏢 Stages:', Object.keys(COORD.stages || {}));
-    console.log('⌨️  s=Sync  b=Broadcast  r=Reset');
-  }
-
-  // Warten, bis alle Skripte geladen sind
-  if (document.readyState === 'complete') {
-    init();
-  } else {
-    window.addEventListener('load', init);
-  }
 </script>
-
 </body>
 </html>
