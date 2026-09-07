@@ -1,757 +1,396 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌀 STAGE‑Reich · Index · Corridor · Legitimation</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔺 Dreieck‑Raum · 120°‑Screens · 9×9‑Respo‑Mesh · Orbit</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:#06070e; color:#e0e8f0; font-family:'Consolas','Segoe UI',monospace;
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .container {
+    max-width:1300px; width:100%; background:rgba(12,16,28,0.7); backdrop-filter:blur(4px);
+    border-radius:28px; border:1px solid rgba(120,220,150,0.15); padding:24px 28px 32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.8);
+  }
+  header {
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    margin-bottom:16px; border-bottom:1px solid rgba(120,220,150,0.1); padding-bottom:12px;
+  }
+  header h1 {
+    font-size:20px; font-weight:300; letter-spacing:2px;
+    background:linear-gradient(135deg, #7ee0a0, #d8f0c0); -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  header .badge { background:rgba(120,220,150,0.08); border:1px solid rgba(120,220,150,0.15);
+    border-radius:100px; padding:4px 18px; font-size:12px; color:#a0d0a8; }
 
-  <!-- ========================================================= -->
-  <!-- KERN-MODULE (global, werden von allen Etagen genutzt)     -->
-  <!-- ========================================================= -->
-  <script src="coord.js"></script>
-  <script src="aufzug.js"></script>
-  <script src="OS_CORE.js"></script>
+  .note {
+    background:rgba(255,190,90,0.06); border:1px solid rgba(255,190,90,0.18);
+    border-radius:12px; padding:10px 14px; font-size:11.5px; line-height:1.6; color:#e8d8b8;
+    margin-bottom:14px;
+  }
+  .note b { color:#ffcf8c; }
 
-  <!-- ========================================================= -->
-  <!-- ACHSEN-MODULE (b/h/t – HDF-Cube-Grundlage)               -->
-  <!-- ========================================================= -->
-  <script src="b/axiom.map.js"></script>
-  <script src="h/axiom.map.js"></script>
-  <script src="t/axiom.map.js"></script>
+  .grid-2 { display:grid; grid-template-columns:1.3fr 0.7fr; gap:18px; }
+  @media (max-width:980px){ .grid-2 { grid-template-columns:1fr; } }
 
-  <!-- ========================================================= -->
-  <!-- NC-SUITE (Figur, Kraft, Space, Time)                     -->
-  <!-- ========================================================= -->
-  <script src="NC_figur.js"></script>
-  <script src="NC_kraft.js"></script>
-  <script src="NC_space.js"></script>
-  <script src="NC_time.js"></script>
-  <script src="NC.suite"></script> <!-- bündelt die vier Module -->
+  .stage-wrap {
+    background:#000; border-radius:16px; border:1px solid rgba(120,220,150,0.1);
+    overflow:hidden; aspect-ratio:4/3; position:relative; cursor:grab;
+    box-shadow:inset 0 0 70px rgba(20,60,30,0.25);
+  }
+  .stage-wrap:active { cursor:grabbing; }
+  .stage {
+    width:100%; height:100%; position:relative; perspective:1400px;
+  }
+  .orbit-inner {
+    width:100%; height:100%; position:relative; transform-style:preserve-3d;
+    transform: rotateX(-18deg) rotateY(25deg);
+  }
 
-  <!-- ========================================================= -->
-  <!-- VEC-MODULE (Vektoren & Koordinaten)                       -->
-  <!-- ========================================================= -->
-  <script src="vec.js"></script>
-  <script src="vec3.js"></script>
-  <script src="vec9.js"></script>
+  .axis { position:absolute; left:50%; top:50%; transform-style:preserve-3d; }
+  .axis-x { width:280px; height:1px; background:rgba(255,90,90,0.35); transform:translate(-140px,0,0); }
+  .axis-y { width:1px; height:220px; background:rgba(90,220,120,0.35); transform:translate(0,-220px,0) rotateX(0deg); }
+  .axis-z { width:1px; height:280px; background:rgba(90,150,255,0.35); transform:translate(0,0,-140px) rotateX(90deg); transform-origin: 0 0; }
 
-  <style>
-    /* ==========================================================
-       GLOBALES STYLING – dunkel, konsolenhaft, übersichtlich
-       ========================================================== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  .screen {
+    position:absolute; left:50%; top:50%; width:180px; height:260px; margin:-130px 0 0 -90px;
+    border:2px solid rgba(0,0,0,0.6); transition:transform 0.6s cubic-bezier(.2,.9,.25,1.05), background 0.4s;
+    display:flex; align-items:flex-end; justify-content:center; padding-bottom:6px;
+    font-size:10px; letter-spacing:1px; color:rgba(0,0,0,0.6);
+  }
+  #screen0 { background:linear-gradient(135deg,#12c2e9,#0057ff); box-shadow:0 0 30px rgba(20,150,255,0.4); }
+  #screen1 { background:linear-gradient(135deg,#ff2fa0,#b8006b); box-shadow:0 0 30px rgba(255,30,140,0.4); }
+  #screen2 { background:rgba(255,255,255,0.14); backdrop-filter:blur(3px); box-shadow:0 0 24px rgba(255,255,255,0.2); }
 
-    body {
-      background: #0b0b0b;
-      color: #e0e0e0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
+  .mesh-point {
+    position:absolute; left:50%; top:50%; width:8px; height:8px; margin:-4px 0 0 -4px;
+    border-radius:50%; cursor:pointer;
+  }
 
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      padding: 24px 20px 30px;
-    }
+  .panel {
+    background:rgba(16,20,14,0.4); border:1px solid rgba(120,220,150,0.08);
+    border-radius:16px; padding:12px 14px; margin-bottom:12px;
+  }
+  .panel h2 { font-size:12px; color:#b0e8c0; border-bottom:1px solid rgba(120,220,150,0.1);
+    padding-bottom:6px; margin-bottom:8px; letter-spacing:1px; }
 
-    /* ─── HEADER ─────────────────────────────────────────────── */
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #2a3a4a;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-    }
+  .limb-select { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; }
+  .limb-select button { flex:1; min-width:60px; background:rgba(20,28,20,0.6); border:1px solid rgba(120,220,150,0.15);
+    border-radius:8px; padding:6px 4px; color:#c0d8c8; font-family:inherit; font-size:10.5px; cursor:pointer; }
+  .limb-select button.active { border-color:#7ee0a0; color:#7ee0a0; background:rgba(80,180,110,0.15); }
 
-    .header h1 {
-      color: #6cf;
-      font-size: 26px;
-      font-weight: 300;
-      letter-spacing: 2px;
-    }
+  .slider-row { margin-bottom:6px; }
+  .slider-row label { display:flex; justify-content:space-between; font-size:10.5px; color:#9ab8a4; margin-bottom:2px; }
+  .slider-row input[type=range] { width:100%; }
 
-    .header h1 small {
-      color: #5a7a8a;
-      font-size: 13px;
-      font-weight: 300;
-      letter-spacing: 1px;
-    }
+  .state-row, .scenario-grid { display:flex; gap:6px; margin-top:8px; flex-wrap:wrap; }
+  .state-row button, .scenario-grid button {
+    flex:1; min-width:70px; background:rgba(20,28,20,0.6); border:1px solid rgba(120,220,150,0.15);
+    border-radius:8px; padding:7px 4px; color:#c0d8c8; font-family:inherit; font-size:10.5px; cursor:pointer;
+  }
+  .state-row button.lock { border-color:#ff6b6b; color:#ff6b6b; }
+  .scenario-grid button { border-color:rgba(255,190,90,0.2); color:#ffcf8c; }
 
-    .status-leds {
-      display: flex;
-      gap: 18px;
-      font-size: 12px;
-      color: #5a7a8a;
-    }
+  .status-row { display:flex; flex-wrap:wrap; gap:10px 18px; font-size:11px; color:#9ab8a4; margin-bottom:10px; }
+  .status-row b { color:#a0e0b0; }
 
-    .status-leds span {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .led {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #2a4a5a;
-      transition: 0.3s;
-    }
-
-    .led.on {
-      background: #8cf0d0;
-      box-shadow: 0 0 12px #8cf0d0;
-    }
-
-    .led.pulse {
-      background: #f0d080;
-      animation: pulse 1.2s infinite;
-    }
-
-    .led.off {
-      background: #2a4a5a;
-    }
-
-    .led.sync {
-      background: #b388ff;
-      box-shadow: 0 0 12px #b388ff;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50%      { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* ─── ETAGEN-GRID (Corridor) ────────────────────────────── */
-    .section-title {
-      color: #f0d080;
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 1.5px;
-      margin: 24px 0 12px;
-      border-bottom: 1px solid #1a2a3a;
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title .badge {
-      font-size: 10px;
-      color: #5a7a8a;
-      font-weight: 300;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: #111;
-      border: 1px solid #2a3a4a;
-      border-radius: 12px;
-      padding: 16px 18px;
-      text-decoration: none;
-      color: #e0e0e0;
-      display: block;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .card:hover {
-      border-color: #6cf;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-    }
-
-    .card .icon {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .card .name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #d0e0e8;
-    }
-
-    .card .path {
-      font-size: 10px;
-      color: #4a5a6a;
-      margin-top: 4px;
-      word-break: break-all;
-    }
-
-    .card .coord-badge {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      font-size: 10px;
-      color: #b388ff;
-      background: rgba(179, 136, 255, 0.08);
-      padding: 2px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(179, 136, 255, 0.1);
-    }
-
-    .card .status-tag {
-      display: inline-block;
-      font-size: 8px;
-      padding: 1px 10px;
-      border-radius: 12px;
-      margin-top: 6px;
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .card .status-tag.legit {
-      border: 1px solid #8cf0d0;
-      color: #8cf0d0;
-    }
-
-    .card .status-tag.pending {
-      border: 1px solid #f0d080;
-      color: #f0d080;
-    }
-
-    /* ─── KOORDINATEN-ANZEIGE ───────────────────────────────── */
-    .coord-box {
-      background: #111;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 12px;
-      line-height: 1.7;
-      color: #8ab0c0;
-      margin: 6px 0 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .coord-box .axis-label {
-      color: #f0d080;
-      font-weight: bold;
-    }
-
-    .coord-box .stage-entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 2px 4px;
-      border-bottom: 1px solid #0e1620;
-    }
-
-    .coord-box .stage-entry .id {
-      color: #d0e0e8;
-    }
-
-    .coord-box .stage-entry .pos {
-      color: #b388ff;
-    }
-
-    /* ─── LOG ────────────────────────────────────────────────── */
-    .log-box {
-      background: #111;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 11px;
-      line-height: 1.6;
-      max-height: 160px;
-      overflow-y: auto;
-      color: #5a7a8a;
-      margin-top: 6px;
-    }
-
-    .log-box .entry {
-      border-bottom: 1px solid #0e1620;
-      padding: 2px 0;
-    }
-
-    .log-box .time {
-      color: #2a3a4a;
-    }
-
-    .log-box .floor {
-      color: #6cf;
-    }
-
-    .log-box .msg {
-      color: #8ab0c0;
-    }
-
-    /* ─── SYNC-BAR ───────────────────────────────────────────── */
-    .sync-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      background: #0e141c;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      margin: 16px 0 6px;
-    }
-
-    .sync-bar .label {
-      font-size: 11px;
-      color: #b388ff;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-bar input {
-      flex: 1;
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #d0e0e8;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-family: inherit;
-      min-width: 120px;
-    }
-
-    .sync-bar input::placeholder {
-      color: #4a5a6a;
-    }
-
-    .sync-bar button {
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #9ab0c0;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .sync-bar button:hover {
-      background: #2a3a4a;
-      border-color: #6cf;
-      color: #d0e8f8;
-    }
-
-    .sync-bar button.sync {
-      border-color: rgba(179, 136, 255, 0.2);
-      color: #b388ff;
-    }
-
-    .sync-bar button.sync:hover {
-      background: rgba(179, 136, 255, 0.1);
-      border-color: #b388ff;
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────────────── */
-    .footer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-      margin-top: 24px;
-      padding: 8px 16px;
-      background: #0e141c;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      font-size: 10px;
-      color: #3a4a5a;
-    }
-
-    .footer .gold {
-      color: #f0d080;
-    }
-
-    .footer .stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* ─── SCROLLBAR ──────────────────────────────────────────── */
-    ::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #080c12;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #1a2a3a;
-      border-radius: 4px;
-    }
-  </style>
+  .log-box {
+    background:rgba(0,0,0,0.4); border-radius:12px; padding:8px 12px;
+    font-size:10.5px; color:#8a9aaa; height:80px; overflow-y:auto;
+    border:1px solid rgba(120,220,150,0.05); line-height:1.5; margin-top:6px;
+  }
+  .footer { text-align:center; color:#3a4a5a; font-size:10px; margin-top:14px;
+    border-top:1px solid rgba(120,220,150,0.05); padding-top:10px; }
+</style>
 </head>
 <body>
-
 <div class="container">
 
-  <!-- ========================================================= -->
-  <!-- HEADER                                                    -->
-  <!-- ========================================================= -->
-  <div class="header">
-    <h1>🌀 STAGE‑Reich <small>Corridor · Legitimation · Technik</small></h1>
-    <div class="status-leds">
-      <span><span class="led on" id="ledSystem"></span> SYSTEM</span>
-      <span><span class="led sync" id="ledSync"></span> SYNC</span>
-      <span><span class="led pulse" id="ledReich"></span> REICH</span>
+<header>
+  <h1>🔺 Dreieck‑Raum · 120°‑Screens · 9×9‑Respo‑Mesh · Orbit</h1>
+  <span class="badge">● Maus ziehen = Raum drehen</span>
+</header>
+
+<div class="note">
+  <b>Sachstand:</b> Die 3 Screens stehen jetzt geometrisch korrekt <b>120° zueinander versetzt</b> um eine
+  gemeinsame Mittelachse (echte Dreieckssymmetrie, kein Zufalls-Winkel). Das 9×9‑Respo‑Mesh liegt als
+  <b>achsenorientierte Bodenebene</b> (X = Spalte, Z = Zeile, Y = Messwert/Höhe) im Zentrum. Mit der Maus im
+  Bild ziehen dreht den <b>gesamten Raum</b> (Orbit) um den Mittelpunkt. Die vorherige
+  "RUN‑21‑Bewertung" mit den A+/A‑Noten war reine Fremdbewertung/Stil — hier zählt nur, ob das unten wirklich
+  läuft und du es bewegen kannst.
+</div>
+
+<div class="status-row">
+  <span>Ø MESH‑SCORE <b id="meshScoreDisplay">–</b></span>
+  <span>ORBIT <b id="orbitDisplay">rotY 25° · rotX −18°</b></span>
+  <span>AKTIVES SCREEN <b id="activeScreenDisplay">Screen 0</b></span>
+</div>
+
+<div class="grid-2">
+  <div>
+    <div class="stage-wrap" id="stageWrap">
+      <div class="stage">
+        <div class="orbit-inner" id="orbitInner">
+          <div class="axis axis-x"></div>
+          <div class="axis axis-y"></div>
+          <div class="axis axis-z"></div>
+          <div class="screen" id="screen0">SCREEN 0 · 0°</div>
+          <div class="screen" id="screen1">SCREEN 1 · 120°</div>
+          <div class="screen" id="screen2">SCREEN 2 · 240°</div>
+          <div id="meshLayer"></div>
+        </div>
+      </div>
+    </div>
+    <div class="log-box" id="logBox">[init] Dreieck‑Raum geladen …</div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>🎛️ Screen wählen &amp; bewegen</h2>
+      <div class="limb-select">
+        <button class="active" data-screen="0">Screen 0</button>
+        <button data-screen="1">Screen 1</button>
+        <button data-screen="2">Screen 2</button>
+      </div>
+      <div class="slider-row">
+        <label><span>Zusatz‑Rotation (relativ zur 120°‑Basis)</span><span id="rotYVal">0°</span></label>
+        <input type="range" id="rotY" min="-45" max="45" value="0">
+      </div>
+      <div class="slider-row">
+        <label><span>Kippung X</span><span id="rotXVal">0°</span></label>
+        <input type="range" id="rotX" min="-45" max="45" value="0">
+      </div>
+      <div class="slider-row">
+        <label><span>Radius (Abstand zur Mittelachse)</span><span id="radVal">150</span></label>
+        <input type="range" id="rad" min="60" max="260" value="150">
+      </div>
+      <div class="state-row">
+        <button id="btnHalten">✋ HALTEN</button>
+        <button id="btnBewegen">🔄 BEWEGEN</button>
+        <button class="lock" id="btnFixieren">🔒 FIXIEREN</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>⭐ Szenarien (alle 3 Screens gleichzeitig)</h2>
+      <div class="scenario-grid">
+        <button data-preset="neutral">120° Neutral</button>
+        <button data-preset="weit">Weit (Radius+)</button>
+        <button data-preset="eng">Eng (Radius−)</button>
+        <button data-preset="kill">Kill‑Bill‑Move</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>🧩 9×9‑Respo‑Mesh</h2>
+      <div class="scenario-grid">
+        <button id="btnMeshFit">📐 FIT (Referenzkurve)</button>
+        <button id="btnMeshRecall">⏪ RECALL</button>
+      </div>
     </div>
   </div>
+</div>
 
-  <!-- ========================================================= -->
-  <!-- ETAGEN-CORRIDOR (alle legitimierten Stages)              -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🏢 ETAGEN · CORRIDOR
-    <span class="badge" id="floorCount">0 Etagen</span>
-  </div>
-  <div class="grid" id="floorGrid"></div>
-
-  <!-- ========================================================= -->
-  <!-- KOORDINATEN-SYSTEM (b/h/t + Stages)                      -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🧭 KOORDINATEN · b/h/t · HDF-Cube
-    <span class="badge" id="coordCount">0 registriert</span>
-  </div>
-  <div class="coord-box" id="coordBox">
-    Koordinaten werden geladen…
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- SYNC-BAR (arg.sync – Kommunikation mit Etagen)           -->
-  <!-- ========================================================= -->
-  <div class="sync-bar">
-    <span class="label"><span class="led sync" style="display:inline-block;width:8px;height:8px;"></span> arg.sync</span>
-    <input type="text" id="syncInput" placeholder="Nachricht an Etagen…" value="sync:orakel">
-    <button class="sync" id="btnSync">🔄 SYNC</button>
-    <button id="btnBroadcast">📡 BROADCAST</button>
-    <button id="btnResetAll">⟲ RESET</button>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- GETEILTES LOG (etagenübergreifend)                       -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    📜 GETEILTES LOG
-    <span class="badge" id="logCount">0 Einträge</span>
-  </div>
-  <div class="log-box" id="logBox"></div>
-
-  <!-- ========================================================= -->
-  <!-- FOOTER                                                    -->
-  <!-- ========================================================= -->
-  <div class="footer">
-    <span class="stat"><span class="gold">★</span> STAGE‑Reich · Corridor · Legitimation</span>
-    <span class="stat">🔷 <span id="fActive">0</span> aktive Etagen</span>
-    <span class="stat">⚡ <span id="fSyncCount">0</span> SYNCs</span>
-    <span class="stat">⌨️  s=Sync  b=Broadcast  r=Reset</span>
-  </div>
-
+<div class="footer">⚖️ iki1uc · Dreieck‑Raum · echte 120°‑Symmetrie, achsenorientiertes Mesh, reales Orbit‑Dragging</div>
 </div>
 
 <script>
-  "use strict";
+"use strict";
 
-  /* ==============================================================
-     STAGE‑Reich · Corridor · Legitimation
-     Diese index.html ist der zentrale Einstiegspunkt.
-     Sie lädt alle Module, zeigt alle Etagen an,
-     legitimiert stage.html als Corridor und
-     integriert etage-8-orbit-viewer als Technik‑Etage.
-     ============================================================== */
+// ================================================================
+//  DREIECK-RAUM · 120°-SCREENS · 9x9-RESPO-MESH · ORBIT
+//  - 3 Screens sitzen auf einem Kreis um die Y-Achse, exakt 120°
+//    auseinander (0°, 120°, 240°) -> echte Dreieckssymmetrie.
+//  - Das 9x9-Mesh liegt als Bodenebene im Zentrum: Spalte -> X,
+//    Zeile -> Z, Messwert -> Höhe Y. Klar achsenorientiert.
+//  - Orbit: Maus-Drag auf der Bühne dreht den gesamten orbit-inner
+//    Container (rotateX/rotateY), das ist die 360°-Rotation.
+// ================================================================
 
-  // ─── 1. ETAGEN-REGISTRY (aus aufzug.js) ──────────────────────
-  // Wenn Aufzug.FLOORS nicht existiert, definieren wir sie hier.
-  // So ist die Seite auch ohne externe aufzug.js lauffähig.
-  if (typeof Aufzug === 'undefined') {
-    console.warn('⚠️ aufzug.js nicht gefunden – lege eigene FLOORS an.');
-    window.Aufzug = {
-      FLOORS: [],
-      init: function() {},
-      log: function() {},
-      setSharedValue: function() {},
-      getSharedValue: function() { return undefined; },
-      getSharedLog: function() { return []; }
-    };
-  }
+const orbitInner = document.getElementById('orbitInner');
+let orbit = { rotY: 25, rotX: -18 };
+function applyOrbit() {
+  orbitInner.style.transform = `rotateX(${orbit.rotX}deg) rotateY(${orbit.rotY}deg)`;
+  document.getElementById('orbitDisplay').textContent = `rotY ${Math.round(orbit.rotY)}° · rotX ${Math.round(orbit.rotX)}°`;
+}
+applyOrbit();
 
-  // Falls die FLOORS noch leer sind, füllen wir sie mit den
-  // wichtigsten Etagen – inklusive stage.html und orbit-viewer.
-  if (Aufzug.FLOORS.length === 0) {
-    Aufzug.FLOORS = [
-      { id: 'stage', name: '🎛️ Stage · Corridor', path: 'stage.html', icon: '🎛️', isRoot: false },
-      { id: 'ui', name: '🖥️ UI · Interface', path: 'ui.html', icon: '🖥️', isRoot: false },
-      { id: 'etage-8-orbit-viewer', name: '🌀 Orbit-Viewer · Etage 8', path: 'etage-8-orbit-viewer/index.html', icon: '🌀', isRoot: false },
-      { id: 'root', name: '🛗 ROOT', path: 'index.html', icon: '🛗', isRoot: true }
-    ];
-  }
+const stageWrap = document.getElementById('stageWrap');
+let dragging = false, lastX = 0, lastY = 0;
+stageWrap.addEventListener('mousedown', (e) => { dragging = true; lastX = e.clientX; lastY = e.clientY; });
+window.addEventListener('mouseup', () => dragging = false);
+window.addEventListener('mousemove', (e) => {
+  if (!dragging) return;
+  const dx = e.clientX - lastX, dy = e.clientY - lastY;
+  orbit.rotY += dx * 0.4;
+  orbit.rotX = Math.max(-70, Math.min(70, orbit.rotX - dy * 0.4));
+  lastX = e.clientX; lastY = e.clientY;
+  applyOrbit();
+});
+// Touch-Unterstützung
+stageWrap.addEventListener('touchstart', (e) => { dragging = true; lastX = e.touches[0].clientX; lastY = e.touches[0].clientY; }, {passive:true});
+window.addEventListener('touchend', () => dragging = false);
+window.addEventListener('touchmove', (e) => {
+  if (!dragging) return;
+  const dx = e.touches[0].clientX - lastX, dy = e.touches[0].clientY - lastY;
+  orbit.rotY += dx * 0.4;
+  orbit.rotX = Math.max(-70, Math.min(70, orbit.rotX - dy * 0.4));
+  lastX = e.touches[0].clientX; lastY = e.touches[0].clientY;
+  applyOrbit();
+}, {passive:true});
 
-  // ─── 2. KOORDINATEN-REGISTRIERUNG ─────────────────────────────
-  // Wenn COORD nicht existiert, bauen wir eine minimale Version.
-  if (typeof COORD === 'undefined') {
-    console.warn('⚠️ coord.js nicht gefunden – lege eigene COORD an.');
-    window.COORD = {
-      axes: {
-        b: 'Breite (X‑Achse)',
-        h: 'Höhe (Y‑Achse)',
-        t: 'Tiefe (Z‑Achse)'
-      },
-      stages: {},
-      register: function(id, x, y, z) {
-        this.stages[id] = { x, y, z };
-      },
-      get: function(id) {
-        return this.stages[id] || null;
-      }
-    };
-  }
+// ─── LOG ─────────────────────────────────────────────────────
+function log(msg) {
+  const box = document.getElementById('logBox');
+  const t = new Date().toLocaleTimeString();
+  const e = document.createElement('div');
+  e.textContent = `[${t}] ${msg}`;
+  box.appendChild(e); box.scrollTop = box.scrollHeight;
+  if (box.children.length > 40) box.removeChild(box.firstChild);
+}
 
-  // Alle Etagen aus Aufzug.FLOORS in COORD registrieren (falls noch nicht geschehen)
-  Aufzug.FLOORS.forEach(f => {
-    if (!f.isRoot && !COORD.stages[f.id]) {
-      // Standard-Koordinaten vergeben: x = Index, y = 0, z = 0
-      const idx = Aufzug.FLOORS.indexOf(f);
-      COORD.register(f.id, idx + 1, 0, 0);
-    }
+// ─── SCREENS: 3 Stück, Basiswinkel 0/120/240 ───────────────────
+const screens = {
+  0: { el: document.getElementById('screen0'), base: 0,   rotY:0, rotX:0, rad:150, locked:false },
+  1: { el: document.getElementById('screen1'), base: 120, rotY:0, rotX:0, rad:150, locked:false },
+  2: { el: document.getElementById('screen2'), base: 240, rotY:0, rotX:0, rad:150, locked:false },
+};
+let activeScreen = 0;
+
+function applyScreen(key) {
+  const s = screens[key];
+  const totalAngle = s.base + s.rotY;
+  // rotateY um Mittelachse auf den Basiswinkel + Zusatzrotation, dann nach außen verschieben
+  s.el.style.transform =
+    `rotateY(${totalAngle}deg) translateZ(${s.rad}px) rotateX(${s.rotX}deg)`;
+}
+Object.keys(screens).forEach(applyScreen);
+
+document.querySelectorAll('.limb-select button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.limb-select button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeScreen = Number(btn.dataset.screen);
+    const s = screens[activeScreen];
+    document.getElementById('rotY').value = s.rotY;
+    document.getElementById('rotX').value = s.rotX;
+    document.getElementById('rad').value = s.rad;
+    document.getElementById('rotYVal').textContent = s.rotY + '°';
+    document.getElementById('rotXVal').textContent = s.rotX + '°';
+    document.getElementById('radVal').textContent = s.rad;
+    document.getElementById('activeScreenDisplay').textContent = `Screen ${activeScreen} (Basis ${s.base}°)`;
+    log(`🎛️ Screen ${activeScreen} gewählt (Basiswinkel ${s.base}°)${s.locked ? ' — fixiert' : ''}`);
   });
+});
 
-  // Spezielle Koordinaten für wichtige Etagen
-  COORD.register('stage', 1, 0, 0);
-  COORD.register('ui', 2, 0, 0);
-  COORD.register('etage-8-orbit-viewer', 3, 8, 1);
+function bindSlider(id, prop, unit) {
+  document.getElementById(id).addEventListener('input', (e) => {
+    const s = screens[activeScreen];
+    if (s.locked) { log('🔒 Screen ist fixiert — erst BEWEGEN klicken'); e.target.value = s[prop]; return; }
+    s[prop] = Number(e.target.value);
+    document.getElementById(id + 'Val').textContent = s[prop] + (unit || '');
+    applyScreen(activeScreen);
+  });
+}
+bindSlider('rotY', 'rotY', '°');
+bindSlider('rotX', 'rotX', '°');
+bindSlider('rad', 'rad', '');
 
-  // Achsen registrieren (falls nicht schon in coord.js)
-  if (!COORD.stages.b) COORD.register('b', 1, 0, 0);
-  if (!COORD.stages.h) COORD.register('h', 0, 1, 0);
-  if (!COORD.stages.t) COORD.register('t', 0, 0, 1);
+document.getElementById('btnHalten').addEventListener('click', () => log(`✋ HALTEN → Screen ${activeScreen} bleibt stehen`));
+document.getElementById('btnBewegen').addEventListener('click', () => { screens[activeScreen].locked = false; log(`🔄 BEWEGEN → Screen ${activeScreen} wieder frei`); });
+document.getElementById('btnFixieren').addEventListener('click', () => { screens[activeScreen].locked = true; log(`🔒 FIXIEREN → Screen ${activeScreen} gesperrt`); });
 
-  // ─── 3. DOM-REFERENZEN ────────────────────────────────────────
-  const floorGrid = document.getElementById('floorGrid');
-  const coordBox = document.getElementById('coordBox');
-  const logBox = document.getElementById('logBox');
-  const syncInput = document.getElementById('syncInput');
-
-  // ─── 4. ETAGEN ANZEIGEN ──────────────────────────────────────
-  function renderFloors() {
-    floorGrid.innerHTML = '';
-    let count = 0;
-
-    Aufzug.FLOORS.forEach(f => {
-      if (f.isRoot) return;
-      count++;
-
-      const coord = COORD.get(f.id) || { x: '?', y: '?', z: '?' };
-      const isLegit = !!COORD.get(f.id);
-
-      const card = document.createElement('a');
-      card.className = 'card';
-      card.href = f.path;
-      card.innerHTML = `
-        <span class="icon">${f.icon || '📁'}</span>
-        <span class="name">${f.name}</span>
-        <span class="coord-badge">(${coord.x}, ${coord.y}, ${coord.z})</span>
-        <div class="path">${f.path}</div>
-        <span class="status-tag ${isLegit ? 'legit' : 'pending'}">${isLegit ? '✅ legitimiert' : '⏳ pending'}</span>
-      `;
-      floorGrid.appendChild(card);
+// ─── SZENARIEN (alle 3 Screens) ─────────────────────────────
+const scenarios = {
+  neutral: { rotY:0, rotX:0, rad:150 },
+  weit:    { rotY:0, rotX:6, rad:230 },
+  eng:     { rotY:0, rotX:-4, rad:80 },
+  kill:    { rotY:30, rotX:-10, rad:110 },
+};
+document.querySelectorAll('.scenario-grid button[data-preset]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = scenarios[btn.dataset.preset];
+    let skipped = 0;
+    Object.keys(screens).forEach(k => {
+      if (screens[k].locked) { skipped++; return; }
+      Object.assign(screens[k], p);
+      applyScreen(k);
     });
+    const s = screens[activeScreen];
+    document.getElementById('rotY').value = s.rotY;
+    document.getElementById('rotX').value = s.rotX;
+    document.getElementById('rad').value = s.rad;
+    document.getElementById('rotYVal').textContent = s.rotY + '°';
+    document.getElementById('rotXVal').textContent = s.rotX + '°';
+    document.getElementById('radVal').textContent = s.rad;
+    log(`⭐ Szenario "${btn.textContent}" angefahren${skipped ? ` (${skipped} fixiert übersprungen)` : ''}`);
+  });
+});
 
-    document.getElementById('floorCount').textContent = `${count} Etagen`;
-    document.getElementById('fActive').textContent = count;
-  }
+// ─── 9x9 RESPO-MESH (achsenorientiert: Spalte=X, Zeile=Z, Wert=Y) ──
+const COLS = 9, ROWS = 9, SPACING = 26;
+const meshLayer = document.getElementById('meshLayer');
+let meshSlots = [];
 
-  // ─── 5. KOORDINATEN ANZEIGEN ──────────────────────────────────
-  function renderCoords() {
-    const out = [];
-
-    // Achsen
-    out.push('<span class="axis-label">📐 Achsen:</span>');
-    Object.entries(COORD.axes || {}).forEach(([k, v]) => {
-      out.push(`&nbsp;&nbsp;• ${k}: ${v}`);
-    });
-
-    // Stages
-    out.push('<br><span class="axis-label">🏢 Stages:</span>');
-    const entries = Object.entries(COORD.stages || {});
-    if (entries.length === 0) {
-      out.push('&nbsp;&nbsp;– keine registriert –');
-    } else {
-      entries.forEach(([id, c]) => {
-        out.push(`<div class="stage-entry"><span class="id">${id}</span><span class="pos">(${c.x}, ${c.y}, ${c.z})</span></div>`);
+function meshInit() {
+  meshLayer.innerHTML = '';
+  meshSlots = [];
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const idx = r * COLS + c;
+      const v = Math.sin(idx * 0.2 + 0.5);
+      const point = { value: v, targetValue: v, x: (c - 4) * SPACING, z: (r - 4) * SPACING, el: null };
+      const div = document.createElement('div');
+      div.className = 'mesh-point';
+      div.addEventListener('click', () => {
+        point.targetValue = point.targetValue > 0 ? -0.9 : 0.9;
+        log(`🧩 Slot [${r},${c}] umgeschaltet`);
       });
+      meshLayer.appendChild(div);
+      point.el = div;
+      meshSlots.push(point);
     }
-
-    coordBox.innerHTML = out.join('');
-    document.getElementById('coordCount').textContent = `${entries.length} registriert`;
   }
+}
+meshInit();
 
-  // ─── 6. LOG ANZEIGEN ──────────────────────────────────────────
-  function renderLog() {
-    const entries = (Aufzug.getSharedLog && Aufzug.getSharedLog()) || [];
-    logBox.innerHTML = '';
-    entries.slice().reverse().forEach(e => {
-      const entry = document.createElement('div');
-      entry.className = 'entry';
-      entry.innerHTML = `
-        <span class="time">[${e.time || '--:--:--'}]</span>
-        <span class="floor">${e.floor || 'system'}</span>
-        <span class="msg">${e.msg || ''}</span>
-      `;
-      logBox.appendChild(entry);
-    });
-    document.getElementById('logCount').textContent = `${entries.length} Einträge`;
+function meshColor(score01) {
+  const rC = Math.round(200 * (1 - score01) + 40 * score01);
+  const gC = Math.round(90 + score01 * 140);
+  return `rgba(${rC}, ${gC}, 60, 0.85)`;
+}
+
+function meshRender() {
+  let sum = 0;
+  for (const p of meshSlots) {
+    p.value += (p.targetValue - p.value) * 0.05;
+    const score01 = Math.max(0, 1 - Math.abs(p.value));
+    sum += score01;
+    const y = p.value * 24; // Höhe = Messwert
+    p.el.style.transform = `translate3d(${p.x}px, ${-y}px, ${p.z}px)`;
+    p.el.style.background = meshColor(score01);
   }
+  document.getElementById('meshScoreDisplay').textContent = Math.round((sum / meshSlots.length) * 100) + '%';
+}
 
-  // ─── 7. SYNC-FUNKTIONEN ──────────────────────────────────────
-  let syncCount = 0;
+document.getElementById('btnMeshFit').addEventListener('click', () => {
+  meshSlots.forEach((p, i) => { p.targetValue = Math.sin(i * 0.2) * 0.9; });
+  log('📐 MESH FIT → Referenzkurve auf 9×9‑Mesh angelegt');
+});
+document.getElementById('btnMeshRecall').addEventListener('click', () => {
+  meshInit();
+  log('⏪ MESH RECALL → Ausgangszustand wiederhergestellt');
+});
 
-  function doSync(message) {
-    const msg = message || syncInput.value.trim() || 'sync:orakel';
-    syncCount++;
+// ─── LOOP ────────────────────────────────────────────────────
+function loop() { meshRender(); requestAnimationFrame(loop); }
+loop();
 
-    // LED kurz aufleuchten lassen
-    const led = document.getElementById('ledSync');
-    led.className = 'led sync';
-    setTimeout(() => { led.className = 'led'; }, 400);
-
-    // In Aufzug-Log schreiben
-    if (Aufzug.log) {
-      Aufzug.log(`SYNC: ${msg}`);
-    }
-
-    // An alle Etagen per postMessage senden (wenn iframes existieren)
-    document.querySelectorAll('iframe').forEach(iframe => {
-      try {
-        iframe.contentWindow.postMessage({ type: 'arg.sync', payload: msg, from: 'orakel' }, '*');
-      } catch (_) {}
-    });
-
-    // Lokales Log
-    const logEntry = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: `⬆ SYNC: ${msg}`
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(logEntry);
-    }
-
-    document.getElementById('fSyncCount').textContent = syncCount;
-    renderLog();
-  }
-
-  function broadcastSync() {
-    doSync(syncInput.value.trim() || 'broadcast:orakel');
-  }
-
-  function resetAll() {
-    syncCount = 0;
-    document.getElementById('fSyncCount').textContent = '0';
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().length = 0;
-    }
-    renderLog();
-    const led = document.getElementById('ledSystem');
-    led.className = 'led';
-    setTimeout(() => { led.className = 'led on'; }, 300);
-  }
-
-  // ─── 8. EVENT-BINDING ─────────────────────────────────────────
-  document.getElementById('btnSync').addEventListener('click', () => doSync());
-  document.getElementById('btnBroadcast').addEventListener('click', broadcastSync);
-  document.getElementById('btnResetAll').addEventListener('click', resetAll);
-
-  syncInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSync();
-  });
-
-  // ─── 9. TASTATUR ──────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 's' || e.key === 'S') { e.preventDefault(); doSync(); }
-    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); broadcastSync(); }
-    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetAll(); }
-  });
-
-  // ─── 10. POSTMESSAGE-EMPFAENGER (von Etagen) ──────────────────
-  window.addEventListener('message', (event) => {
-    const data = event.data;
-    if (data && data.type === 'arg.sync') {
-      const from = data.from || 'unbekannt';
-      const payload = data.payload || '';
-      syncInput.value = payload;
-      document.getElementById('fSyncCount').textContent = ++syncCount;
-      // In Aufzug-Log schreiben
-      if (Aufzug.log) {
-        Aufzug.log(`📨 Empfangen von ${from}: ${payload}`);
-      }
-      renderLog();
-    }
-    if (data && data.type === 'etage.ready') {
-      const from = data.from || 'unbekannt';
-      // Etage in COORD nachtragen, falls nicht vorhanden
-      if (!COORD.get(from)) {
-        const idx = Aufzug.FLOORS.findIndex(f => f.id === from);
-        COORD.register(from, idx + 1, 0, 0);
-        renderCoords();
-        renderFloors();
-      }
-    }
-  });
-
-  // ─── 11. INIT ──────────────────────────────────────────────────
-  function init() {
-    // Aufzug initialisieren (falls vorhanden)
-    if (Aufzug.init) {
-      Aufzug.init({ currentId: 'root', basePath: '' });
-    }
-
-    renderFloors();
-    renderCoords();
-    renderLog();
-
-    document.getElementById('fSyncCount').textContent = '0';
-    document.getElementById('ledSystem').className = 'led on';
-    document.getElementById('ledReich').className = 'led pulse';
-
-    // Begrüßung
-    const welcome = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: '🌀 STAGE‑Reich · Corridor · Legitimation · bereit'
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(welcome);
-    }
-    renderLog();
-
-    console.log('🌀 STAGE‑Reich initialisiert');
-    console.log('📐 Achsen:', Object.keys(COORD.axes || {}));
-    console.log('🏢 Stages:', Object.keys(COORD.stages || {}));
-    console.log('⌨️  s=Sync  b=Broadcast  r=Reset');
-  }
-
-  // Warten, bis alle Skripte geladen sind
-  if (document.readyState === 'complete') {
-    init();
-  } else {
-    window.addEventListener('load', init);
-  }
+log('🔺 Dreieck‑Raum bereit · 3 Screens bei 0°/120°/240°, Maus ziehen = Orbit');
 </script>
-
 </body>
 </html>
