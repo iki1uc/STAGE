@@ -1,756 +1,510 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌀 STAGE‑Reich · Index · Corridor · Legitimation</title>
-
-  <!-- ========================================================= -->
-  <!-- KERN-MODULE (global, werden von allen Etagen genutzt)     -->
-  <!-- ========================================================= -->
-  <script src="coord.js"></script>
-  <script src="aufzug.js"></script>
-  <script src="OS_CORE.js"></script>
-
-  <!-- ========================================================= -->
-  <!-- ACHSEN-MODULE (b/h/t – HDF-Cube-Grundlage)               -->
-  <!-- ========================================================= -->
-  <script src="b/axiom.map.js"></script>
-  <script src="h/axiom.map.js"></script>
-  <script src="t/axiom.map.js"></script>
-
-  <!-- ========================================================= -->
-  <!-- NC-SUITE (Figur, Kraft, Space, Time)                     -->
-  <!-- ========================================================= -->
-  <script src="NC_figur.js"></script>
-  <script src="NC_kraft.js"></script>
-  <script src="NC_space.js"></script>
-  <script src="NC_time.js"></script>
-  <script src="NC.suite"></script> <!-- bündelt die vier Module -->
-
-  <!-- ========================================================= -->
-  <!-- VEC-MODULE (Vektoren & Koordinaten)                       -->
-  <!-- ========================================================= -->
-  <script src="vec.js"></script>
-  <script src="vec3.js"></script>
-  <script src="vec9.js"></script>
-
-  <style>
-    /* ==========================================================
-       GLOBALES STYLING – dunkel, konsolenhaft, übersichtlich
-       ========================================================== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      background: #0b0b0b;
-      color: #e0e0e0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
-
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      padding: 24px 20px 30px;
-    }
-
-    /* ─── HEADER ─────────────────────────────────────────────── */
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #2a3a4a;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-    }
-
-    .header h1 {
-      color: #6cf;
-      font-size: 26px;
-      font-weight: 300;
-      letter-spacing: 2px;
-    }
-
-    .header h1 small {
-      color: #5a7a8a;
-      font-size: 13px;
-      font-weight: 300;
-      letter-spacing: 1px;
-    }
-
-    .status-leds {
-      display: flex;
-      gap: 18px;
-      font-size: 12px;
-      color: #5a7a8a;
-    }
-
-    .status-leds span {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    .led {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #2a4a5a;
-      transition: 0.3s;
-    }
-
-    .led.on {
-      background: #8cf0d0;
-      box-shadow: 0 0 12px #8cf0d0;
-    }
-
-    .led.pulse {
-      background: #f0d080;
-      animation: pulse 1.2s infinite;
-    }
-
-    .led.off {
-      background: #2a4a5a;
-    }
-
-    .led.sync {
-      background: #b388ff;
-      box-shadow: 0 0 12px #b388ff;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50%      { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* ─── ETAGEN-GRID (Corridor) ────────────────────────────── */
-    .section-title {
-      color: #f0d080;
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 1.5px;
-      margin: 24px 0 12px;
-      border-bottom: 1px solid #1a2a3a;
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title .badge {
-      font-size: 10px;
-      color: #5a7a8a;
-      font-weight: 300;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: #111;
-      border: 1px solid #2a3a4a;
-      border-radius: 12px;
-      padding: 16px 18px;
-      text-decoration: none;
-      color: #e0e0e0;
-      display: block;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .card:hover {
-      border-color: #6cf;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-    }
-
-    .card .icon {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .card .name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #d0e0e8;
-    }
-
-    .card .path {
-      font-size: 10px;
-      color: #4a5a6a;
-      margin-top: 4px;
-      word-break: break-all;
-    }
-
-    .card .coord-badge {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      font-size: 10px;
-      color: #b388ff;
-      background: rgba(179, 136, 255, 0.08);
-      padding: 2px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(179, 136, 255, 0.1);
-    }
-
-    .card .status-tag {
-      display: inline-block;
-      font-size: 8px;
-      padding: 1px 10px;
-      border-radius: 12px;
-      margin-top: 6px;
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .card .status-tag.legit {
-      border: 1px solid #8cf0d0;
-      color: #8cf0d0;
-    }
-
-    .card .status-tag.pending {
-      border: 1px solid #f0d080;
-      color: #f0d080;
-    }
-
-    /* ─── KOORDINATEN-ANZEIGE ───────────────────────────────── */
-    .coord-box {
-      background: #111;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 12px;
-      line-height: 1.7;
-      color: #8ab0c0;
-      margin: 6px 0 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .coord-box .axis-label {
-      color: #f0d080;
-      font-weight: bold;
-    }
-
-    .coord-box .stage-entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 2px 4px;
-      border-bottom: 1px solid #0e1620;
-    }
-
-    .coord-box .stage-entry .id {
-      color: #d0e0e8;
-    }
-
-    .coord-box .stage-entry .pos {
-      color: #b388ff;
-    }
-
-    /* ─── LOG ────────────────────────────────────────────────── */
-    .log-box {
-      background: #111;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 11px;
-      line-height: 1.6;
-      max-height: 160px;
-      overflow-y: auto;
-      color: #5a7a8a;
-      margin-top: 6px;
-    }
-
-    .log-box .entry {
-      border-bottom: 1px solid #0e1620;
-      padding: 2px 0;
-    }
-
-    .log-box .time {
-      color: #2a3a4a;
-    }
-
-    .log-box .floor {
-      color: #6cf;
-    }
-
-    .log-box .msg {
-      color: #8ab0c0;
-    }
-
-    /* ─── SYNC-BAR ───────────────────────────────────────────── */
-    .sync-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      background: #0e141c;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      margin: 16px 0 6px;
-    }
-
-    .sync-bar .label {
-      font-size: 11px;
-      color: #b388ff;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-bar input {
-      flex: 1;
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #d0e0e8;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-family: inherit;
-      min-width: 120px;
-    }
-
-    .sync-bar input::placeholder {
-      color: #4a5a6a;
-    }
-
-    .sync-bar button {
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #9ab0c0;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .sync-bar button:hover {
-      background: #2a3a4a;
-      border-color: #6cf;
-      color: #d0e8f8;
-    }
-
-    .sync-bar button.sync {
-      border-color: rgba(179, 136, 255, 0.2);
-      color: #b388ff;
-    }
-
-    .sync-bar button.sync:hover {
-      background: rgba(179, 136, 255, 0.1);
-      border-color: #b388ff;
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────────────── */
-    .footer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-      margin-top: 24px;
-      padding: 8px 16px;
-      background: #0e141c;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      font-size: 10px;
-      color: #3a4a5a;
-    }
-
-    .footer .gold {
-      color: #f0d080;
-    }
-
-    .footer .stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* ─── SCROLLBAR ──────────────────────────────────────────── */
-    ::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #080c12;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #1a2a3a;
-      border-radius: 4px;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌀 3‑SPIEGEL · RESPO‑9×9 · HOLO‑RAUM · 360°</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#05070e;
+    color:#c0d0d0;
+    font-family:'Segoe UI','Consolas',monospace;
+    overflow:hidden;
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+  }
+  #ui {
+    position:fixed;
+    bottom:20px;
+    left:50%;
+    transform:translateX(-50%);
+    background:rgba(6,8,16,0.8);
+    backdrop-filter:blur(8px);
+    border-radius:20px;
+    border:1px solid rgba(120,220,150,0.15);
+    padding:12px 20px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px 20px;
+    align-items:center;
+    justify-content:center;
+    z-index:10;
+    max-width:95vw;
+    box-shadow:0 10px 40px rgba(0,0,0,0.8);
+    pointer-events:auto;
+  }
+  #ui label { font-size:11px; color:#8aa8a0; display:flex; align-items:center; gap:8px; }
+  #ui input[type=range] { width:80px; accent-color:#7ee0a0; cursor:pointer; }
+  #ui button {
+    background:rgba(20,28,20,0.5); border:1px solid rgba(120,220,150,0.2);
+    border-radius:10px; padding:5px 12px; color:#c0d8c8; font-family:inherit;
+    font-size:11px; cursor:pointer; transition:0.2s;
+  }
+  #ui button:hover { border-color:#7ee0a0; background:rgba(80,180,110,0.15); color:#fff; }
+  #ui button.active { border-color:#f0d080; color:#f0d080; }
+  #stats {
+    position:fixed;
+    top:16px;
+    right:20px;
+    background:rgba(0,0,0,0.6);
+    backdrop-filter:blur(4px);
+    border-radius:12px;
+    padding:8px 14px;
+    font-size:10px;
+    color:#6a8a7a;
+    border:1px solid rgba(120,220,150,0.08);
+    pointer-events:none;
+    z-index:10;
+    line-height:1.6;
+    text-align:right;
+  }
+  #stats .val { color:#a0e0b0; font-weight:bold; }
+  #log {
+    position:fixed;
+    bottom:90px;
+    left:20px;
+    background:rgba(0,0,0,0.5);
+    backdrop-filter:blur(4px);
+    border-radius:10px;
+    padding:6px 12px;
+    font-size:9px;
+    color:#5a7a6a;
+    max-height:80px;
+    overflow-y:auto;
+    border:1px solid rgba(120,220,150,0.06);
+    pointer-events:none;
+    z-index:10;
+    width:260px;
+    line-height:1.4;
+  }
+  #log .entry { border-bottom:1px solid rgba(100,180,150,0.03); padding:1px 0; }
+  #log .time { color:#2a3a3a; }
+  #log .msg { color:#8aa8a0; }
+  canvas { display:block; width:100vw; height:100vh; background:#05070e; }
+</style>
 </head>
 <body>
 
-<div class="container">
-
-  <!-- ========================================================= -->
-  <!-- HEADER                                                    -->
-  <!-- ========================================================= -->
-  <div class="header">
-    <h1>🌀 STAGE‑Reich <small>Corridor · Legitimation · Technik</small></h1>
-    <div class="status-leds">
-      <span><span class="led on" id="ledSystem"></span> SYSTEM</span>
-      <span><span class="led sync" id="ledSync"></span> SYNC</span>
-      <span><span class="led pulse" id="ledReich"></span> REICH</span>
-    </div>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- ETAGEN-CORRIDOR (alle legitimierten Stages)              -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🏢 ETAGEN · CORRIDOR
-    <span class="badge" id="floorCount">0 Etagen</span>
-  </div>
-  <div class="grid" id="floorGrid"></div>
-
-  <!-- ========================================================= -->
-  <!-- KOORDINATEN-SYSTEM (b/h/t + Stages)                      -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🧭 KOORDINATEN · b/h/t · HDF-Cube
-    <span class="badge" id="coordCount">0 registriert</span>
-  </div>
-  <div class="coord-box" id="coordBox">
-    Koordinaten werden geladen…
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- SYNC-BAR (arg.sync – Kommunikation mit Etagen)           -->
-  <!-- ========================================================= -->
-  <div class="sync-bar">
-    <span class="label"><span class="led sync" style="display:inline-block;width:8px;height:8px;"></span> arg.sync</span>
-    <input type="text" id="syncInput" placeholder="Nachricht an Etagen…" value="sync:orakel">
-    <button class="sync" id="btnSync">🔄 SYNC</button>
-    <button id="btnBroadcast">📡 BROADCAST</button>
-    <button id="btnResetAll">⟲ RESET</button>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- GETEILTES LOG (etagenübergreifend)                       -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    📜 GETEILTES LOG
-    <span class="badge" id="logCount">0 Einträge</span>
-  </div>
-  <div class="log-box" id="logBox"></div>
-
-  <!-- ========================================================= -->
-  <!-- FOOTER                                                    -->
-  <!-- ========================================================= -->
-  <div class="footer">
-    <span class="stat"><span class="gold">★</span> STAGE‑Reich · Corridor · Legitimation</span>
-    <span class="stat">🔷 <span id="fActive">0</span> aktive Etagen</span>
-    <span class="stat">⚡ <span id="fSyncCount">0</span> SYNCs</span>
-    <span class="stat">⌨️  s=Sync  b=Broadcast  r=Reset</span>
-  </div>
-
+<div id="stats">
+  <div>🌀 RESPO‑9×9</div>
+  <div>Score: <span class="val" id="statsScore">0%</span></div>
+  <div>Gear: <span class="val" id="statsGear">0</span></div>
+  <div>Mode: <span class="val" id="statsMode">360°</span></div>
 </div>
 
+<div id="log"></div>
+
+<div id="ui">
+  <label>🌀 Rotation <input type="range" id="rotSlider" min="0" max="360" value="0"> <span id="rotVal">0°</span></label>
+  <label>📐 Neigung <input type="range" id="tiltSlider" min="0" max="30" value="12"> <span id="tiltVal">12°</span></label>
+  <label>🔮 Tiefe <input type="range" id="depthSlider" min="50" max="250" value="140"> <span id="depthVal">140</span></label>
+  <button id="btnPose1">Offen</button>
+  <button id="btnPose2">Diamant</button>
+  <button id="btnPose3">Kill‑Bill</button>
+  <button id="btnPose4" class="active">360°</button>
+  <button id="btnRespo">🎲 Respo</button>
+  <button id="btnReset">⟲ Reset</button>
+</div>
+
+<!-- Canvas für 3D‑Szene -->
+<canvas id="canvas"></canvas>
+
 <script>
-  "use strict";
+"use strict";
 
-  /* ==============================================================
-     STAGE‑Reich · Corridor · Legitimation
-     Diese index.html ist der zentrale Einstiegspunkt.
-     Sie lädt alle Module, zeigt alle Etagen an,
-     legitimiert stage.html als Corridor und
-     integriert etage-8-orbit-viewer als Technik‑Etage.
-     ============================================================== */
+// ================================================================
+//  3‑SPIEGEL · RESPO‑9×9 · HOLO‑RAUM · 360°
+//  Three.js-basierte 3D‑Szene mit Orbit‑Steuerung (Maus + Slider)
+//  und 9×9‑Respo‑Punkten, die live die Slots abbilden.
+// ================================================================
 
-  // ─── 1. ETAGEN-REGISTRY (aus aufzug.js) ──────────────────────
-  // Wenn Aufzug.FLOORS nicht existiert, definieren wir sie hier.
-  // So ist die Seite auch ohne externe aufzug.js lauffähig.
-  if (typeof Aufzug === 'undefined') {
-    console.warn('⚠️ aufzug.js nicht gefunden – lege eigene FLOORS an.');
-    window.Aufzug = {
-      FLOORS: [],
-      init: function() {},
-      log: function() {},
-      setSharedValue: function() {},
-      getSharedValue: function() { return undefined; },
-      getSharedLog: function() { return []; }
-    };
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+
+// ─── SCENE SETUP ──────────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05070e);
+scene.fog = new THREE.Fog(0x05070e, 8, 18);
+
+const camera = new THREE.PerspectiveCamera(40, window.innerWidth/window.innerHeight, 0.1, 30);
+camera.position.set(6, 4, 8);
+camera.lookAt(0,0,0);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.autoRotate = false;
+controls.autoRotateSpeed = 1.2;
+controls.minDistance = 3;
+controls.maxDistance = 20;
+controls.target.set(0, 0, 0);
+
+// ─── LIGHTS ──────────────────────────────────────────────────────
+const ambient = new THREE.AmbientLight(0x222244, 0.8);
+scene.add(ambient);
+
+const dirLight = new THREE.DirectionalLight(0xffeedd, 2.5);
+dirLight.position.set(5, 10, 7);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+const fillLight = new THREE.DirectionalLight(0x4488ff, 0.6);
+fillLight.position.set(-5, 3, -5);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0x88ddff, 0.4);
+rimLight.position.set(0, -3, 5);
+scene.add(rimLight);
+
+// ─── RESPO‑9×9 SYSTEM ──────────────────────────────────────────
+const RESPO_SIZE = 9;
+const TOTAL = 81;
+const respoSlots = [];
+let respoValues = new Float32Array(TOTAL);
+let respoTime = 0;
+let gear = 0;
+
+// Bodenraster (freie Innenfläche, klickbar wird später über Raycaster)
+const gridHelper = new THREE.GridHelper(6, 9, 0x44aa77, 0x226644);
+gridHelper.position.y = -0.55;
+scene.add(gridHelper);
+
+// Punktewolke für Respo
+const pointGeometry = new THREE.BufferGeometry();
+const positions = new Float32Array(TOTAL * 3);
+const colors = new Float32Array(TOTAL * 3);
+const sizes = new Float32Array(TOTAL);
+
+// Positionen: 9×9 auf einer leicht gewölbten Fläche
+let idx = 0;
+for (let r = 0; r < RESPO_SIZE; r++) {
+  for (let c = 0; c < RESPO_SIZE; c++) {
+    const x = (c / (RESPO_SIZE-1) - 0.5) * 5.0;
+    const z = (r / (RESPO_SIZE-1) - 0.5) * 5.0;
+    const y = -0.3 + 0.1 * Math.sin(r*0.7 + c*0.5) * 0.8;
+    positions[idx*3] = x;
+    positions[idx*3+1] = y;
+    positions[idx*3+2] = z;
+    colors[idx*3] = 0.2;
+    colors[idx*3+1] = 0.6;
+    colors[idx*3+2] = 0.8;
+    sizes[idx] = 0.08;
+    idx++;
   }
+}
+pointGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+pointGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+pointGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-  // Falls die FLOORS noch leer sind, füllen wir sie mit den
-  // wichtigsten Etagen – inklusive stage.html und orbit-viewer.
-  if (Aufzug.FLOORS.length === 0) {
-    Aufzug.FLOORS = [
-      { id: 'stage', name: '🎛️ Stage · Corridor', path: 'stage.html', icon: '🎛️', isRoot: false },
-      { id: 'ui', name: '🖥️ UI · Interface', path: 'ui.html', icon: '🖥️', isRoot: false },
-      { id: 'etage-8-orbit-viewer', name: '🌀 Orbit-Viewer · Etage 8', path: 'etage-8-orbit-viewer/index.html', icon: '🌀', isRoot: false },
-      { id: 'root', name: '🛗 ROOT', path: 'index.html', icon: '🛗', isRoot: true }
-    ];
-  }
+const pointMaterial = new THREE.PointsMaterial({
+  size: 0.18,
+  vertexColors: true,
+  transparent: true,
+  opacity: 0.9,
+  blending: THREE.AdditiveBlending,
+  depthWrite: false,
+  sizeAttenuation: true,
+});
+const respoPoints = new THREE.Points(pointGeometry, pointMaterial);
+scene.add(respoPoints);
 
-  // ─── 2. KOORDINATEN-REGISTRIERUNG ─────────────────────────────
-  // Wenn COORD nicht existiert, bauen wir eine minimale Version.
-  if (typeof COORD === 'undefined') {
-    console.warn('⚠️ coord.js nicht gefunden – lege eigene COORD an.');
-    window.COORD = {
-      axes: {
-        b: 'Breite (X‑Achse)',
-        h: 'Höhe (Y‑Achse)',
-        t: 'Tiefe (Z‑Achse)'
-      },
-      stages: {},
-      register: function(id, x, y, z) {
-        this.stages[id] = { x, y, z };
-      },
-      get: function(id) {
-        return this.stages[id] || null;
-      }
-    };
-  }
-
-  // Alle Etagen aus Aufzug.FLOORS in COORD registrieren (falls noch nicht geschehen)
-  Aufzug.FLOORS.forEach(f => {
-    if (!f.isRoot && !COORD.stages[f.id]) {
-      // Standard-Koordinaten vergeben: x = Index, y = 0, z = 0
-      const idx = Aufzug.FLOORS.indexOf(f);
-      COORD.register(f.id, idx + 1, 0, 0);
-    }
+// Kugeln für jeden Slot (visuell prägnanter)
+const spheres = [];
+for (let i = 0; i < TOTAL; i++) {
+  const geo = new THREE.SphereGeometry(0.12, 8, 8);
+  const mat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(0.3, 0.7, 0.9),
+    emissive: new THREE.Color(0.1, 0.3, 0.5),
+    emissiveIntensity: 0.3,
+    roughness: 0.2,
+    metalness: 0.6,
   });
+  const mesh = new THREE.Mesh(geo, mat);
+  const pos = pointGeometry.attributes.position.array;
+  mesh.position.set(pos[i*3], pos[i*3+1], pos[i*3+2]);
+  mesh.castShadow = true;
+  scene.add(mesh);
+  spheres.push(mesh);
+}
 
-  // Spezielle Koordinaten für wichtige Etagen
-  COORD.register('stage', 1, 0, 0);
-  COORD.register('ui', 2, 0, 0);
-  COORD.register('etage-8-orbit-viewer', 3, 8, 1);
+// ─── 3 SPIEGEL (Glieder) ──────────────────────────────────────
+const mirrorGroup = new THREE.Group();
+scene.add(mirrorGroup);
 
-  // Achsen registrieren (falls nicht schon in coord.js)
-  if (!COORD.stages.b) COORD.register('b', 1, 0, 0);
-  if (!COORD.stages.h) COORD.register('h', 0, 1, 0);
-  if (!COORD.stages.t) COORD.register('t', 0, 0, 1);
-
-  // ─── 3. DOM-REFERENZEN ────────────────────────────────────────
-  const floorGrid = document.getElementById('floorGrid');
-  const coordBox = document.getElementById('coordBox');
-  const logBox = document.getElementById('logBox');
-  const syncInput = document.getElementById('syncInput');
-
-  // ─── 4. ETAGEN ANZEIGEN ──────────────────────────────────────
-  function renderFloors() {
-    floorGrid.innerHTML = '';
-    let count = 0;
-
-    Aufzug.FLOORS.forEach(f => {
-      if (f.isRoot) return;
-      count++;
-
-      const coord = COORD.get(f.id) || { x: '?', y: '?', z: '?' };
-      const isLegit = !!COORD.get(f.id);
-
-      const card = document.createElement('a');
-      card.className = 'card';
-      card.href = f.path;
-      card.innerHTML = `
-        <span class="icon">${f.icon || '📁'}</span>
-        <span class="name">${f.name}</span>
-        <span class="coord-badge">(${coord.x}, ${coord.y}, ${coord.z})</span>
-        <div class="path">${f.path}</div>
-        <span class="status-tag ${isLegit ? 'legit' : 'pending'}">${isLegit ? '✅ legitimiert' : '⏳ pending'}</span>
-      `;
-      floorGrid.appendChild(card);
-    });
-
-    document.getElementById('floorCount').textContent = `${count} Etagen`;
-    document.getElementById('fActive').textContent = count;
-  }
-
-  // ─── 5. KOORDINATEN ANZEIGEN ──────────────────────────────────
-  function renderCoords() {
-    const out = [];
-
-    // Achsen
-    out.push('<span class="axis-label">📐 Achsen:</span>');
-    Object.entries(COORD.axes || {}).forEach(([k, v]) => {
-      out.push(`&nbsp;&nbsp;• ${k}: ${v}`);
-    });
-
-    // Stages
-    out.push('<br><span class="axis-label">🏢 Stages:</span>');
-    const entries = Object.entries(COORD.stages || {});
-    if (entries.length === 0) {
-      out.push('&nbsp;&nbsp;– keine registriert –');
-    } else {
-      entries.forEach(([id, c]) => {
-        out.push(`<div class="stage-entry"><span class="id">${id}</span><span class="pos">(${c.x}, ${c.y}, ${c.z})</span></div>`);
-      });
-    }
-
-    coordBox.innerHTML = out.join('');
-    document.getElementById('coordCount').textContent = `${entries.length} registriert`;
-  }
-
-  // ─── 6. LOG ANZEIGEN ──────────────────────────────────────────
-  function renderLog() {
-    const entries = (Aufzug.getSharedLog && Aufzug.getSharedLog()) || [];
-    logBox.innerHTML = '';
-    entries.slice().reverse().forEach(e => {
-      const entry = document.createElement('div');
-      entry.className = 'entry';
-      entry.innerHTML = `
-        <span class="time">[${e.time || '--:--:--'}]</span>
-        <span class="floor">${e.floor || 'system'}</span>
-        <span class="msg">${e.msg || ''}</span>
-      `;
-      logBox.appendChild(entry);
-    });
-    document.getElementById('logCount').textContent = `${entries.length} Einträge`;
-  }
-
-  // ─── 7. SYNC-FUNKTIONEN ──────────────────────────────────────
-  let syncCount = 0;
-
-  function doSync(message) {
-    const msg = message || syncInput.value.trim() || 'sync:orakel';
-    syncCount++;
-
-    // LED kurz aufleuchten lassen
-    const led = document.getElementById('ledSync');
-    led.className = 'led sync';
-    setTimeout(() => { led.className = 'led'; }, 400);
-
-    // In Aufzug-Log schreiben
-    if (Aufzug.log) {
-      Aufzug.log(`SYNC: ${msg}`);
-    }
-
-    // An alle Etagen per postMessage senden (wenn iframes existieren)
-    document.querySelectorAll('iframe').forEach(iframe => {
-      try {
-        iframe.contentWindow.postMessage({ type: 'arg.sync', payload: msg, from: 'orakel' }, '*');
-      } catch (_) {}
-    });
-
-    // Lokales Log
-    const logEntry = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: `⬆ SYNC: ${msg}`
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(logEntry);
-    }
-
-    document.getElementById('fSyncCount').textContent = syncCount;
-    renderLog();
-  }
-
-  function broadcastSync() {
-    doSync(syncInput.value.trim() || 'broadcast:orakel');
-  }
-
-  function resetAll() {
-    syncCount = 0;
-    document.getElementById('fSyncCount').textContent = '0';
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().length = 0;
-    }
-    renderLog();
-    const led = document.getElementById('ledSystem');
-    led.className = 'led';
-    setTimeout(() => { led.className = 'led on'; }, 300);
-  }
-
-  // ─── 8. EVENT-BINDING ─────────────────────────────────────────
-  document.getElementById('btnSync').addEventListener('click', () => doSync());
-  document.getElementById('btnBroadcast').addEventListener('click', broadcastSync);
-  document.getElementById('btnResetAll').addEventListener('click', resetAll);
-
-  syncInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSync();
+function createMirror(color, label) {
+  const group = new THREE.Group();
+  const geometry = new THREE.PlaneGeometry(1.8, 2.4);
+  const material = new THREE.MeshStandardMaterial({
+    color: color,
+    emissive: color,
+    emissiveIntensity: 0.05,
+    side: THREE.DoubleSide,
+    transparent: true,
+    opacity: 0.35,
+    roughness: 0.1,
+    metalness: 0.9,
+    envMapIntensity: 0.8,
   });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  group.add(mesh);
 
-  // ─── 9. TASTATUR ──────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 's' || e.key === 'S') { e.preventDefault(); doSync(); }
-    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); broadcastSync(); }
-    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetAll(); }
-  });
+  // Rahmen
+  const frame = new THREE.EdgesGeometry(geometry);
+  const lineMat = new THREE.LineBasicMaterial({ color: 0x88ddbb, transparent:true, opacity:0.2 });
+  const line = new THREE.LineSegments(frame, lineMat);
+  group.add(line);
 
-  // ─── 10. POSTMESSAGE-EMPFAENGER (von Etagen) ──────────────────
-  window.addEventListener('message', (event) => {
-    const data = event.data;
-    if (data && data.type === 'arg.sync') {
-      const from = data.from || 'unbekannt';
-      const payload = data.payload || '';
-      syncInput.value = payload;
-      document.getElementById('fSyncCount').textContent = ++syncCount;
-      // In Aufzug-Log schreiben
-      if (Aufzug.log) {
-        Aufzug.log(`📨 Empfangen von ${from}: ${payload}`);
-      }
-      renderLog();
-    }
-    if (data && data.type === 'etage.ready') {
-      const from = data.from || 'unbekannt';
-      // Etage in COORD nachtragen, falls nicht vorhanden
-      if (!COORD.get(from)) {
-        const idx = Aufzug.FLOORS.findIndex(f => f.id === from);
-        COORD.register(from, idx + 1, 0, 0);
-        renderCoords();
-        renderFloors();
-      }
-    }
-  });
+  // Label (als Sprite, kleiner Text)
+  const canvas2 = document.createElement('canvas');
+  canvas2.width = 128; canvas2.height = 48;
+  const ctx2 = canvas2.getContext('2d');
+  ctx2.fillStyle = 'rgba(0,0,0,0)';
+  ctx2.fillRect(0,0,128,48);
+  ctx2.font = 'bold 20px Consolas';
+  ctx2.textAlign = 'center';
+  ctx2.textBaseline = 'middle';
+  ctx2.fillStyle = '#88ddbb';
+  ctx2.fillText(label, 64, 24);
+  const texture = new THREE.CanvasTexture(canvas2);
+  const spriteMat = new THREE.SpriteMaterial({ map:texture, transparent:true, depthTest:false });
+  const sprite = new THREE.Sprite(spriteMat);
+  sprite.scale.set(0.6, 0.22, 1);
+  sprite.position.z = 0.01;
+  group.add(sprite);
 
-  // ─── 11. INIT ──────────────────────────────────────────────────
-  function init() {
-    // Aufzug initialisieren (falls vorhanden)
-    if (Aufzug.init) {
-      Aufzug.init({ currentId: 'root', basePath: '' });
-    }
+  return group;
+}
 
-    renderFloors();
-    renderCoords();
-    renderLog();
+const mirrorLeft = createMirror(0x0088ff, 'LINKS');
+mirrorLeft.position.set(-1.8, 0.0, 0);
+mirrorLeft.rotation.y = 0.3;  // 12° nach innen
+mirrorGroup.add(mirrorLeft);
 
-    document.getElementById('fSyncCount').textContent = '0';
-    document.getElementById('ledSystem').className = 'led on';
-    document.getElementById('ledReich').className = 'led pulse';
+const mirrorRight = createMirror(0xff44aa, 'RECHTS');
+mirrorRight.position.set(1.8, 0.0, 0);
+mirrorRight.rotation.y = -0.3;
+mirrorGroup.add(mirrorRight);
 
-    // Begrüßung
-    const welcome = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: '🌀 STAGE‑Reich · Corridor · Legitimation · bereit'
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(welcome);
-    }
-    renderLog();
+const mirrorFront = createMirror(0x88ddff, 'FRONT');
+mirrorFront.position.set(0, 0.3, 1.2);
+mirrorFront.rotation.x = -0.2; // 13° nach hinten
+mirrorGroup.add(mirrorFront);
 
-    console.log('🌀 STAGE‑Reich initialisiert');
-    console.log('📐 Achsen:', Object.keys(COORD.axes || {}));
-    console.log('🏢 Stages:', Object.keys(COORD.stages || {}));
-    console.log('⌨️  s=Sync  b=Broadcast  r=Reset');
+// ─── SCENE‑ZUSTAND ──────────────────────────────────────────────
+let sceneMode = '360'; // offen, diamant, killbill, 360
+let rotY = 0;
+let tilt = 12; // Grad
+let depth = 140;
+
+function applyPose(pose) {
+  // Pose: { left: {rotY, rotX, posZ}, right: {…}, front: {…} }
+  // Wir übersetzen das in die 3D‑Gruppen‑Transformationen
+  // left/right: rotation.y = rotY (rad), position.z = posZ/100
+  // front: rotation.x = -rotX (rad), position.z = posZ/100
+  const rad = deg => deg * Math.PI / 180;
+  const l = pose.left || {rotY:12, rotX:2, posZ:80};
+  const r = pose.right || {rotY:-12, rotX:2, posZ:80};
+  const f = pose.front || {rotY:0, rotX:13, posZ:140};
+
+  mirrorLeft.rotation.y = rad(l.rotY);
+  mirrorLeft.position.z = l.posZ / 100;
+  mirrorLeft.rotation.x = rad(l.rotX);
+  mirrorRight.rotation.y = rad(r.rotY);
+  mirrorRight.position.z = r.posZ / 100;
+  mirrorRight.rotation.x = rad(r.rotX);
+  mirrorFront.rotation.x = -rad(f.rotX);
+  mirrorFront.position.z = f.posZ / 100;
+  mirrorFront.rotation.y = rad(f.rotY);
+}
+
+const poses = {
+  offen: {
+    left: {rotY:30, rotX:2, posZ:40},
+    right: {rotY:-30, rotX:2, posZ:40},
+    front: {rotY:0, rotX:8, posZ:100}
+  },
+  diamant: {
+    left: {rotY:12, rotX:2, posZ:80},
+    right: {rotY:-12, rotX:2, posZ:80},
+    front: {rotY:0, rotX:13, posZ:140}
+  },
+  killbill: {
+    left: {rotY:40, rotX:-10, posZ:10},
+    right: {rotY:-40, rotX:-10, posZ:10},
+    front: {rotY:0, rotX:4, posZ:170}
+  },
+  '360': {
+    left: {rotY:20, rotX:0, posZ:120},
+    right: {rotY:-20, rotX:0, posZ:120},
+    front: {rotY:0, rotX:5, posZ:200}
   }
+};
 
-  // Warten, bis alle Skripte geladen sind
-  if (document.readyState === 'complete') {
-    init();
-  } else {
-    window.addEventListener('load', init);
+// ─── RESPO‑UPDATE ──────────────────────────────────────────────
+function updateRespo() {
+  const pos = pointGeometry.attributes.position.array;
+  const col = pointGeometry.attributes.color.array;
+  const sizes = pointGeometry.attributes.size.array;
+
+  let sum = 0;
+  for (let i = 0; i < TOTAL; i++) {
+    const val = Math.sin(i * 0.2 + respoTime * 0.0008) * 0.6 + 0.5;
+    respoValues[i] = Math.max(0, Math.min(1, val));
+    sum += respoValues[i];
+
+    // Höhe (y) leicht modulieren
+    const yOffset = (respoValues[i] - 0.5) * 0.6;
+    pos[i*3+1] = -0.3 + yOffset * 0.5;
+
+    // Farbe: von blau-grün zu gold
+    const r = 0.2 + 0.8 * respoValues[i];
+    const g = 0.6 + 0.4 * respoValues[i];
+    const b = 0.8 - 0.6 * respoValues[i];
+    col[i*3] = r;
+    col[i*3+1] = g;
+    col[i*3+2] = b;
+
+    sizes[i] = 0.06 + 0.18 * respoValues[i];
+
+    // Kugeln aktualisieren
+    const mesh = spheres[i];
+    mesh.position.set(pos[i*3], pos[i*3+1], pos[i*3+2]);
+    mesh.material.color.setRGB(r, g, b);
+    const scale = 0.6 + 1.2 * respoValues[i];
+    mesh.scale.set(scale, scale, scale);
   }
+  pointGeometry.attributes.position.needsUpdate = true;
+  pointGeometry.attributes.color.needsUpdate = true;
+  pointGeometry.attributes.size.needsUpdate = true;
+
+  const avg = sum / TOTAL;
+  document.getElementById('statsScore').textContent = Math.round(avg * 100) + '%';
+  document.getElementById('statsGear').textContent = gear;
+  document.getElementById('statsMode').textContent = sceneMode.toUpperCase();
+}
+
+// ─── CONTROLS ──────────────────────────────────────────────────
+let isRotating = false;
+document.getElementById('rotSlider').addEventListener('input', e => {
+  const val = parseFloat(e.target.value);
+  document.getElementById('rotVal').textContent = Math.round(val) + '°';
+  mirrorGroup.rotation.y = val * Math.PI / 180;
+});
+document.getElementById('tiltSlider').addEventListener('input', e => {
+  const val = parseFloat(e.target.value);
+  document.getElementById('tiltVal').textContent = Math.round(val) + '°';
+  // tilt beeinflusst die Neigung der Spiegel insgesamt – wir passen die Front an
+  mirrorFront.rotation.x = -val * Math.PI / 180;
+});
+document.getElementById('depthSlider').addEventListener('input', e => {
+  const val = parseFloat(e.target.value);
+  document.getElementById('depthVal').textContent = Math.round(val);
+  // Tiefe beeinflusst alle Spiegel gleichmäßig
+  const factor = val / 140;
+  mirrorLeft.position.z = 0.8 * factor;
+  mirrorRight.position.z = 0.8 * factor;
+  mirrorFront.position.z = 1.2 * factor;
+});
+
+// Szenarien
+const poseButtons = {
+  offen: document.getElementById('btnPose1'),
+  diamant: document.getElementById('btnPose2'),
+  killbill: document.getElementById('btnPose3'),
+  '360': document.getElementById('btnPose4')
+};
+Object.keys(poseButtons).forEach(key => {
+  poseButtons[key].addEventListener('click', () => {
+    Object.values(poseButtons).forEach(b => b.classList.remove('active'));
+    poseButtons[key].classList.add('active');
+    sceneMode = key;
+    applyPose(poses[key]);
+    // Slider nachziehen
+    const p = poses[key];
+    const l = p.left;
+    document.getElementById('rotSlider').value = l.rotY;
+    document.getElementById('rotVal').textContent = Math.round(l.rotY) + '°';
+    document.getElementById('tiltSlider').value = l.rotX;
+    document.getElementById('tiltVal').textContent = Math.round(l.rotX) + '°';
+    document.getElementById('depthSlider').value = l.posZ;
+    document.getElementById('depthVal').textContent = Math.round(l.posZ);
+    log(`⭐ Pose: ${key}`);
+  });
+});
+
+document.getElementById('btnRespo').addEventListener('click', () => {
+  // Zufällige Respo-Werte anstoßen
+  for (let i = 0; i < TOTAL; i++) {
+    respoValues[i] = Math.random();
+  }
+  log('🎲 Respo randomisiert');
+});
+
+document.getElementById('btnReset').addEventListener('click', () => {
+  // Szene zurücksetzen
+  mirrorGroup.rotation.y = 0;
+  document.getElementById('rotSlider').value = 0;
+  document.getElementById('rotVal').textContent = '0°';
+  applyPose(poses.diamant);
+  document.getElementById('tiltSlider').value = 12;
+  document.getElementById('tiltVal').textContent = '12°';
+  document.getElementById('depthSlider').value = 140;
+  document.getElementById('depthVal').textContent = '140';
+  Object.values(poseButtons).forEach(b => b.classList.remove('active'));
+  poseButtons.diamant.classList.add('active');
+  sceneMode = 'diamant';
+  log('⟲ Reset');
+});
+
+function log(msg) {
+  const box = document.getElementById('log');
+  const t = new Date().toLocaleTimeString();
+  const e = document.createElement('div');
+  e.className = 'entry';
+  e.innerHTML = `<span class="time">[${t}]</span> <span class="msg">${msg}</span>`;
+  box.appendChild(e);
+  box.scrollTop = box.scrollHeight;
+  if (box.children.length > 30) box.removeChild(box.firstChild);
+}
+
+// ─── ANIMATION LOOP ─────────────────────────────────────────────
+function animate() {
+  requestAnimationFrame(animate);
+
+  respoTime += 16;
+  gear = (gear + 1) % 12;
+  if (respoTime % 120 < 16) updateRespo(); // alle 120ms updaten
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+// ─── RESIZE ─────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+// ─── INIT ──────────────────────────────────────────────────────
+applyPose(poses.diamant);
+updateRespo();
+log('🌀 3‑SPIEGEL · RESPO‑9×9 · HOLO‑RAUM gestartet');
+log('🖱️ Maus ziehen = 360° drehen · Slider justieren');
+animate();
+
 </script>
 
 </body>
