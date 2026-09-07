@@ -1,757 +1,695 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🌀 STAGE‑Reich · Index · Corridor · Legitimation</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌀 DREIECK‑SCREEN · RESPO‑HUB · GEAR · 81‑SLOT</title>
 
-  <!-- ========================================================= -->
-  <!-- KERN-MODULE (global, werden von allen Etagen genutzt)     -->
-  <!-- ========================================================= -->
-  <script src="coord.js"></script>
-  <script src="aufzug.js"></script>
-  <script src="OS_CORE.js"></script>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: radial-gradient(ellipse at 20% 30%, #0a0e1a, #000000);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Segoe UI', 'Consolas', monospace;
+    padding: 12px;
+    color: #c0d0d0;
+  }
+  .container {
+    max-width: 1400px;
+    width: 100%;
+    background: rgba(6,8,16,0.6);
+    backdrop-filter: blur(4px);
+    border-radius: 40px;
+    padding: 18px 22px 24px;
+    border: 1px solid rgba(160,200,240,0.05);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.9), inset 0 0 80px rgba(100,180,255,0.02);
+  }
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(160,200,240,0.06);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+  header h1 {
+    font-size: 22px;
+    font-weight: 300;
+    letter-spacing: 4px;
+    background: linear-gradient(135deg, #e0e8f0, #b0c8d8, #8098b0, #c0d8e8, #b388ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  header h1 small { font-size: 11px; letter-spacing: 2px; -webkit-text-fill-color:#4a5a6a; color:#4a5a6a; }
+  .status-leds { display:flex; gap:16px; font-size:11px; color:#5a7a8a; flex-wrap:wrap; }
+  .led { display:inline-block; width:9px; height:9px; border-radius:50%; background:#2a4a5a; transition:.3s; }
+  .led.on { background:#8cf0d0; box-shadow:0 0 12px #8cf0d0; }
+  .led.pulse { background:#f0d080; animation:pulse 1.2s infinite; }
+  .led.off { background:#2a4a5a; }
+  @keyframes pulse { 0%,100%{opacity:.4;transform:scale(.8)} 50%{opacity:1;transform:scale(1.2)} }
 
-  <!-- ========================================================= -->
-  <!-- ACHSEN-MODULE (b/h/t – HDF-Cube-Grundlage)               -->
-  <!-- ========================================================= -->
-  <script src="b/axiom.map.js"></script>
-  <script src="h/axiom.map.js"></script>
-  <script src="t/axiom.map.js"></script>
+  /* Menü */
+  .menu-bar {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    background: rgba(0,0,0,0.2); border-radius: 16px; padding: 4px 6px;
+    margin-bottom: 14px; border: 1px solid rgba(100,180,255,0.03);
+  }
+  .menu-bar button {
+    background: transparent; border: none; color: #5a7a8a;
+    padding: 6px 18px; border-radius: 12px; font-size: 11px;
+    font-family: inherit; cursor: pointer; transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+  .menu-bar button:hover { color: #b0c8d8; background: rgba(40,70,90,0.15); }
+  .menu-bar button.active { color: #f0d080; background: rgba(255,215,0,0.06); box-shadow: inset 0 0 20px rgba(255,215,0,0.02); }
 
-  <!-- ========================================================= -->
-  <!-- NC-SUITE (Figur, Kraft, Space, Time)                     -->
-  <!-- ========================================================= -->
-  <script src="NC_figur.js"></script>
-  <script src="NC_kraft.js"></script>
-  <script src="NC_space.js"></script>
-  <script src="NC_time.js"></script>
-  <script src="NC.suite"></script> <!-- bündelt die vier Module -->
+  .tab-content { display: none; animation: fadeIn 0.3s ease; }
+  .tab-content.active { display: block; }
+  @keyframes fadeIn { from { opacity:0.3; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
 
-  <!-- ========================================================= -->
-  <!-- VEC-MODULE (Vektoren & Koordinaten)                       -->
-  <!-- ========================================================= -->
-  <script src="vec.js"></script>
-  <script src="vec3.js"></script>
-  <script src="vec9.js"></script>
+  /* Toolbar */
+  .toolbar {
+    display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    background: rgba(0,0,0,0.15); border-radius: 14px; padding: 6px 12px;
+    margin-bottom: 12px; border: 1px solid rgba(100,180,255,0.02);
+  }
+  .toolbar button {
+    background: rgba(20,28,36,0.4); border: 1px solid rgba(120,160,190,0.06);
+    color: #9ab0c0; padding: 4px 14px; border-radius: 18px;
+    font-size: 10px; font-family: inherit; cursor: pointer; transition: all 0.2s;
+  }
+  .toolbar button:hover { background:rgba(40,70,90,0.2); border-color:rgba(160,200,240,0.1); color:#d0e8f8; }
+  .toolbar button.primary { border-color:rgba(255,215,0,0.1); color:#f0d080; }
+  .toolbar button.primary:hover { background:rgba(255,215,0,0.04); }
+  .toolbar button.danger { border-color:rgba(255,80,80,0.08); color:#d06060; }
+  .toolbar button.danger:hover { background:rgba(255,80,80,0.04); }
 
-  <style>
-    /* ==========================================================
-       GLOBALES STYLING – dunkel, konsolenhaft, übersichtlich
-       ========================================================== */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  /* Dreieck-Canvas */
+  #triCanvas {
+    display: block; width: 100%; aspect-ratio: 1/1;
+    background: #000; border-radius: 16px;
+    border: 1px solid rgba(120,220,150,0.1);
+    box-shadow: inset 0 0 60px rgba(20,60,30,0.25);
+    margin: 0 auto;
+    max-width: 700px;
+  }
 
-    body {
-      background: #0b0b0b;
-      color: #e0e0e0;
-      font-family: 'Consolas', 'Courier New', monospace;
-      min-height: 100vh;
-      display: flex;
-      justify-content: center;
-    }
+  /* 3D-Geometrie-Demo (Kill-Bill-Screens) */
+  .scene3d {
+    perspective: 1200px;
+    width: 100%; max-width: 700px; margin: 0 auto 12px;
+    height: 400px; position: relative;
+  }
+  .scene3d .screen {
+    position: absolute; width: 200px; height: 280px; background: rgba(255,255,255,0.05);
+    border: 2px solid rgba(200,220,255,0.08); border-radius: 8px; backdrop-filter: blur(2px);
+    display: flex; align-items: center; justify-content: center; font-size: 12px; color: #4a6a7a;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 0 40px rgba(100,180,255,0.02);
+  }
+  .scene3d .screen:hover { border-color: rgba(200,220,255,0.2); }
+  .scene3d .left { background: rgba(0,150,255,0.08); transform: rotateY(12deg) translateX(-140px) translateZ(60px); left:10%; top:10%; }
+  .scene3d .right { background: rgba(255,0,150,0.08); transform: rotateY(-12deg) translateX(140px) translateZ(60px); right:10%; top:10%; }
+  .scene3d .front { background: rgba(255,255,255,0.03); transform: rotateX(13deg) translateZ(120px); left:50%; top:10%; transform-origin:center bottom; margin-left:-120px; width:240px; height:200px; backdrop-filter:blur(4px); }
+  .scene3d .inner { position:absolute; width:240px; height:200px; left:50%; top:10%; margin-left:-120px; background:#fff; border:1px solid #000; z-index:-1; transform:translateZ(0px); opacity:0.6; }
 
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      padding: 24px 20px 30px;
-    }
+  .scene-controls { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
+  .scene-controls button { background:rgba(20,28,36,0.4); border:1px solid rgba(120,160,190,0.06); color:#9ab0c0; padding:3px 12px; border-radius:12px; font-size:9px; cursor:pointer; transition:.2s; }
+  .scene-controls button:hover { border-color:#f0d080; color:#f0d080; }
 
-    /* ─── HEADER ─────────────────────────────────────────────── */
-    .header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 2px solid #2a3a4a;
-      padding-bottom: 12px;
-      margin-bottom: 20px;
-    }
+  /* Matrix 9x9 */
+  .matrix-9x9 {
+    display: grid; grid-template-columns: repeat(9, 1fr); gap: 3px;
+    max-width: 540px; margin: 0 auto; aspect-ratio: 1/1;
+  }
+  .cell81 {
+    background: rgba(24,32,40,0.3); border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #8a9aaa; cursor: pointer;
+    border: 1px solid rgba(100,140,170,0.03); transition: all 0.2s;
+    aspect-ratio: 1/1; text-shadow: 0 0 6px rgba(160,200,240,0.1);
+  }
+  .cell81:hover { border-color:rgba(200,230,255,0.15); transform:scale(1.02); z-index:2; }
+  .cell81.active { background: radial-gradient(circle at 30% 30%, #d8e8f0, #a0b8c8); color: #0a1218; border-color: #b0d0e0; box-shadow: 0 0 20px rgba(180,220,255,0.3); transform: scale(1.06); font-weight: bold; }
 
-    .header h1 {
-      color: #6cf;
-      font-size: 26px;
-      font-weight: 300;
-      letter-spacing: 2px;
-    }
+  /* HDF & Workboard einfach gehalten */
+  .hdf-panel { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:800px){ .hdf-panel { grid-template-columns:1fr; } }
+  .hdf-card { background:rgba(0,0,0,0.2); border-radius:16px; padding:12px 14px; border:1px solid rgba(100,180,255,0.03); }
+  .hdf-card h4 { font-size:11px; color:#b388ff; letter-spacing:1.5px; border-bottom:1px solid rgba(179,136,255,0.04); padding-bottom:4px; margin-bottom:8px; }
+  .cmd-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:4px; }
+  .cmd-item { background:rgba(10,14,20,0.4); border:1px solid rgba(100,180,255,0.04); border-radius:8px; padding:6px 4px; text-align:center; font-size:9px; cursor:pointer; transition:.2s; }
+  .cmd-item:hover { border-color:#f0d080; background:rgba(255,215,0,0.04); }
+  .cmd-item .key { color:#ffaa00; font-weight:bold; }
+  .resolver-output { background:#0a0a12; border:1px solid #1a1a2a; border-radius:8px; padding:8px 10px; font-size:9px; color:#8af; white-space:pre-wrap; min-height:50px; margin-top:8px; font-family:'Consolas',monospace; }
 
-    .header h1 small {
-      color: #5a7a8a;
-      font-size: 13px;
-      font-weight: 300;
-      letter-spacing: 1px;
-    }
+  .repo-grid-wb { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:6px; max-height:320px; overflow-y:auto; padding-right:4px; }
+  .repo-tile-wb { background:rgba(10,14,20,0.5); border:1px solid rgba(100,180,255,0.06); border-radius:10px; padding:6px; cursor:pointer; transition:.2s; position:relative; }
+  .repo-tile-wb:hover { transform:translateY(-1px); border-color:rgba(160,200,240,0.12); }
+  .repo-tile-wb .name { font-size:9px; font-weight:600; color:#d0e0e8; word-break:break-word; }
+  .repo-tile-wb .dot { display:inline-block; width:7px; height:7px; border-radius:50%; margin-right:4px; vertical-align:middle; }
+  .dot.gruen { background:#8cf0d0; box-shadow:0 0 6px #8cf0d0; }
+  .dot.gelb { background:#f0d080; box-shadow:0 0 6px #f0d080; }
+  .dot.rot { background:#ff6b6b; box-shadow:0 0 6px #ff6b6b; }
 
-    .status-leds {
-      display: flex;
-      gap: 18px;
-      font-size: 12px;
-      color: #5a7a8a;
-    }
+  .wb-board { background:rgba(0,0,0,0.2); border-radius:14px; padding:10px 12px; border:1px solid rgba(100,180,255,0.03); }
+  .wb-board h4 { font-size:11px; color:#f0d080; letter-spacing:1.5px; border-bottom:1px solid rgba(255,215,0,0.04); padding-bottom:4px; margin-bottom:8px; display:flex; justify-content:space-between; }
+  .wb-chip { display:flex; justify-content:space-between; align-items:center; gap:6px; background:rgba(20,28,36,0.4); border:1px solid rgba(100,180,255,0.04); border-radius:8px; padding:4px 10px; font-size:9px; margin-bottom:4px; color:#d0e0e8; }
+  .wb-chip button.rm { background:none; border:none; color:#d06060; cursor:pointer; font-size:12px; padding:0 4px; }
 
-    .status-leds span {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
+  .log-box {
+    background: rgba(0,0,0,0.25); border-radius: 10px; padding: 4px 12px;
+    font-size: 8px; color: #4a5a6a; max-height: 70px; overflow-y: auto;
+    line-height: 1.5; border: 1px solid rgba(100,180,255,0.02); margin-top: 12px;
+    font-family: 'Consolas', monospace;
+  }
+  .log-box .entry { border-bottom:1px solid rgba(100,180,255,0.02); padding:1px 0; }
+  .log-box .time { color:#2a3a4a; }
+  .log-box .msg { color:#8ab0c0; }
+  .log-box .msg.ok { color:#8cf0d0; }
+  .log-box .msg.warn { color:#f0d080; }
+  .log-box .msg.err { color:#ff6b6b; }
 
-    .led {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #2a4a5a;
-      transition: 0.3s;
-    }
+  .footer {
+    display:flex; flex-wrap:wrap; gap:12px; justify-content:center; margin-top:12px;
+    padding:4px 12px; background:rgba(0,0,0,0.12); border-radius:12px;
+    border:1px solid rgba(100,180,255,0.02); font-size:8px; color:#3a4a5a;
+  }
+  .footer .gold { color:#f0d080; }
+  .footer .stat { display:flex; align-items:center; gap:4px; }
 
-    .led.on {
-      background: #8cf0d0;
-      box-shadow: 0 0 12px #8cf0d0;
-    }
-
-    .led.pulse {
-      background: #f0d080;
-      animation: pulse 1.2s infinite;
-    }
-
-    .led.off {
-      background: #2a4a5a;
-    }
-
-    .led.sync {
-      background: #b388ff;
-      box-shadow: 0 0 12px #b388ff;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; transform: scale(0.8); }
-      50%      { opacity: 1; transform: scale(1.2); }
-    }
-
-    /* ─── ETAGEN-GRID (Corridor) ────────────────────────────── */
-    .section-title {
-      color: #f0d080;
-      font-size: 14px;
-      font-weight: 400;
-      letter-spacing: 1.5px;
-      margin: 24px 0 12px;
-      border-bottom: 1px solid #1a2a3a;
-      padding-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .section-title .badge {
-      font-size: 10px;
-      color: #5a7a8a;
-      font-weight: 300;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 14px;
-    }
-
-    .card {
-      background: #111;
-      border: 1px solid #2a3a4a;
-      border-radius: 12px;
-      padding: 16px 18px;
-      text-decoration: none;
-      color: #e0e0e0;
-      display: block;
-      transition: all 0.2s ease;
-      position: relative;
-    }
-
-    .card:hover {
-      border-color: #6cf;
-      transform: translateY(-3px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-    }
-
-    .card .icon {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .card .name {
-      font-size: 14px;
-      font-weight: 500;
-      color: #d0e0e8;
-    }
-
-    .card .path {
-      font-size: 10px;
-      color: #4a5a6a;
-      margin-top: 4px;
-      word-break: break-all;
-    }
-
-    .card .coord-badge {
-      position: absolute;
-      top: 12px;
-      right: 14px;
-      font-size: 10px;
-      color: #b388ff;
-      background: rgba(179, 136, 255, 0.08);
-      padding: 2px 10px;
-      border-radius: 12px;
-      border: 1px solid rgba(179, 136, 255, 0.1);
-    }
-
-    .card .status-tag {
-      display: inline-block;
-      font-size: 8px;
-      padding: 1px 10px;
-      border-radius: 12px;
-      margin-top: 6px;
-      background: rgba(0, 0, 0, 0.3);
-    }
-
-    .card .status-tag.legit {
-      border: 1px solid #8cf0d0;
-      color: #8cf0d0;
-    }
-
-    .card .status-tag.pending {
-      border: 1px solid #f0d080;
-      color: #f0d080;
-    }
-
-    /* ─── KOORDINATEN-ANZEIGE ───────────────────────────────── */
-    .coord-box {
-      background: #111;
-      padding: 12px 16px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 12px;
-      line-height: 1.7;
-      color: #8ab0c0;
-      margin: 6px 0 12px;
-      max-height: 200px;
-      overflow-y: auto;
-    }
-
-    .coord-box .axis-label {
-      color: #f0d080;
-      font-weight: bold;
-    }
-
-    .coord-box .stage-entry {
-      display: flex;
-      justify-content: space-between;
-      padding: 2px 4px;
-      border-bottom: 1px solid #0e1620;
-    }
-
-    .coord-box .stage-entry .id {
-      color: #d0e0e8;
-    }
-
-    .coord-box .stage-entry .pos {
-      color: #b388ff;
-    }
-
-    /* ─── LOG ────────────────────────────────────────────────── */
-    .log-box {
-      background: #111;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #2a3a4a;
-      font-size: 11px;
-      line-height: 1.6;
-      max-height: 160px;
-      overflow-y: auto;
-      color: #5a7a8a;
-      margin-top: 6px;
-    }
-
-    .log-box .entry {
-      border-bottom: 1px solid #0e1620;
-      padding: 2px 0;
-    }
-
-    .log-box .time {
-      color: #2a3a4a;
-    }
-
-    .log-box .floor {
-      color: #6cf;
-    }
-
-    .log-box .msg {
-      color: #8ab0c0;
-    }
-
-    /* ─── SYNC-BAR ───────────────────────────────────────────── */
-    .sync-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-      background: #0e141c;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      margin: 16px 0 6px;
-    }
-
-    .sync-bar .label {
-      font-size: 11px;
-      color: #b388ff;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .sync-bar input {
-      flex: 1;
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #d0e0e8;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-family: inherit;
-      min-width: 120px;
-    }
-
-    .sync-bar input::placeholder {
-      color: #4a5a6a;
-    }
-
-    .sync-bar button {
-      background: #1a1a2a;
-      border: 1px solid #2a3a4a;
-      color: #9ab0c0;
-      padding: 6px 18px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-family: inherit;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .sync-bar button:hover {
-      background: #2a3a4a;
-      border-color: #6cf;
-      color: #d0e8f8;
-    }
-
-    .sync-bar button.sync {
-      border-color: rgba(179, 136, 255, 0.2);
-      color: #b388ff;
-    }
-
-    .sync-bar button.sync:hover {
-      background: rgba(179, 136, 255, 0.1);
-      border-color: #b388ff;
-    }
-
-    /* ─── FOOTER ─────────────────────────────────────────────── */
-    .footer {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      justify-content: center;
-      margin-top: 24px;
-      padding: 8px 16px;
-      background: #0e141c;
-      border-radius: 12px;
-      border: 1px solid #1a2a3a;
-      font-size: 10px;
-      color: #3a4a5a;
-    }
-
-    .footer .gold {
-      color: #f0d080;
-    }
-
-    .footer .stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* ─── SCROLLBAR ──────────────────────────────────────────── */
-    ::-webkit-scrollbar {
-      width: 5px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: #080c12;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #1a2a3a;
-      border-radius: 4px;
-    }
-  </style>
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:#080c12; }
+  ::-webkit-scrollbar-thumb { background:#1a2a3a; border-radius:4px; }
+</style>
 </head>
 <body>
-
 <div class="container">
 
-  <!-- ========================================================= -->
-  <!-- HEADER                                                    -->
-  <!-- ========================================================= -->
-  <div class="header">
-    <h1>🌀 STAGE‑Reich <small>Corridor · Legitimation · Technik</small></h1>
-    <div class="status-leds">
-      <span><span class="led on" id="ledSystem"></span> SYSTEM</span>
-      <span><span class="led sync" id="ledSync"></span> SYNC</span>
-      <span><span class="led pulse" id="ledReich"></span> REICH</span>
+<header>
+  <h1>🌀 DREIECK‑SCREEN <small>GEAR · 81‑SLOT · RESPO</small></h1>
+  <div class="status-leds">
+    <span><span class="led on" id="ledSystem"></span> SYSTEM</span>
+    <span><span class="led pulse" id="ledTri"></span> DREIECK</span>
+    <span><span class="led" id="ledGear"></span> GEAR</span>
+    <span><span class="led" id="ledBoard"></span> BOARD</span>
+  </div>
+</header>
+
+<!-- MENU -->
+<div class="menu-bar" id="menuBar">
+  <button class="active" data-tab="tabTri">🌀 DREIECK‑SCREEN</button>
+  <button data-tab="tabMatrix">🧩 81‑MATRIX</button>
+  <button data-tab="tabHdf">⚙️ HDF‑RESOLVER</button>
+  <button data-tab="tabWorkboard">📋 WORKBOARD</button>
+</div>
+
+<!-- ========================================================= -->
+<!-- TAB 1: DREIECK-SCREEN (Trianguliertes Mesh + 3D-Geometrie) -->
+<!-- ========================================================= -->
+<div class="tab-content active" id="tabTri">
+  <div class="toolbar">
+    <span style="font-size:10px;color:#5a7a8a;">🎯 Score: <span id="triScore">0</span>%</span>
+    <span style="font-size:10px;color:#5a7a8a;">⚡ Gear: <span id="triGear">0</span></span>
+    <button class="primary" id="triMiss">🎯 MISS</button>
+    <button class="primary" id="triFasil">⚖️ FASIL</button>
+    <button class="primary" id="triFix">🔧 FIX</button>
+    <button class="primary" id="triFit">📐 FIT</button>
+    <button class="warn" id="triRecall">⏪ RECALL</button>
+    <button class="danger" id="triRefinal">⚡ REFINAL</button>
+    <button id="triReset">⟲ RESET</button>
+    <button id="triPause">⏸ PAUSE</button>
+  </div>
+
+  <!-- Dreieck-Canvas -->
+  <canvas id="triCanvas" width="600" height="600"></canvas>
+
+  <!-- 3D-Geometrie-Demo (Kill-Bill-Screens) -->
+  <div class="scene3d" id="scene3d">
+    <div class="screen left">12° links</div>
+    <div class="screen right">12° rechts</div>
+    <div class="screen front">13° transparent</div>
+    <div class="inner">Innenfläche</div>
+  </div>
+  <div class="scene-controls">
+    <button data-pose="neutral">🧘 Neutral</button>
+    <button data-pose="killbill">⚡ Kill‑Bill</button>
+    <button data-pose="wide">📐 Weit</button>
+    <button data-pose="close">🔒 Geschlossen</button>
+  </div>
+
+  <div class="log-box" id="triLog">
+    <div class="entry"><span class="time">[INIT]</span> <span class="msg ok">🌀 Dreieck‑Screen geladen · 81 Slots · Gear 0</span></div>
+  </div>
+</div>
+
+<!-- ========================================================= -->
+<!-- TAB 2: 81-MATRIX (wie gehabt) -->
+<!-- ========================================================= -->
+<div class="tab-content" id="tabMatrix">
+  <div class="toolbar">
+    <span style="font-size:10px;color:#5a7a8a;">🔹 aktiv: <span id="mActive">0</span>/81</span>
+    <span style="font-size:10px;color:#5a7a8a;">⚡ <span id="mEnergy">0</span>%</span>
+    <span style="font-size:10px;color:#5a7a8a;">🎯 <span id="mScore">0</span></span>
+    <button class="primary" id="mReset">⟲ Reset</button>
+    <button id="mRandom">🎲 Random</button>
+    <button id="mLoop">⏯ Loop</button>
+  </div>
+  <div class="matrix-9x9" id="matrixGrid"></div>
+  <div class="log-box" id="matrixLog"><div class="entry"><span class="time">[MATRIX]</span> <span class="msg ok">81‑Matrix bereit</span></div></div>
+</div>
+
+<!-- ========================================================= -->
+<!-- TAB 3: HDF-RESOLVER (vereinfacht) -->
+<!-- ========================================================= -->
+<div class="tab-content" id="tabHdf">
+  <div class="toolbar">
+    <button class="primary" id="hResolve">⚙️ RESOLVE</button>
+    <button id="hAuto">▶ AUTO</button>
+    <button class="danger" id="hReset">⟲ Reset</button>
+    <span style="font-size:10px;color:#5a7a8a;margin-left:auto;">HDF <span id="hCount">0</span></span>
+  </div>
+  <div class="hdf-panel">
+    <div class="hdf-card">
+      <h4>⌨️ COMMANDS.room</h4>
+      <div class="cmd-grid" id="cmdGrid"></div>
+      <div class="resolver-output" id="resolverOutput">⚙️ Resolver bereit</div>
+    </div>
+    <div class="hdf-card">
+      <h4>📋 one.room</h4>
+      <div class="resolver-output" id="oneRoomBox" style="min-height:60px;"></div>
     </div>
   </div>
+  <div class="log-box" id="hdfLog"><div class="entry"><span class="time">[HDF]</span> <span class="msg ok">HDF‑Resolver aktiv</span></div></div>
+</div>
 
-  <!-- ========================================================= -->
-  <!-- ETAGEN-CORRIDOR (alle legitimierten Stages)              -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🏢 ETAGEN · CORRIDOR
-    <span class="badge" id="floorCount">0 Etagen</span>
+<!-- ========================================================= -->
+<!-- TAB 4: WORKBOARD (vereinfacht) -->
+<!-- ========================================================= -->
+<div class="tab-content" id="tabWorkboard">
+  <div class="toolbar">
+    <input type="text" id="wbUser" value="iki1uc" placeholder="GitHub-User" style="flex:0.7;background:rgba(20,28,36,0.5);border:1px solid rgba(120,160,190,0.08);color:#d0e0e8;padding:4px 12px;border-radius:16px;font-size:10px;">
+    <button class="primary" id="wbLoad">⬇ Laden</button>
+    <input type="text" id="wbFilter" placeholder="🔎 Filter…" style="flex:0.7;background:rgba(20,28,36,0.5);border:1px solid rgba(120,160,190,0.08);color:#d0e0e8;padding:4px 12px;border-radius:16px;font-size:10px;">
+    <span style="font-size:10px;color:#5a7a8a;" id="wbCount">0 Repos</span>
   </div>
-  <div class="grid" id="floorGrid"></div>
+  <div class="workboard-layout" style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+    <div>
+      <div style="font-size:10px;color:#5a7a8a;margin-bottom:4px;">🔷 Repos · Klick = auswählen</div>
+      <div class="repo-grid-wb" id="wbGrid"></div>
+    </div>
+    <div class="wb-board">
+      <h4>🔗 BOARD <span id="wbBoardCount">0</span></h4>
+      <div id="wbBoardList"></div>
+      <button id="wbClear" style="margin-top:6px;background:none;border:1px solid rgba(255,80,80,0.08);color:#d06060;padding:3px 12px;border-radius:12px;font-size:9px;cursor:pointer;">⟲ Leeren</button>
+    </div>
+  </div>
+  <div class="log-box" id="wbLog"><div class="entry"><span class="time">[WORK]</span> <span class="msg ok">Workboard bereit</span></div></div>
+</div>
 
-  <!-- ========================================================= -->
-  <!-- KOORDINATEN-SYSTEM (b/h/t + Stages)                      -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    🧭 KOORDINATEN · b/h/t · HDF-Cube
-    <span class="badge" id="coordCount">0 registriert</span>
-  </div>
-  <div class="coord-box" id="coordBox">
-    Koordinaten werden geladen…
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- SYNC-BAR (arg.sync – Kommunikation mit Etagen)           -->
-  <!-- ========================================================= -->
-  <div class="sync-bar">
-    <span class="label"><span class="led sync" style="display:inline-block;width:8px;height:8px;"></span> arg.sync</span>
-    <input type="text" id="syncInput" placeholder="Nachricht an Etagen…" value="sync:orakel">
-    <button class="sync" id="btnSync">🔄 SYNC</button>
-    <button id="btnBroadcast">📡 BROADCAST</button>
-    <button id="btnResetAll">⟲ RESET</button>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- GETEILTES LOG (etagenübergreifend)                       -->
-  <!-- ========================================================= -->
-  <div class="section-title">
-    📜 GETEILTES LOG
-    <span class="badge" id="logCount">0 Einträge</span>
-  </div>
-  <div class="log-box" id="logBox"></div>
-
-  <!-- ========================================================= -->
-  <!-- FOOTER                                                    -->
-  <!-- ========================================================= -->
-  <div class="footer">
-    <span class="stat"><span class="gold">★</span> STAGE‑Reich · Corridor · Legitimation</span>
-    <span class="stat">🔷 <span id="fActive">0</span> aktive Etagen</span>
-    <span class="stat">⚡ <span id="fSyncCount">0</span> SYNCs</span>
-    <span class="stat">⌨️  s=Sync  b=Broadcast  r=Reset</span>
-  </div>
+<div class="footer">
+  <span class="stat"><span class="gold">★</span> DREIECK‑SCREEN · GEAR · 81‑SLOT · RESPO</span>
+  <span class="stat">⌨️ 1=Tri  2=Matrix  3=HDF  4=Board</span>
+</div>
 
 </div>
 
 <script>
-  "use strict";
+"use strict";
+/* ================================================================
+   RESPO · HUB – DREIECK‑SCREEN EDITION
+   ================================================================ */
 
-  /* ==============================================================
-     STAGE‑Reich · Corridor · Legitimation
-     Diese index.html ist der zentrale Einstiegspunkt.
-     Sie lädt alle Module, zeigt alle Etagen an,
-     legitimiert stage.html als Corridor und
-     integriert etage-8-orbit-viewer als Technik‑Etage.
-     ============================================================== */
+// ─── 1. LOG (global) ─────────────────────────────────────────────
+function log(msg, type='', target='triLog') {
+  const box = document.getElementById(target);
+  if (!box) return;
+  const time = new Date().toLocaleTimeString('de-DE');
+  const cls = ['ok','warn','err'].includes(type) ? type : '';
+  const entry = document.createElement('div');
+  entry.className = 'entry';
+  entry.innerHTML = `<span class="time">[${time}]</span> <span class="msg ${cls}">${msg}</span>`;
+  box.appendChild(entry);
+  box.scrollTop = box.scrollHeight;
+  while (box.children.length > 30) box.removeChild(box.firstChild);
+}
 
-  // ─── 1. ETAGEN-REGISTRY (aus aufzug.js) ──────────────────────
-  // Wenn Aufzug.FLOORS nicht existiert, definieren wir sie hier.
-  // So ist die Seite auch ohne externe aufzug.js lauffähig.
-  if (typeof Aufzug === 'undefined') {
-    console.warn('⚠️ aufzug.js nicht gefunden – lege eigene FLOORS an.');
-    window.Aufzug = {
-      FLOORS: [],
-      init: function() {},
-      log: function() {},
-      setSharedValue: function() {},
-      getSharedValue: function() { return undefined; },
-      getSharedLog: function() { return []; }
-    };
-  }
-
-  // Falls die FLOORS noch leer sind, füllen wir sie mit den
-  // wichtigsten Etagen – inklusive stage.html und orbit-viewer.
-  if (Aufzug.FLOORS.length === 0) {
-    Aufzug.FLOORS = [
-      { id: 'stage', name: '🎛️ Stage · Corridor', path: 'stage.html', icon: '🎛️', isRoot: false },
-      { id: 'ui', name: '🖥️ UI · Interface', path: 'ui.html', icon: '🖥️', isRoot: false },
-      { id: 'etage-8-orbit-viewer', name: '🌀 Orbit-Viewer · Etage 8', path: 'etage-8-orbit-viewer/index.html', icon: '🌀', isRoot: false },
-      { id: 'root', name: '🛗 ROOT', path: 'index.html', icon: '🛗', isRoot: true }
-    ];
-  }
-
-  // ─── 2. KOORDINATEN-REGISTRIERUNG ─────────────────────────────
-  // Wenn COORD nicht existiert, bauen wir eine minimale Version.
-  if (typeof COORD === 'undefined') {
-    console.warn('⚠️ coord.js nicht gefunden – lege eigene COORD an.');
-    window.COORD = {
-      axes: {
-        b: 'Breite (X‑Achse)',
-        h: 'Höhe (Y‑Achse)',
-        t: 'Tiefe (Z‑Achse)'
-      },
-      stages: {},
-      register: function(id, x, y, z) {
-        this.stages[id] = { x, y, z };
-      },
-      get: function(id) {
-        return this.stages[id] || null;
-      }
-    };
-  }
-
-  // Alle Etagen aus Aufzug.FLOORS in COORD registrieren (falls noch nicht geschehen)
-  Aufzug.FLOORS.forEach(f => {
-    if (!f.isRoot && !COORD.stages[f.id]) {
-      // Standard-Koordinaten vergeben: x = Index, y = 0, z = 0
-      const idx = Aufzug.FLOORS.indexOf(f);
-      COORD.register(f.id, idx + 1, 0, 0);
-    }
+// ─── 2. MENÜ ────────────────────────────────────────────────────
+const tabs = {
+  tri: document.getElementById('tabTri'),
+  matrix: document.getElementById('tabMatrix'),
+  hdf: document.getElementById('tabHdf'),
+  workboard: document.getElementById('tabWorkboard')
+};
+const menuBtns = document.querySelectorAll('.menu-bar button');
+menuBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    menuBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(tabs).forEach(t => t.classList.remove('active'));
+    const target = document.getElementById(btn.dataset.tab);
+    if (target) target.classList.add('active');
+    log(`📂 Tab: ${btn.textContent.trim()}`, 'ok', 'triLog');
   });
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === '1') menuBtns[0].click();
+  if (e.key === '2') menuBtns[1].click();
+  if (e.key === '3') menuBtns[2].click();
+  if (e.key === '4') menuBtns[3].click();
+});
 
-  // Spezielle Koordinaten für wichtige Etagen
-  COORD.register('stage', 1, 0, 0);
-  COORD.register('ui', 2, 0, 0);
-  COORD.register('etage-8-orbit-viewer', 3, 8, 1);
+// ================================================================
+// MODUL A: DREIECK-SCREEN (Trianguliertes Mesh + 3D-Geometrie)
+// ================================================================
+const triCanvas = document.getElementById('triCanvas');
+const triCtx = triCanvas.getContext('2d');
+const W = triCanvas.width, H = triCanvas.height;
+const TOTAL = 81, COLS = 9, ROWS = 9;
+const TOLERANCE = 0.15;
 
-  // Achsen registrieren (falls nicht schon in coord.js)
-  if (!COORD.stages.b) COORD.register('b', 1, 0, 0);
-  if (!COORD.stages.h) COORD.register('h', 0, 1, 0);
-  if (!COORD.stages.t) COORD.register('t', 0, 0, 1);
+let triSlots = [];
+let triRunning = true;
+let triTime = 0;
+let triGear = 0;
+let triLoop = null;
 
-  // ─── 3. DOM-REFERENZEN ────────────────────────────────────────
-  const floorGrid = document.getElementById('floorGrid');
-  const coordBox = document.getElementById('coordBox');
-  const logBox = document.getElementById('logBox');
-  const syncInput = document.getElementById('syncInput');
+function triInitSlots() {
+  triSlots = [];
+  for (let i=0; i<TOTAL; i++) {
+    const v = Math.sin(i*0.2 + 0.5);
+    triSlots.push({ value:v, truth:0, pulse:0, drift:0, angle:(i*37)%360, targetValue:v, deviation:Math.abs(v), score:1 - Math.min(Math.abs(v),1) });
+  }
+}
+triInitSlots();
 
-  // ─── 4. ETAGEN ANZEIGEN ──────────────────────────────────────
-  function renderFloors() {
-    floorGrid.innerHTML = '';
-    let count = 0;
+function triCompute(s) { s.deviation = Math.abs(s.value - s.truth); s.score = Math.max(0, 1 - Math.min(s.deviation, 1)); }
+function triAvgScore() {
+  let sum=0; for (const s of triSlots) { triCompute(s); sum += s.score; } return sum / TOTAL;
+}
 
-    Aufzug.FLOORS.forEach(f => {
-      if (f.isRoot) return;
-      count++;
+function triDraw() {
+  triCtx.clearRect(0,0,W,H);
+  const bg = triCtx.createRadialGradient(W/2,H/2,20,W/2,H/2,W);
+  bg.addColorStop(0,'#0a1a0e'); bg.addColorStop(1,'#020804');
+  triCtx.fillStyle = bg; triCtx.fillRect(0,0,W,H);
 
-      const coord = COORD.get(f.id) || { x: '?', y: '?', z: '?' };
-      const isLegit = !!COORD.get(f.id);
-
-      const card = document.createElement('a');
-      card.className = 'card';
-      card.href = f.path;
-      card.innerHTML = `
-        <span class="icon">${f.icon || '📁'}</span>
-        <span class="name">${f.name}</span>
-        <span class="coord-badge">(${coord.x}, ${coord.y}, ${coord.z})</span>
-        <div class="path">${f.path}</div>
-        <span class="status-tag ${isLegit ? 'legit' : 'pending'}">${isLegit ? '✅ legitimiert' : '⏳ pending'}</span>
-      `;
-      floorGrid.appendChild(card);
-    });
-
-    document.getElementById('floorCount').textContent = `${count} Etagen`;
-    document.getElementById('fActive').textContent = count;
+  // Punkte
+  const pts = [];
+  for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
+    const idx = r*COLS+c; const s = triSlots[idx]; triCompute(s);
+    pts.push({ x:(c/(COLS-1))*W, y:(r/(ROWS-1))*H, z:s.score });
   }
 
-  // ─── 5. KOORDINATEN ANZEIGEN ──────────────────────────────────
-  function renderCoords() {
-    const out = [];
+  const triColor = (z) => {
+    const r = Math.round(200*(1-z) + 40*z);
+    const g = Math.round(90 + z*140);
+    return `rgba(${r}, ${g}, 60, ${0.25 + z*0.35})`;
+  };
 
-    // Achsen
-    out.push('<span class="axis-label">📐 Achsen:</span>');
-    Object.entries(COORD.axes || {}).forEach(([k, v]) => {
-      out.push(`&nbsp;&nbsp;• ${k}: ${v}`);
-    });
-
-    // Stages
-    out.push('<br><span class="axis-label">🏢 Stages:</span>');
-    const entries = Object.entries(COORD.stages || {});
-    if (entries.length === 0) {
-      out.push('&nbsp;&nbsp;– keine registriert –');
-    } else {
-      entries.forEach(([id, c]) => {
-        out.push(`<div class="stage-entry"><span class="id">${id}</span><span class="pos">(${c.x}, ${c.y}, ${c.z})</span></div>`);
-      });
-    }
-
-    coordBox.innerHTML = out.join('');
-    document.getElementById('coordCount').textContent = `${entries.length} registriert`;
+  for (let r=0; r<ROWS-1; r++) for (let c=0; c<COLS-1; c++) {
+    const idx = r*COLS+c, idxR=(r+1)*COLS+c, idxC=r*COLS+(c+1), idxRC=(r+1)*COLS+(c+1);
+    const p0=pts[idx], p1=pts[idxR], p2=pts[idxC], p3=pts[idxRC];
+    if (!p0||!p1||!p2||!p3) continue;
+    // Dreieck 1
+    triCtx.beginPath(); triCtx.moveTo(p0.x,p0.y); triCtx.lineTo(p1.x,p1.y); triCtx.lineTo(p2.x,p2.y); triCtx.closePath();
+    const a1=(p0.z+p1.z+p2.z)/3; triCtx.fillStyle=triColor(a1); triCtx.fill();
+    triCtx.strokeStyle='rgba(120,220,150,0.06)'; triCtx.lineWidth=0.5; triCtx.stroke();
+    // Dreieck 2
+    triCtx.beginPath(); triCtx.moveTo(p1.x,p1.y); triCtx.lineTo(p3.x,p3.y); triCtx.lineTo(p2.x,p2.y); triCtx.closePath();
+    const a2=(p1.z+p3.z+p2.z)/3; triCtx.fillStyle=triColor(a2); triCtx.fill();
+    triCtx.strokeStyle='rgba(120,220,150,0.06)'; triCtx.lineWidth=0.5; triCtx.stroke();
   }
 
-  // ─── 6. LOG ANZEIGEN ──────────────────────────────────────────
-  function renderLog() {
-    const entries = (Aufzug.getSharedLog && Aufzug.getSharedLog()) || [];
-    logBox.innerHTML = '';
-    entries.slice().reverse().forEach(e => {
-      const entry = document.createElement('div');
-      entry.className = 'entry';
-      entry.innerHTML = `
-        <span class="time">[${e.time || '--:--:--'}]</span>
-        <span class="floor">${e.floor || 'system'}</span>
-        <span class="msg">${e.msg || ''}</span>
-      `;
-      logBox.appendChild(entry);
-    });
-    document.getElementById('logCount').textContent = `${entries.length} Einträge`;
+  // Knoten
+  for (const p of pts) {
+    const r = 2 + p.z*3;
+    triCtx.beginPath(); triCtx.arc(p.x,p.y,r,0,Math.PI*2);
+    const col = triColor(p.z); triCtx.fillStyle=col; triCtx.fill();
+    triCtx.strokeStyle='rgba(200,255,220,0.12)'; triCtx.lineWidth=0.5; triCtx.stroke();
   }
 
-  // ─── 7. SYNC-FUNKTIONEN ──────────────────────────────────────
-  let syncCount = 0;
+  const avg = triAvgScore();
+  triCtx.fillStyle='rgba(150,230,170,0.06)'; triCtx.font='14px Consolas'; triCtx.textAlign='center'; triCtx.textBaseline='top';
+  triCtx.fillText(`🌀 DREIECK · Score ${(avg*100).toFixed(1)}% · Gear ${triGear}`, W/2, 6);
 
-  function doSync(message) {
-    const msg = message || syncInput.value.trim() || 'sync:orakel';
-    syncCount++;
+  // Status-LEDs
+  document.getElementById('triScore').textContent = Math.round(avg*100);
+  document.getElementById('triGear').textContent = triGear;
+  document.getElementById('ledTri').className = 'led ' + (triRunning ? 'pulse' : 'off');
+  document.getElementById('ledGear').className = 'led ' + (triGear > 0 ? 'on' : 'off');
+}
 
-    // LED kurz aufleuchten lassen
-    const led = document.getElementById('ledSync');
-    led.className = 'led sync';
-    setTimeout(() => { led.className = 'led'; }, 400);
-
-    // In Aufzug-Log schreiben
-    if (Aufzug.log) {
-      Aufzug.log(`SYNC: ${msg}`);
-    }
-
-    // An alle Etagen per postMessage senden (wenn iframes existieren)
-    document.querySelectorAll('iframe').forEach(iframe => {
-      try {
-        iframe.contentWindow.postMessage({ type: 'arg.sync', payload: msg, from: 'orakel' }, '*');
-      } catch (_) {}
-    });
-
-    // Lokales Log
-    const logEntry = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: `⬆ SYNC: ${msg}`
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(logEntry);
-    }
-
-    document.getElementById('fSyncCount').textContent = syncCount;
-    renderLog();
+function triUpdate() {
+  for (const s of triSlots) {
+    s.value += (s.targetValue - s.value) * 0.008;
+    s.pulse += Math.sin(triTime*0.001 + s.angle*0.01)*0.001;
+    s.drift += Math.cos(triTime*0.002 + s.angle*0.02)*0.001;
+    s.pulse = Math.min(Math.max(s.pulse,-1),1); s.drift = Math.min(Math.max(s.drift,-1),1);
+    s.angle = (s.angle + 0.02) % 360;
   }
+  triGear = (triGear + 1) % 12;
+}
 
-  function broadcastSync() {
-    doSync(syncInput.value.trim() || 'broadcast:orakel');
-  }
+function triLoopFn() {
+  if (!triRunning) return;
+  triTime += 16;
+  triUpdate();
+  triDraw();
+  if (Math.floor(triTime/2000)%2===0) { /* Status aktualisieren */ }
+  requestAnimationFrame(triLoopFn);
+}
 
-  function resetAll() {
-    syncCount = 0;
-    document.getElementById('fSyncCount').textContent = '0';
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().length = 0;
-    }
-    renderLog();
-    const led = document.getElementById('ledSystem');
-    led.className = 'led';
-    setTimeout(() => { led.className = 'led on'; }, 300);
-  }
+// Steuerung
+function triMiss() { let sum=0; for (const s of triSlots) { triCompute(s); sum += s.deviation; } const avg = sum/TOTAL; log(`🎯 MISS · Ø Abweichung ${avg.toFixed(3)}`, 'warn', 'triLog'); }
+function triFasil() { const avg = triSlots.reduce((s,a)=>s+a.value,0)/TOTAL; for (const s of triSlots) { s.value = s.value*0.6 + avg*0.4; s.targetValue = s.value; s.pulse*=0.8; s.drift*=0.8; } log('⚖️ FASIL · geglättet', 'ok', 'triLog'); }
+function triFix() { let f=0; for (const s of triSlots) { if (s.value>1.5||s.value<-1.5){ s.value=Math.sign(s.value)*1.2; s.targetValue=s.value; f++; } s.pulse=Math.min(Math.max(s.pulse,-1),1); s.drift=Math.min(Math.max(s.drift,-1),1); s.angle=(s.angle%360+360)%360; } log(`🔧 FIX · ${f} Ausreißer`, 'ok', 'triLog'); }
+function triFit() { for (let i=0;i<TOTAL;i++){ const s=triSlots[i]; const ph=i*0.2+triTime*0.0003; s.targetValue=Math.sin(ph)*0.9; s.value=s.value*0.5+s.targetValue*0.5; s.pulse=Math.sin(triTime/120+i*0.1)*0.6; s.drift=Math.cos(triTime/240+i*0.05)*0.5; s.angle=(triTime/10+i*4)%360; } log('📐 FIT · Referenzkurve', 'ok', 'triLog'); }
+function triRecall() { triInitSlots(); log('⏪ RECALL', 'warn', 'triLog'); }
+function triRefinal() { for (const s of triSlots) { s.value=Math.sin(s.angle*Math.PI/180)*0.5; s.targetValue=s.value; s.pulse=0; s.drift=0; s.angle=(s.angle+10)%360; } log('⚡ REFINAL', 'warn', 'triLog'); }
+function triReset() { triInitSlots(); triGear=0; log('⟲ RESET', 'warn', 'triLog'); }
+function triTogglePause() { triRunning = !triRunning; document.getElementById('triPause').textContent = triRunning ? '⏸ PAUSE' : '▶ START'; log(triRunning ? '▶ Fortgesetzt' : '⏸ Pausiert', 'warn', 'triLog'); }
 
-  // ─── 8. EVENT-BINDING ─────────────────────────────────────────
-  document.getElementById('btnSync').addEventListener('click', () => doSync());
-  document.getElementById('btnBroadcast').addEventListener('click', broadcastSync);
-  document.getElementById('btnResetAll').addEventListener('click', resetAll);
+document.getElementById('triMiss').addEventListener('click', triMiss);
+document.getElementById('triFasil').addEventListener('click', triFasil);
+document.getElementById('triFix').addEventListener('click', triFix);
+document.getElementById('triFit').addEventListener('click', triFit);
+document.getElementById('triRecall').addEventListener('click', triRecall);
+document.getElementById('triRefinal').addEventListener('click', triRefinal);
+document.getElementById('triReset').addEventListener('click', triReset);
+document.getElementById('triPause').addEventListener('click', triTogglePause);
 
-  syncInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') doSync();
+// 3D-Geometrie (Kill-Bill-Posen)
+const scene = document.getElementById('scene3d');
+const screens = scene.querySelectorAll('.screen, .inner');
+const poses = {
+  neutral: { left:'rotateY(12deg) translateX(-140px) translateZ(60px)', right:'rotateY(-12deg) translateX(140px) translateZ(60px)', front:'rotateX(13deg) translateZ(120px)' },
+  killbill: { left:'rotateY(25deg) translateX(-180px) translateZ(20px)', right:'rotateY(-25deg) translateX(180px) translateZ(20px)', front:'rotateX(25deg) translateZ(80px)' },
+  wide: { left:'rotateY(5deg) translateX(-220px) translateZ(100px)', right:'rotateY(-5deg) translateX(220px) translateZ(100px)', front:'rotateX(8deg) translateZ(160px)' },
+  close: { left:'rotateY(18deg) translateX(-80px) translateZ(80px)', right:'rotateY(-18deg) translateX(80px) translateZ(80px)', front:'rotateX(18deg) translateZ(60px)' }
+};
+document.querySelectorAll('.scene-controls button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const p = poses[btn.dataset.pose];
+    if (!p) return;
+    const left = scene.querySelector('.left'); if (left) left.style.transform = p.left;
+    const right = scene.querySelector('.right'); if (right) right.style.transform = p.right;
+    const front = scene.querySelector('.front'); if (front) front.style.transform = p.front;
+    log(`🧘 Pose: ${btn.dataset.pose}`, 'ok', 'triLog');
   });
+});
 
-  // ─── 9. TASTATUR ──────────────────────────────────────────────
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 's' || e.key === 'S') { e.preventDefault(); doSync(); }
-    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); broadcastSync(); }
-    if (e.key === 'r' || e.key === 'R') { e.preventDefault(); resetAll(); }
-  });
+// Start Dreieck-Loop
+triLoopFn();
+log('🌀 Dreieck‑Screen gestartet', 'ok', 'triLog');
+log('⌨️  m=MISS f=FASIL x=FIX t=FIT r=RECALL R=REFINAL space=Pause', 'warn', 'triLog');
 
-  // ─── 10. POSTMESSAGE-EMPFAENGER (von Etagen) ──────────────────
-  window.addEventListener('message', (event) => {
-    const data = event.data;
-    if (data && data.type === 'arg.sync') {
-      const from = data.from || 'unbekannt';
-      const payload = data.payload || '';
-      syncInput.value = payload;
-      document.getElementById('fSyncCount').textContent = ++syncCount;
-      // In Aufzug-Log schreiben
-      if (Aufzug.log) {
-        Aufzug.log(`📨 Empfangen von ${from}: ${payload}`);
-      }
-      renderLog();
-    }
-    if (data && data.type === 'etage.ready') {
-      const from = data.from || 'unbekannt';
-      // Etage in COORD nachtragen, falls nicht vorhanden
-      if (!COORD.get(from)) {
-        const idx = Aufzug.FLOORS.findIndex(f => f.id === from);
-        COORD.register(from, idx + 1, 0, 0);
-        renderCoords();
-        renderFloors();
-      }
-    }
-  });
+// ================================================================
+// MODUL B: 81-MATRIX (wie gehabt, leicht vereinfacht)
+// ================================================================
+const MATRIX_SYMBOLE = ['▲','▼','◄','►','◆','◇','○','●','■','□','✦','✧','✪','✫','✬','✭','✮','✯','☀','☾','⊕','⚑','⚐','⚙','✹','✸','✶','✷','✳','✴','✱','✲','✢','✣','✤','✥','✦','✧','✩','✪','✫','✬','✭','✮','✯','✰','✱','✲','✳','✴','✵','✶','✷','✸','✹','✺','✻','✼','✽','✾','✿','❀','❁','❂','❃','❄','❅','❆','❇','❈','❉','❊','✦','✧','✪','✫','✬','✭','✮','✯','✰','✱','✲','✳','✴','✵','✶','✷','✸','✹'];
+const mGrid = document.getElementById('matrixGrid');
+const mState = { grid:[], active:0, energy:0, score:0, loop:null, loopActive:false };
 
-  // ─── 11. INIT ──────────────────────────────────────────────────
-  function init() {
-    // Aufzug initialisieren (falls vorhanden)
-    if (Aufzug.init) {
-      Aufzug.init({ currentId: 'root', basePath: '' });
-    }
-
-    renderFloors();
-    renderCoords();
-    renderLog();
-
-    document.getElementById('fSyncCount').textContent = '0';
-    document.getElementById('ledSystem').className = 'led on';
-    document.getElementById('ledReich').className = 'led pulse';
-
-    // Begrüßung
-    const welcome = {
-      time: new Date().toLocaleTimeString('de-DE'),
-      floor: '🛗 ROOT',
-      msg: '🌀 STAGE‑Reich · Corridor · Legitimation · bereit'
-    };
-    if (Aufzug.getSharedLog && Array.isArray(Aufzug.getSharedLog())) {
-      Aufzug.getSharedLog().push(welcome);
-    }
-    renderLog();
-
-    console.log('🌀 STAGE‑Reich initialisiert');
-    console.log('📐 Achsen:', Object.keys(COORD.axes || {}));
-    console.log('🏢 Stages:', Object.keys(COORD.stages || {}));
-    console.log('⌨️  s=Sync  b=Broadcast  r=Reset');
+function mBuild() {
+  mGrid.innerHTML = '';
+  mState.grid = [];
+  for (let i=0; i<81; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'cell81';
+    cell.dataset.idx = i;
+    cell.textContent = MATRIX_SYMBOLE[i % MATRIX_SYMBOLE.length];
+    cell.addEventListener('click', () => mToggle(i));
+    mGrid.appendChild(cell);
+    mState.grid.push({ active: false, elem: cell });
   }
-
-  // Warten, bis alle Skripte geladen sind
-  if (document.readyState === 'complete') {
-    init();
-  } else {
-    window.addEventListener('load', init);
+  mUpdateUI();
+}
+function mToggle(idx) {
+  const c = mState.grid[idx];
+  c.active = !c.active;
+  c.elem.classList.toggle('active', c.active);
+  mState.active += c.active ? 1 : -1;
+  mState.energy = Math.min(100, Math.max(0, mState.energy + (c.active ? 2 : -1)));
+  mState.score += c.active ? 10 : -2;
+  if (mState.score < 0) mState.score = 0;
+  mUpdateUI();
+}
+function mUpdateUI() {
+  document.getElementById('mActive').textContent = mState.active;
+  document.getElementById('mEnergy').textContent = Math.round(mState.energy);
+  document.getElementById('mScore').textContent = mState.score;
+}
+function mReset() {
+  mState.grid.forEach(c => { c.active = false; c.elem.classList.remove('active'); });
+  mState.active = 0; mState.energy = 0; mState.score = 0;
+  mUpdateUI();
+  if (mState.loop) { clearInterval(mState.loop); mState.loop=null; mState.loopActive=false; document.getElementById('mLoop').textContent='⏯ Loop'; }
+  log('⟲ Matrix Reset', 'warn', 'matrixLog');
+}
+function mRandom() {
+  for (let i=0; i<20; i++) {
+    const idx = Math.floor(Math.random()*81);
+    if (!mState.grid[idx].active) mToggle(idx);
   }
+  log('🎲 20 zufällig aktiviert', 'ok', 'matrixLog');
+}
+function mToggleLoop() {
+  if (mState.loop) { clearInterval(mState.loop); mState.loop=null; mState.loopActive=false; document.getElementById('mLoop').textContent='⏯ Loop'; log('⏸ Loop gestoppt', 'warn', 'matrixLog'); }
+  else { mState.loop = setInterval(() => { const idx=Math.floor(Math.random()*81); if(!mState.grid[idx].active) mToggle(idx); }, 400); mState.loopActive=true; document.getElementById('mLoop').textContent='⏹ Stop'; log('▶ Loop gestartet', 'ok', 'matrixLog'); }
+}
+document.getElementById('mReset').addEventListener('click', mReset);
+document.getElementById('mRandom').addEventListener('click', mRandom);
+document.getElementById('mLoop').addEventListener('click', mToggleLoop);
+mBuild();
+log('🧩 81‑Matrix initialisiert', 'ok', 'matrixLog');
+
+// ================================================================
+// MODUL C: HDF-RESOLVER (vereinfacht)
+// ================================================================
+const COMMANDS = ['d','e','i','n','o','r','s','u','w'];
+const ONE_ROOM = ['#SLIDE → SLIDE.hdf','#HDFRESPO → HDFRESPO.hdf','#ID → ID.hdf'];
+let hdfCount = 0, hdfAuto = null;
+
+function renderCommands() {
+  const grid = document.getElementById('cmdGrid');
+  grid.innerHTML = '';
+  COMMANDS.forEach(c => {
+    const div = document.createElement('div');
+    div.className = 'cmd-item';
+    div.innerHTML = `<span class="key">${c}</span> → TMP.${COMMANDS.indexOf(c)+1}`;
+    div.addEventListener('click', () => { document.getElementById('resolverOutput').textContent = `⌨️ ${c} → TMP.${COMMANDS.indexOf(c)+1}`; log(`⌨️ ${c}`, 'warn', 'hdfLog'); });
+    grid.appendChild(div);
+  });
+  document.getElementById('oneRoomBox').textContent = ONE_ROOM.join('\n');
+}
+renderCommands();
+
+function hdfResolve() {
+  const t = prompt('Auftrag: #SLIDE, #HDFRESPO, #ID');
+  if (!t) return;
+  hdfCount++;
+  const found = ONE_ROOM.find(line => line.startsWith(t));
+  document.getElementById('resolverOutput').textContent = found ? `✅ ${found}` : `❌ ${t} nicht gefunden`;
+  document.getElementById('hCount').textContent = hdfCount;
+  log(`⚙️ ${t} → ${found || 'unbekannt'}`, found?'ok':'err', 'hdfLog');
+}
+function hdfAutoToggle() {
+  if (hdfAuto) { clearInterval(hdfAuto); hdfAuto=null; document.getElementById('hAuto').textContent='▶ AUTO'; log('⏸ Auto pausiert', 'warn', 'hdfLog'); }
+  else {
+    hdfAuto = setInterval(() => {
+      const targets = ['#SLIDE','#HDFRESPO','#ID'];
+      const t = targets[Math.floor(Math.random()*3)];
+      hdfCount++;
+      const found = ONE_ROOM.find(line => line.startsWith(t));
+      document.getElementById('resolverOutput').textContent = `⚡ ${t} → ${found || '?'}`;
+      document.getElementById('hCount').textContent = hdfCount;
+    }, 2200);
+    document.getElementById('hAuto').textContent='⏸ STOP';
+    log('▶ Auto gestartet', 'ok', 'hdfLog');
+  }
+}
+function hdfReset() { if(hdfAuto){clearInterval(hdfAuto);hdfAuto=null;document.getElementById('hAuto').textContent='▶ AUTO';} hdfCount=0; document.getElementById('hCount').textContent='0'; document.getElementById('resolverOutput').textContent='⚙️ Resolver zurückgesetzt'; log('⟲ HDF Reset', 'warn', 'hdfLog'); }
+document.getElementById('hResolve').addEventListener('click', hdfResolve);
+document.getElementById('hAuto').addEventListener('click', hdfAutoToggle);
+document.getElementById('hReset').addEventListener('click', hdfReset);
+log('⚙️ HDF‑Resolver aktiv', 'ok', 'hdfLog');
+
+// ================================================================
+// MODUL D: WORKBOARD (vereinfacht, nur Demo)
+// ================================================================
+const wbState = { repos:[], selected:new Set(), planned:[] };
+
+function wbRender() {
+  const grid = document.getElementById('wbGrid');
+  const q = document.getElementById('wbFilter').value.trim().toLowerCase();
+  const entries = wbState.repos.filter(r => !q || r.name.toLowerCase().includes(q));
+  grid.innerHTML = '';
+  entries.forEach(r => {
+    const sel = wbState.selected.has(r.id);
+    const dot = r.open_issues > 0 ? 'gelb' : 'gruen';
+    const tile = document.createElement('div');
+    tile.className = 'repo-tile-wb' + (sel ? ' selected' : '');
+    tile.innerHTML = `<div class="name"><span class="dot ${dot}"></span>${r.name}</div>`;
+    tile.addEventListener('click', () => {
+      if (wbState.selected.has(r.id)) wbState.selected.delete(r.id);
+      else wbState.selected.add(r.id);
+      wbRender();
+    });
+    grid.appendChild(tile);
+  });
+  document.getElementById('wbCount').textContent = `${wbState.repos.length} Repos`;
+  document.getElementById('wbBoardCount').textContent = wbState.selected.size;
+  // Board-Liste
+  const list = document.getElementById('wbBoardList');
+  list.innerHTML = '';
+  [...wbState.selected].forEach(id => {
+    const r = wbState.repos.find(e => e.id === id);
+    const chip = document.createElement('div');
+    chip.className = 'wb-chip';
+    chip.innerHTML = `<span>${r ? r.name : id}</span><button class="rm">✕</button>`;
+    chip.querySelector('.rm').addEventListener('click', () => { wbState.selected.delete(id); wbRender(); });
+    list.appendChild(chip);
+  });
+  document.getElementById('ledBoard').className = 'led ' + (wbState.selected.size > 0 ? 'on' : 'off');
+}
+
+async function wbLoad() {
+  const user = document.getElementById('wbUser').value.trim();
+  if (!user) { log('⚠️ Benutzername eingeben', 'warn', 'wbLog'); return; }
+  try {
+    const res = await fetch(`https://api.github.com/users/${encodeURIComponent(user)}/repos?per_page=100&sort=pushed`);
+    if (!res.ok) throw new Error('API-Fehler');
+    const data = await res.json();
+    wbState.repos = data.map(r => ({ id: r.full_name, name: r.name, open_issues: r.open_issues_count, pushed_at: r.pushed_at }));
+    wbRender();
+    log(`✅ ${wbState.repos.length} Repos geladen`, 'ok', 'wbLog');
+  } catch (err) { log(`❌ ${err.message}`, 'err', 'wbLog'); }
+}
+document.getElementById('wbLoad').addEventListener('click', wbLoad);
+document.getElementById('wbFilter').addEventListener('input', wbRender);
+document.getElementById('wbClear').addEventListener('click', () => { wbState.selected = new Set(); wbRender(); log('⟲ Board geleert', 'warn', 'wbLog'); });
+wbRender();
+log('📋 Workboard bereit', 'ok', 'wbLog');
+setTimeout(wbLoad, 800);
+
+// Tastatur-Kurzbefehle global
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ' && document.getElementById('tabTri').classList.contains('active')) { e.preventDefault(); triTogglePause(); }
+  if (e.key === 'm' && document.getElementById('tabTri').classList.contains('active')) triMiss();
+  if (e.key === 'f' && document.getElementById('tabTri').classList.contains('active')) triFasil();
+  if (e.key === 'x' && document.getElementById('tabTri').classList.contains('active')) triFix();
+  if (e.key === 't' && document.getElementById('tabTri').classList.contains('active')) triFit();
+  if (e.key === 'r' && document.getElementById('tabTri').classList.contains('active')) triRecall();
+  if (e.key === 'R' && document.getElementById('tabTri').classList.contains('active')) triRefinal();
+});
 </script>
-
 </body>
 </html>
