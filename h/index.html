@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔺 Körper‑Geometrie · Halten · Bewegen · Fixieren · Formen</title>
+<style>
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:#06070e; color:#e0e8f0; font-family:'Consolas','Segoe UI',monospace;
+    min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  .container {
+    max-width:1300px; width:100%; background:rgba(12,16,28,0.7); backdrop-filter:blur(4px);
+    border-radius:28px; border:1px solid rgba(120,220,150,0.15); padding:24px 28px 32px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.8);
+  }
+  header {
+    display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    margin-bottom:16px; border-bottom:1px solid rgba(120,220,150,0.1); padding-bottom:12px;
+  }
+  header h1 {
+    font-size:22px; font-weight:300; letter-spacing:2px;
+    background:linear-gradient(135deg, #7ee0a0, #d8f0c0); -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent; background-clip:text;
+  }
+  header .badge {
+    background:rgba(120,220,150,0.08); border:1px solid rgba(120,220,150,0.15);
+    border-radius:100px; padding:4px 18px; font-size:12px; color:#a0d0a8;
+  }
+  .note {
+    background:rgba(255,190,90,0.06); border:1px solid rgba(255,190,90,0.18);
+    border-radius:12px; padding:12px 16px; font-size:12px; line-height:1.6; color:#e8d8b8;
+    margin-bottom:16px;
+  }
+  .note b { color:#ffcf8c; }
+
+  .grid-2 { display:grid; grid-template-columns:1.2fr 0.8fr; gap:18px; }
+  @media (max-width:950px){ .grid-2 { grid-template-columns:1fr; } }
+
+  /* ─── 3D SZENE ─────────────────────────────────────────── */
+  .scene-wrap {
+    background:#000; border-radius:16px; border:1px solid rgba(120,220,150,0.1);
+    overflow:hidden; aspect-ratio:4/3; position:relative;
+    box-shadow:inset 0 0 60px rgba(20,60,30,0.25);
+  }
+  .scene {
+    width:100%; height:100%; position:relative;
+    perspective:1200px; transform-style:preserve-3d;
+  }
+  .back {
+    position:absolute; inset:0;
+    background:linear-gradient(135deg, #1a1a1a, #0a0a0a, #202020);
+    transform:translateZ(-260px);
+  }
+  .floor {
+    position:absolute; left:0; right:0; bottom:0; height:35%;
+    background:linear-gradient(to bottom, #4a1e1e, #180808);
+    transform-origin:bottom center;
+    transform:rotateX(75deg) translateZ(-40px);
+  }
+  .limb {
+    position:absolute; width:34%; height:60%;
+    top:18%;
+    border:2px solid rgba(0,0,0,0.6);
+    transition:transform 0.6s cubic-bezier(.2,.9,.25,1.05), background 0.4s;
+    transform-style:preserve-3d;
+  }
+  #limbLeft  { left:2%;  background:linear-gradient(135deg,#12c2e9,#0057ff); box-shadow:0 0 30px rgba(20,150,255,0.45); }
+  #limbRight { right:2%; background:linear-gradient(135deg,#ff2fa0,#b8006b); box-shadow:0 0 30px rgba(255,30,140,0.45); }
+  #limbFront {
+    left:33%; width:34%; height:46%; top:27%;
+    background:rgba(255,255,255,0.10); backdrop-filter:blur(3px);
+    box-shadow:0 0 24px rgba(255,255,255,0.2);
+  }
+  .free-inner {
+    position:absolute; left:33%; width:34%; height:46%; top:27%;
+    display:grid; grid-template-columns:repeat(6,1fr); grid-template-rows:repeat(6,1fr);
+    transform:translateZ(-2px);
+  }
+  .free-inner div {
+    border:1px solid rgba(0,0,0,0.5); background:#fff; cursor:pointer; transition:background 0.15s;
+  }
+  .free-inner div.on { background:#000; }
+
+  .limb-tag {
+    position:absolute; bottom:4px; left:0; right:0; text-align:center;
+    font-size:10px; color:rgba(0,0,0,0.65); letter-spacing:1px; pointer-events:none;
+  }
+
+  /* ─── STEUERUNG ────────────────────────────────────────── */
+  .panel {
+    background:rgba(16,20,14,0.4); border:1px solid rgba(120,220,150,0.08);
+    border-radius:16px; padding:14px 16px; margin-bottom:14px;
+  }
+  .panel h2 {
+    font-size:13px; color:#b0e8c0; border-bottom:1px solid rgba(120,220,150,0.1);
+    padding-bottom:6px; margin-bottom:10px; letter-spacing:1px;
+  }
+  .limb-select { display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap; }
+  .limb-select button {
+    flex:1; min-width:70px; background:rgba(20,28,20,0.6); border:1px solid rgba(120,220,150,0.15);
+    border-radius:8px; padding:6px 4px; color:#c0d8c8; font-family:inherit; font-size:11px; cursor:pointer;
+  }
+  .limb-select button.active { border-color:#7ee0a0; color:#7ee0a0; background:rgba(80,180,110,0.15); }
+
+  .slider-row { margin-bottom:8px; }
+  .slider-row label { display:flex; justify-content:space-between; font-size:11px; color:#9ab8a4; margin-bottom:2px; }
+  .slider-row input[type=range] { width:100%; }
+
+  .state-row { display:flex; gap:8px; margin-top:10px; }
+  .state-row button {
+    flex:1; background:rgba(20,28,20,0.6); border:1px solid rgba(120,220,150,0.15);
+    border-radius:8px; padding:8px 4px; color:#c0d8c8; font-family:inherit; font-size:11px; cursor:pointer;
+  }
+  .state-row button:hover { border-color:#7ee0a0; color:#fff; }
+  .state-row button.lock { border-color:#ff6b6b; color:#ff6b6b; }
+
+  .scenario-grid {
+    display:grid; grid-template-columns:repeat(2,1fr); gap:8px;
+  }
+  .scenario-grid button {
+    background:rgba(20,28,20,0.6); border:1px solid rgba(255,190,90,0.2);
+    border-radius:8px; padding:8px 4px; color:#ffcf8c; font-family:inherit; font-size:11px; cursor:pointer;
+  }
+  .scenario-grid button:hover { border-color:#ffcf8c; background:rgba(255,190,90,0.12); }
+
+  .log-box {
+    background:rgba(0,0,0,0.4); border-radius:12px; padding:10px 14px;
+    font-size:11px; color:#8a9aaa; height:90px; overflow-y:auto;
+    border:1px solid rgba(120,220,150,0.05); line-height:1.6; margin-top:6px;
+  }
+  .footer {
+    text-align:center; color:#3a4a5a; font-size:10px; margin-top:16px;
+    border-top:1px solid rgba(120,220,150,0.05); padding-top:10px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>🔺 Körper‑Geometrie · Halten · Bewegen · Fixieren · Formen</h1>
+  <span class="badge">● interaktives 3D‑Segment‑System</span>
+</header>
+
+<div class="note">
+  <b>Sachstand:</b> Das ist ein steuerbares 3D‑Szenen-System mit drei "Gliedern" (Links/Rechts/Front),
+  die du wie Gelenke drehen und verschieben kannst. Die Zahlenwerte unten (Grad, Prozent) sind reale,
+  wirksame CSS‑3D‑Transform‑Werte dieser Szene — <b>keine CAD‑Vermessung eines realen Raums</b>.
+  Wenn du ein echtes physisches Objekt/Zimmer abbilden willst, sag mir die echten Maße, dann rechne ich
+  damit statt mit den Default‑Werten hier.
+</div>
+
+<div class="grid-2">
+  <div>
+    <div class="scene-wrap">
+      <div class="scene" id="scene">
+        <div class="back"></div>
+        <div class="floor"></div>
+        <div class="limb" id="limbLeft"><span class="limb-tag">LINKS · 12°</span></div>
+        <div class="limb" id="limbRight"><span class="limb-tag">RECHTS · 12°</span></div>
+        <div class="limb" id="limbFront"><span class="limb-tag">FRONT · 13°</span></div>
+        <div class="free-inner" id="freeInner"></div>
+      </div>
+    </div>
+    <div class="log-box" id="logBox">[init] Körper‑Geometrie‑System geladen …</div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>🎛️ Glied wählen &amp; bewegen</h2>
+      <div class="limb-select">
+        <button class="active" data-limb="limbLeft">Links</button>
+        <button data-limb="limbRight">Rechts</button>
+        <button data-limb="limbFront">Front</button>
+      </div>
+
+      <div class="slider-row">
+        <label><span>Rotation Y (Neigung zur Mitte)</span><span id="rotYVal">12°</span></label>
+        <input type="range" id="rotY" min="-45" max="45" value="12">
+      </div>
+      <div class="slider-row">
+        <label><span>Rotation X (vor/zurück kippen)</span><span id="rotXVal">2°</span></label>
+        <input type="range" id="rotX" min="-45" max="45" value="2">
+      </div>
+      <div class="slider-row">
+        <label><span>Tiefe Z (mm‑analog, Skala 0–200)</span><span id="posZVal">80</span></label>
+        <input type="range" id="posZ" min="-100" max="200" value="80">
+      </div>
+
+      <div class="state-row">
+        <button id="btnHalten">✋ HALTEN</button>
+        <button id="btnBewegen">🔄 BEWEGEN</button>
+        <button class="lock" id="btnFixieren">🔒 FIXIEREN</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>⭐ Szenarien (vordefinierte Formen)</h2>
+      <div class="scenario-grid">
+        <button data-preset="offen">Weit geöffnet</button>
+        <button data-preset="diamant">Diamant geschlossen</button>
+        <button data-preset="asym">Asymmetrisch</button>
+        <button data-preset="killbill">Kill‑Bill‑Move</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">⚖️ iki1uc · Körper‑Geometrie‑System · reale CSS‑3D‑Transforms, keine CAD‑Vermessung</div>
+</div>
+
+<script>
+"use strict";
+
+// ================================================================
+//  KÖRPER-GEOMETRIE-SYSTEM
+//  Drei Glieder (Links/Rechts/Front) als echte, per Slider steuerbare
+//  CSS-3D-Transforms. Jedes Glied hat einen Zustand: frei beweglich
+//  oder fixiert. Szenarien = benannte, komplette Posen aller Glieder,
+//  die per Klick mit einer CSS-Transition (der "Move") angefahren werden.
+// ================================================================
+
+const limbs = {
+  limbLeft:  { el: document.getElementById('limbLeft'),  rotY: 12,  rotX: 2, posZ: 80,  locked:false },
+  limbRight: { el: document.getElementById('limbRight'), rotY: -12, rotX: 2, posZ: 80,  locked:false },
+  limbFront: { el: document.getElementById('limbFront'), rotY: 0,   rotX: 13,posZ: 140, locked:false },
+};
+
+let activeLimb = 'limbLeft';
+
+function applyTransform(key) {
+  const l = limbs[key];
+  // Links/Rechts: Neigung um Y (zur Mitte), leichte X-Kippung, nach vorne/hinten in Z
+  // Front: Neigung um X (nach hinten geklappt), zentriert
+  l.el.style.transform =
+    `rotateY(${l.rotY}deg) rotateX(${l.rotX}deg) translateZ(${l.posZ}px)`;
+}
+function applyAll() { Object.keys(limbs).forEach(applyTransform); }
+applyAll();
+
+function log(msg) {
+  const box = document.getElementById('logBox');
+  const t = new Date().toLocaleTimeString();
+  const e = document.createElement('div');
+  e.textContent = `[${t}] ${msg}`;
+  box.appendChild(e); box.scrollTop = box.scrollHeight;
+  if (box.children.length > 50) box.removeChild(box.firstChild);
+}
+
+// ─── Glied-Auswahl ──────────────────────────────────────────
+document.querySelectorAll('.limb-select button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.limb-select button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeLimb = btn.dataset.limb;
+    const l = limbs[activeLimb];
+    document.getElementById('rotY').value = l.rotY;
+    document.getElementById('rotX').value = l.rotX;
+    document.getElementById('posZ').value = l.posZ;
+    document.getElementById('rotYVal').textContent = l.rotY + '°';
+    document.getElementById('rotXVal').textContent = l.rotX + '°';
+    document.getElementById('posZVal').textContent = l.posZ;
+    log(`🎛️ Glied gewählt: ${activeLimb} ${l.locked ? '(fixiert)' : ''}`);
+  });
+});
+
+// ─── Slider → aktuelles Glied bewegen (nur wenn nicht fixiert) ──
+function bindSlider(id, prop, unit) {
+  document.getElementById(id).addEventListener('input', (e) => {
+    const l = limbs[activeLimb];
+    if (l.locked) { log('🔒 Glied ist fixiert — erst BEWEGEN klicken'); e.target.value = l[prop]; return; }
+    l[prop] = Number(e.target.value);
+    document.getElementById(id + 'Val').textContent = l[prop] + (unit || '');
+    applyTransform(activeLimb);
+  });
+}
+bindSlider('rotY', 'rotY', '°');
+bindSlider('rotX', 'rotX', '°');
+bindSlider('posZ', 'posZ', '');
+
+// ─── HALTEN / BEWEGEN / FIXIEREN ────────────────────────────
+document.getElementById('btnHalten').addEventListener('click', () => {
+  log(`✋ HALTEN → ${activeLimb} bleibt in aktueller Position stehen`);
+});
+document.getElementById('btnBewegen').addEventListener('click', () => {
+  limbs[activeLimb].locked = false;
+  log(`🔄 BEWEGEN → ${activeLimb} wieder frei beweglich`);
+});
+document.getElementById('btnFixieren').addEventListener('click', () => {
+  limbs[activeLimb].locked = true;
+  log(`🔒 FIXIEREN → ${activeLimb} gesperrt, Slider wirken erst nach BEWEGEN`);
+});
+
+// ─── FREIE INNENFLÄCHE (6×6 schwarz/weiß, klickbar) ────────
+const freeInner = document.getElementById('freeInner');
+for (let i = 0; i < 36; i++) {
+  const cell = document.createElement('div');
+  cell.addEventListener('click', () => cell.classList.toggle('on'));
+  freeInner.appendChild(cell);
+}
+
+// ─── SZENARIEN (benannte Gesamt-Posen) ──────────────────────
+const scenarios = {
+  offen: {
+    limbLeft:  { rotY: 30, rotX: 2,  posZ: 40 },
+    limbRight: { rotY: -30, rotX: 2, posZ: 40 },
+    limbFront: { rotY: 0,  rotX: 8,  posZ: 100 },
+  },
+  diamant: {
+    limbLeft:  { rotY: 12, rotX: 2,  posZ: 80 },
+    limbRight: { rotY: -12, rotX: 2, posZ: 80 },
+    limbFront: { rotY: 0,  rotX: 13, posZ: 140 },
+  },
+  asym: {
+    limbLeft:  { rotY: 25, rotX: -6, posZ: 30 },
+    limbRight: { rotY: -8, rotX: 10, posZ: 110 },
+    limbFront: { rotY: 6,  rotX: 18, posZ: 90 },
+  },
+  killbill: {
+    limbLeft:  { rotY: 40, rotX: -10, posZ: 10 },
+    limbRight: { rotY: -40, rotX: -10, posZ: 10 },
+    limbFront: { rotY: 0,  rotX: 4,   posZ: 170 },
+  },
+};
+
+document.querySelectorAll('.scenario-grid button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const preset = scenarios[btn.dataset.preset];
+    let anyLocked = false;
+    for (const key in preset) {
+      if (limbs[key].locked) { anyLocked = true; continue; }
+      Object.assign(limbs[key], preset[key]);
+      applyTransform(key);
+    }
+    // aktives Glied im Slider-Panel nachziehen
+    const l = limbs[activeLimb];
+    document.getElementById('rotY').value = l.rotY;
+    document.getElementById('rotX').value = l.rotX;
+    document.getElementById('posZ').value = l.posZ;
+    document.getElementById('rotYVal').textContent = l.rotY + '°';
+    document.getElementById('rotXVal').textContent = l.rotX + '°';
+    document.getElementById('posZVal').textContent = l.posZ;
+
+    log(`⭐ SZENARIO "${btn.textContent}" angefahren${anyLocked ? ' (fixierte Glieder übersprungen)' : ''}`);
+  });
+});
+
+log('🔺 Bereit. Glied wählen, Slider bewegen, oder ein Szenario anklicken.');
+</script>
+</body>
+</html>
