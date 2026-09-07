@@ -1,99 +1,492 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌀 Etage 1 · IKI1UC Axiom-Orbit-System</title>
-<style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { background:#0b0b0b; color:#e0e0e0; font-family:Consolas, monospace; }
-  .content { max-width:700px; margin:0 auto; padding:20px; }
-  h1 { color:#6cf; font-size:20px; margin-bottom:14px; }
-  #orbitCanvas { background:#000; border:1px solid #333; display:block; margin-bottom:10px; }
-  .btn { padding:8px 14px; background:#222; color:#fff; border:1px solid #555; cursor:pointer; font-family:inherit; }
-  .btn:hover { border-color:#6cf; }
-  #log { background:#111; padding:10px; height:140px; overflow:auto; font-size:12px; margin-top:6px; }
-  h3 { color:#f0d080; margin-top:16px; font-size:13px; }
-  p.axis { color:#c0d0d0; }
-  .note {
-    background:#1a1400; border:1px solid #4a3a00; color:#f0d080;
-    padding:8px 12px; border-radius:6px; font-size:11px; margin-bottom:14px;
-  }
-</style>
-<!-- gemeinsames Aufzug-Skript: Navigation + geteilte Fähigkeiten/State -->
-<script src="../aufzug.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌀 Dreieck‑Screen · 81‑Slot‑Triangulation</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #06070e;
+            color: #e0e8f0;
+            font-family: 'Consolas', 'Segoe UI', monospace;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: rgba(12,16,28,0.7);
+            backdrop-filter: blur(4px);
+            border-radius: 28px;
+            border: 1px solid rgba(120,220,150,0.15);
+            padding: 24px 28px 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(120,220,150,0.1);
+            padding-bottom: 12px;
+        }
+        header h1 {
+            font-size: 24px;
+            font-weight: 300;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #7ee0a0, #d8f0c0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        header .badge {
+            background: rgba(120,220,150,0.08);
+            border: 1px solid rgba(120,220,150,0.15);
+            border-radius: 100px;
+            padding: 4px 18px;
+            font-size: 12px;
+            color: #a0d0a8;
+        }
+        .status-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 24px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            padding: 10px 16px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            border: 1px solid rgba(120,220,150,0.06);
+        }
+        .status-row .item { display: flex; align-items: center; gap: 6px; }
+        .status-row .label { color: #7a8a9a; }
+        .status-row .value { color: #a0e0b0; font-weight: bold; }
+        .status-row .value.err { color: #ff6b6b; }
+
+        canvas {
+            display: block;
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #000;
+            border-radius: 16px;
+            border: 1px solid rgba(120,220,150,0.1);
+            margin-bottom: 16px;
+            box-shadow: inset 0 0 60px rgba(20,60,30,0.25);
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .btn {
+            background: rgba(20,28,20,0.6);
+            border: 1px solid rgba(120,220,150,0.15);
+            border-radius: 10px;
+            padding: 8px 4px;
+            color: #c0d8c8;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+        }
+        .btn:hover {
+            border-color: #7ee0a0;
+            background: rgba(80,180,110,0.14);
+            color: #fff;
+            transform: translateY(-2px);
+        }
+        .btn.primary { border-color: #7ee0a0; color: #7ee0a0; }
+        .btn.warn { border-color: #f0d080; color: #f0d080; }
+        .btn.danger { border-color: #ff6b6b; color: #ff6b6b; }
+
+        .log-box {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 12px;
+            color: #8a9aaa;
+            height: 110px;
+            overflow-y: auto;
+            border: 1px solid rgba(120,220,150,0.05);
+            line-height: 1.6;
+            margin-top: 6px;
+        }
+        .log-box::-webkit-scrollbar { width: 3px; }
+        .log-box::-webkit-scrollbar-thumb { background: #2a3a2a; border-radius: 4px; }
+
+        .footer {
+            text-align: center;
+            color: #3a4a5a;
+            font-size: 10px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(120,220,150,0.05);
+            padding-top: 10px;
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 16px; }
+            header h1 { font-size: 20px; }
+            .control-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
 </head>
 <body>
-<div class="content">
-  <h1>IKI1UC · Axiom-Orbit-Matrix</h1>
 
-  <div class="note">
-    ℹ️ Die ursprünglichen &lt;script src="core.js"&gt;, "SYS.js", "axiom.js", "rawator*.js", "RESPO.room.js" usw. wurden entfernt,
-    da diese Dateien hier nicht vorliegen und die Seite sonst mit 404-Fehlern nicht läuft.
-    Falls du sie hast, leg sie einfach in diesen Ordner und binde sie oben wieder ein — der Orbit-Code unten läuft eigenständig.
-  </div>
+<div class="container">
 
-  <canvas id="orbitCanvas" width="600" height="300"></canvas>
-  <button class="btn" onclick="stepOrbit()">Orbit-Schritt</button>
-  <button class="btn" onclick="resetOrbit()">Reset</button>
+    <header>
+        <h1>🌀 Dreieck‑Screen · 81‑Slot‑Triangulation</h1>
+        <span class="badge">● LIVE · 9×9 Mesh</span>
+    </header>
 
-  <h3>IQQ-Achse</h3>
-  <p class="axis">9 → 3 → 9 → 3</p>
+    <!-- STATUS -->
+    <div class="status-row" id="statusRow">
+        <span class="item"><span class="label">STATE</span> <span class="value" id="stateDisplay">AKTIV</span></span>
+        <span class="item"><span class="label">READY</span> <span class="value" id="readyDisplay">81/81</span></span>
+        <span class="item"><span class="label">ERRORS</span> <span class="value" id="errorsDisplay">0</span></span>
+        <span class="item"><span class="label">SCORE</span> <span class="value" id="scoreDisplay">–</span></span>
+    </div>
 
-  <h3>OCTA-Orbit</h3>
-  <p class="axis">◎ ◉ ◆ △ ▣ ↺</p>
+    <!-- Haupt‑Canvas: Dreieck‑Mesh -->
+    <canvas id="triCanvas" width="600" height="600"></canvas>
 
-  <h3>A81-Potenzen</h3>
-  <p class="axis">27 · 81 · 243 · 729</p>
+    <!-- STEUERUNG -->
+    <div class="control-grid">
+        <button class="btn primary" id="btnMiss">🎯 MISS</button>
+        <button class="btn primary" id="btnFasil">⚖️ FASIL</button>
+        <button class="btn primary" id="btnFix">🔧 FIX</button>
+        <button class="btn primary" id="btnFit">📐 FIT</button>
+        <button class="btn warn" id="btnRecall">⏪ RECALL</button>
+        <button class="btn danger" id="btnRefinal">⚡ REFINAL</button>
+        <button class="btn" id="btnReset">⟲ RESET</button>
+        <button class="btn" id="btnPause">⏸ PAUSE</button>
+    </div>
 
-  <h3>Log (diese Etage)</h3>
-  <div id="log">System geladen.</div>
+    <!-- LOG -->
+    <div class="log-box" id="logBox">[init] Dreieck‑Screen Emulation geladen …</div>
+
+    <div class="footer">⚖️ iki1uc · QUEAST‑kompatibel · Pipeline 3/6 · reine Dreieck‑Visualisierung</div>
 </div>
 
 <script>
-  const orbit = ["◉","↗","↘","3","9","↘","↗","◎","↗","↘","3","9","↘","↗","◎","↗","↘","81","◆","↘","↗","△","↗","↘","27","▣","↘","↗","3","↺"];
-  let index = 0;
+"use strict";
 
-  function drawOrbit() {
-    const c = document.getElementById("orbitCanvas");
-    const ctx = c.getContext("2d");
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, c.width, c.height);
-    ctx.fillStyle = "#6cf";
-    ctx.font = "40px Consolas";
-    ctx.fillText(orbit[index], 280, 150);
-  }
+// ================================================================
+//  DREIECK‑SCREEN · 81‑SLOT‑TRIANGULATION
+//  Reine Mesh‑Visualisierung der 81 Slots (9×9) als Dreiecks‑Netz.
+//  Keine Liga, keine Hardware‑Simulation, kein Wetter‑Overkill.
+//  Nur die mathematische Triangulation + Slot‑Manipulation.
+// ================================================================
 
-  function stepOrbit() {
-    index++;
-    if (index >= orbit.length) {
-      index = orbit.length - 1; // sauberer Stopp statt Absturz am Ende der Matrix
-      log("Orbit-Ende erreicht — Index bleibt auf letzter Position.");
-    } else {
-      log("Orbit-Schritt: " + orbit[index]);
+// ─── CANVAS ──────────────────────────────────────────────────────
+const canvas = document.getElementById('triCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+
+// ─── STATE ──────────────────────────────────────────────────────
+const TOTAL_SLOTS = 81;
+const COLS = 9, ROWS = 9;
+const TOLERANCE = 0.15;
+
+let slots = [];
+let running = true;
+let time = 0;
+let logEntries = [];
+
+// ─── INIT SLOTS ────────────────────────────────────────────────
+function initSlots() {
+    slots = [];
+    for (let i = 0; i < TOTAL_SLOTS; i++) {
+        const v = Math.sin(i * 0.2 + 0.5);
+        slots.push({
+            value: v,
+            truth: 0,
+            pulse: 0,
+            drift: 0,
+            angle: (i * 37) % 360,
+            targetValue: v,
+            deviation: Math.abs(v),
+            score: 1 - Math.min(Math.abs(v), 1)
+        });
     }
-    drawOrbit();
-    // Fähigkeit weiterreichen: aktueller Orbit-Index wird für andere Etagen/Root sichtbar
-    Aufzug.setSharedValue('orbitIndex', index);
-    Aufzug.log(`Orbit-Schritt ausgeführt (Index ${index}: "${orbit[index]}")`);
-  }
+}
+initSlots();
 
-  function resetOrbit() {
-    index = 0;
-    log("Orbit zurückgesetzt.");
-    drawOrbit();
-    Aufzug.setSharedValue('orbitIndex', index);
-    Aufzug.log('Orbit zurückgesetzt (Index 0)');
-  }
+function computeDeviationAndScore(s) {
+    s.deviation = Math.abs(s.value - s.truth);
+    s.score = Math.max(0, 1 - Math.min(s.deviation, 1));
+}
 
-  function log(msg) {
-    const logBox = document.getElementById("log");
-    logBox.innerHTML += "<br>" + msg;
-    logBox.scrollTop = logBox.scrollHeight;
-  }
+function homeScore() {
+    for (const s of slots) computeDeviationAndScore(s);
+    return slots.reduce((sum, s) => sum + s.score, 0) / TOTAL_SLOTS;
+}
 
-  drawOrbit();
-  Aufzug.init({ currentId: 'etage-1-axiom-orbit', basePath: '../' });
+// ─── STATUS UI ──────────────────────────────────────────────────
+function updateStatus() {
+    for (const s of slots) computeDeviationAndScore(s);
+    const ready = slots.filter(s => s.deviation <= TOLERANCE).length;
+    const errors = TOTAL_SLOTS - ready;
+    const avgScore = slots.reduce((sum, s) => sum + s.score, 0) / TOTAL_SLOTS;
+    const scorePercent = Math.round(avgScore * 100);
+
+    document.getElementById('readyDisplay').textContent = `${ready}/${TOTAL_SLOTS}`;
+    document.getElementById('errorsDisplay').textContent = errors;
+    document.getElementById('errorsDisplay').className = errors === 0 ? 'value' : 'value err';
+    document.getElementById('stateDisplay').textContent = errors === 0 ? 'VOLL AKTIV' : 'ABWEICHEND';
+    document.getElementById('scoreDisplay').textContent = scorePercent + '%';
+}
+
+// ─── LOG ──────────────────────────────────────────────────────
+function log(msg) {
+    const box = document.getElementById('logBox');
+    const timeStr = new Date().toLocaleTimeString();
+    const entry = document.createElement('div');
+    entry.textContent = `[${timeStr}] ${msg}`;
+    box.appendChild(entry);
+    box.scrollTop = box.scrollHeight;
+    if (box.children.length > 60) box.removeChild(box.firstChild);
+    logEntries.push(msg);
+}
+
+// ─── SLOT‑MANIPULATION (MISS, FASIL, FIX, FIT, RECALL, REFINAL) ──
+function doMiss() {
+    let sumDev = 0;
+    for (const s of slots) { computeDeviationAndScore(s); sumDev += s.deviation; }
+    const avgDev = sumDev / TOTAL_SLOTS;
+    log(`🎯 MISS → Ø Abweichung ${avgDev.toFixed(3)}`);
+    updateStatus();
+}
+
+function doFasil() {
+    const avg = slots.reduce((sum, s) => sum + s.value, 0) / TOTAL_SLOTS;
+    for (const s of slots) {
+        s.value = s.value * 0.6 + avg * 0.4;
+        s.targetValue = s.value;
+        s.pulse *= 0.8;
+        s.drift *= 0.8;
+    }
+    log('⚖️ FASIL → Werte geglättet');
+    updateStatus();
+}
+
+function doFix() {
+    let fixed = 0;
+    for (const s of slots) {
+        if (s.value > 1.5 || s.value < -1.5) {
+            s.value = Math.sign(s.value) * 1.2;
+            s.targetValue = s.value;
+            fixed++;
+        }
+        s.pulse = Math.min(Math.max(s.pulse, -1), 1);
+        s.drift = Math.min(Math.max(s.drift, -1), 1);
+        s.angle = ((s.angle % 360) + 360) % 360;
+    }
+    log(`🔧 FIX → ${fixed} Ausreißer korrigiert`);
+    updateStatus();
+}
+
+function doFit() {
+    for (let i = 0; i < TOTAL_SLOTS; i++) {
+        const s = slots[i];
+        const phase = i * 0.2 + time * 0.0003;
+        s.targetValue = Math.sin(phase) * 0.9;
+        s.value = s.value * 0.5 + s.targetValue * 0.5;
+        s.pulse = Math.sin(time / 120 + i * 0.1) * 0.6;
+        s.drift = Math.cos(time / 240 + i * 0.05) * 0.5;
+        s.angle = (time / 10 + i * 4) % 360;
+    }
+    log('📐 FIT → Referenzkurve angelegt');
+    updateStatus();
+}
+
+function doRecall() {
+    initSlots();
+    log('⏪ RECALL → Ausgangszustand wiederhergestellt');
+    updateStatus();
+}
+
+function doRefinal() {
+    for (const s of slots) {
+        s.value = Math.sin(s.angle * Math.PI / 180) * 0.5;
+        s.targetValue = s.value;
+        s.pulse = 0;
+        s.drift = 0;
+        s.angle = (s.angle + 10) % 360;
+    }
+    log('⚡ REFINAL → vollständig neu kalibriert');
+    updateStatus();
+}
+
+// ─── RENDER: TRIANGULIERTES MESH ──────────────────────────────
+function drawTriangleMesh() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Hintergrund – tiefes Dunkelgrün
+    const bg = ctx.createRadialGradient(W/2, H/2, 20, W/2, H/2, W);
+    bg.addColorStop(0, '#0a1a0e');
+    bg.addColorStop(1, '#020804');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // Punkte aus den Slots (9×9)
+    const pts = [];
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const idx = r * COLS + c;
+            const s = slots[idx];
+            computeDeviationAndScore(s);
+            const x = (c / (COLS - 1)) * W;
+            const y = (r / (ROWS - 1)) * H;
+            const z = s.score; // 0..1
+            pts.push({ x, y, z });
+        }
+    }
+
+    // Hilfsfunktion für Dreiecksfarbe (Score → Rot/Grün)
+    const triColor = (z) => {
+        const r = Math.round(200 * (1 - z) + 40 * z);
+        const g = Math.round(90 + z * 140);
+        const b = 60;
+        return `rgba(${r}, ${g}, ${b}, ${0.25 + z * 0.35})`;
+    };
+
+    // Zeichne Dreiecke (je Zelle 2 Dreiecke)
+    for (let r = 0; r < ROWS - 1; r++) {
+        for (let c = 0; c < COLS - 1; c++) {
+            const idx = r * COLS + c;
+            const idxR = (r + 1) * COLS + c;
+            const idxC = r * COLS + (c + 1);
+            const idxRC = (r + 1) * COLS + (c + 1);
+
+            const p0 = pts[idx];
+            const p1 = pts[idxR];
+            const p2 = pts[idxC];
+            const p3 = pts[idxRC];
+
+            if (!p0 || !p1 || !p2 || !p3) continue;
+
+            // Dreieck 1: p0-p1-p2
+            ctx.beginPath();
+            ctx.moveTo(p0.x, p0.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.closePath();
+            const avgZ1 = (p0.z + p1.z + p2.z) / 3;
+            ctx.fillStyle = triColor(avgZ1);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(120,220,150,0.06)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+
+            // Dreieck 2: p1-p3-p2
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p3.x, p3.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.closePath();
+            const avgZ2 = (p1.z + p3.z + p2.z) / 3;
+            ctx.fillStyle = triColor(avgZ2);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(120,220,150,0.06)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+        }
+    }
+
+    // Knotenpunkte (Kreise mit Radius proportional zu score)
+    for (const p of pts) {
+        const radius = 2 + p.z * 3;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, radius, 0, Math.PI * 2);
+        const col = triColor(p.z);
+        ctx.fillStyle = col;
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(200,255,220,0.12)';
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+    }
+
+    // Overlay‑Info (Score + Status)
+    ctx.fillStyle = 'rgba(150,230,170,0.06)';
+    ctx.font = '14px Consolas';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    const avg = slots.reduce((sum, s) => sum + s.score, 0) / TOTAL_SLOTS;
+    ctx.fillText(`🌀 Dreieck‑Screen · Ø Score ${(avg*100).toFixed(1)}% · ${TOTAL_SLOTS} Slots`, W/2, 8);
+}
+
+// ─── UPDATE SLOTS ──────────────────────────────────────────────
+function updateSlots() {
+    for (const s of slots) {
+        s.value += (s.targetValue - s.value) * 0.008;
+        s.pulse += Math.sin(time * 0.001 + s.angle * 0.01) * 0.001;
+        s.drift += Math.cos(time * 0.002 + s.angle * 0.02) * 0.001;
+        s.pulse = Math.min(Math.max(s.pulse, -1), 1);
+        s.drift = Math.min(Math.max(s.drift, -1), 1);
+        s.angle = (s.angle + 0.02) % 360;
+    }
+}
+
+// ─── LOOP ──────────────────────────────────────────────────────
+function loop() {
+    if (running) {
+        time += 16;
+        updateSlots();
+        drawTriangleMesh();
+        if (Math.floor(time / 2000) % 2 === 0) updateStatus();
+    }
+    requestAnimationFrame(loop);
+}
+
+// ─── PAUSE ──────────────────────────────────────────────────────
+document.getElementById('btnPause').addEventListener('click', () => {
+    running = !running;
+    document.getElementById('btnPause').textContent = running ? '⏸ PAUSE' : '▶ START';
+    log(running ? '▶ Fortgesetzt' : '⏸ Pausiert');
+});
+
+// ─── BUTTONS ────────────────────────────────────────────────────
+document.getElementById('btnMiss').addEventListener('click', doMiss);
+document.getElementById('btnFasil').addEventListener('click', doFasil);
+document.getElementById('btnFix').addEventListener('click', doFix);
+document.getElementById('btnFit').addEventListener('click', doFit);
+document.getElementById('btnRecall').addEventListener('click', doRecall);
+document.getElementById('btnRefinal').addEventListener('click', doRefinal);
+document.getElementById('btnReset').addEventListener('click', () => {
+    initSlots();
+    log('⟲ RESET → Slots neu initialisiert');
+    updateStatus();
+});
+
+// ─── TASTATUR ──────────────────────────────────────────────────
+document.addEventListener('keydown', (e) => {
+    if (e.key === ' ') { e.preventDefault(); document.getElementById('btnPause').click(); }
+    if (e.key === 'm') doMiss();
+    if (e.key === 'f') doFasil();
+    if (e.key === 'x') doFix();
+    if (e.key === 't') doFit();
+    if (e.key === 'r') doRecall();
+    if (e.key === 'R') doRefinal();
+});
+
+// ─── INIT ──────────────────────────────────────────────────────
+log('🌀 Dreieck‑Screen · 81‑Slot‑Triangulation gestartet');
+log('📐 Slots: 81 (9×9) · Mesh: 144 Dreiecke');
+log('⌨️  Leertaste=Pause  m=MISS  f=FASIL  x=FIX  t=FIT  r=RECALL  R=REFINAL');
+updateStatus();
+loop();
+
 </script>
+
 </body>
 </html>
