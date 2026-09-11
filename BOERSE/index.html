@@ -3,1053 +3,1147 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>◈ LÄUFER · TMP · USER-TREE · UNI · iki1uc</title>
+<title>♟️ STAGE · SCHACHBRETT · TOOLATOR · MASTER · iki1uc</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box;}
   :root{
-    --bg:#03060c; --fg:#c8d8e8;
-    --cyan:#6cf; --gold:#f0d080; --gold2:#ffe9b0;
-    --violet:#b388ff; --green:#8cf0d0; --pink:#ff9ec4;
-    --red:#ff6666; --orange:#ff8c00;
-    --user:#f0d080;   /* USER = gold */
-    --work:#8cf0d0;   /* WORK = grün */
-    --run:#6cf;       /* RUNNER = cyan */
-    --done:#3a5a4a;
+    --bg:#05070e; --fg:#c0d0d0;
+    --cyan:#6cf; --gold:#f0d080; --purple:#b388ff;
+    --green:#8cf0d0; --red:#ff6666; --orange:#ff8c00;
     --line:rgba(120,220,150,0.08);
-    --panel:rgba(6,10,18,0.75);
-    --serif:'Yu Mincho','Hiragino Mincho ProN',serif;
-    --mono:'Consolas','Courier New',monospace;
+    --panel:rgba(6,8,16,0.75);
   }
   html,body{min-height:100%;}
   body{
-    background:#03060c;
+    background:#05070e;
     background-image:
-      radial-gradient(ellipse at 50% 20%, #0c1a30 0%, #050a14 55%, #010205 100%);
+      radial-gradient(ellipse at 50% 30%, #0c1a2c 0%, #05070e 60%, #020409 100%);
     color:var(--fg);
-    font-family:var(--mono);
+    font-family:'Consolas','Courier New',monospace;
     min-height:100vh;
     overflow-x:hidden;
   }
 
-  /* ── BG-GRID ─────────────────────────────── */
-  #bg{
+  /* ─── 9×9 RESPO HINTERGRUND ─────────────────── */
+  #respoBg{
     position:fixed; inset:0; z-index:-1;
     opacity:0.05; pointer-events:none;
-    display:grid;
-    grid-template-columns:repeat(10,1fr);
-    grid-template-rows:repeat(10,1fr);
-    gap:2px;
+    display:grid; grid-template-columns:repeat(9,1fr);
+    grid-template-rows:repeat(9,1fr); gap:2px;
   }
-  #bg div{
-    background:transparent;
-    border:1px solid rgba(120,220,150,0.1);
+  #respoBg div{
+    background:rgba(120,220,150,0.03);
     border-radius:2px;
+    transition:background .5s;
   }
 
-  /* ── LAYOUT ──────────────────────────────── */
-  #hub{
+  /* ─── MASTER LAYOUT ─────────────────────────── */
+  #master{
     display:flex; flex-direction:column;
     min-height:100vh;
-    padding:14px 18px 18px;
-    max-width:1700px; margin:0 auto;
-    gap:12px;
+    padding:16px 20px 20px;
+    max-width:1500px; margin:0 auto;
+    gap:16px;
   }
 
-  /* ── HEADER ──────────────────────────────── */
-  header{
+  /* ─── HEADER / COMMANDER ───────────────────── */
+  #commander{
     display:flex; flex-wrap:wrap;
     justify-content:space-between; align-items:center;
     padding:12px 20px;
     background:var(--panel);
-    backdrop-filter:blur(12px);
+    backdrop-filter:blur(10px);
     border-radius:16px;
     border:1px solid var(--line);
   }
-  header .brand{
+  #commander .brand{
     font-size:22px; font-weight:300; letter-spacing:3px;
-    background:linear-gradient(135deg,#7ee0a0,#d8f0c0,#b388ff,#f0d080);
+    background:linear-gradient(135deg,#7ee0a0,#d8f0c0,#b388ff);
     -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-    font-family:var(--serif);
     display:flex; align-items:center; gap:12px;
   }
-  header .brand .lg{
-    -webkit-text-fill-color:#6cf;
-    font-size:26px; line-height:1;
-    text-shadow:0 0 20px rgba(108,204,255,0.7);
+  #commander .brand small{
+    font-size:11px; -webkit-text-fill-color:#4a5a6a;
+    letter-spacing:1px;
   }
-  header .brand small{
-    font-size:10px; -webkit-text-fill-color:#4a5a6a;
-    letter-spacing:1.5px; font-family:var(--mono);
+  .commander-status{
+    display:flex; gap:18px; font-size:11px;
+    color:#6a8a7a; flex-wrap:wrap;
   }
-  .stats{
-    display:flex; gap:14px; font-size:10.5px;
-    color:#6a8a7a; flex-wrap:wrap; align-items:center;
-  }
-  .stats b{font-weight:bold;}
-  .v-cyan{color:var(--cyan);}
-  .v-gold{color:var(--gold);}
-  .v-violet{color:var(--violet);}
-  .v-green{color:var(--green);}
-  .v-pink{color:var(--pink);}
-  .led{
+  .commander-status .led{
     display:inline-block; width:8px; height:8px;
     border-radius:50%; margin-right:4px;
   }
-  .led.green{background:#8cf0d0;box-shadow:0 0 8px #8cf0d0;}
-  .led.gold{background:#f0d080;box-shadow:0 0 8px #f0d080;}
-  .led.cyan{background:#6cf;box-shadow:0 0 8px #6cf;}
-  .led.violet{background:#b388ff;box-shadow:0 0 8px #b388ff;}
-  .led.pulse{animation:pulse 1.6s infinite;}
+  .led.green{ background:#8cf0d0; box-shadow:0 0 8px #8cf0d0; }
+  .led.gold{ background:#f0d080; box-shadow:0 0 8px #f0d080; }
+  .led.purple{ background:#b388ff; box-shadow:0 0 8px #b388ff; }
+  .led.off{ background:#2a3a3a; }
+  .led.pulse{ animation:pulse 1.4s infinite; }
   @keyframes pulse{0%,100%{opacity:.4}50%{opacity:1}}
 
-  /* ── MAIN GRID ──────────────────────────── */
-  #main{
+  /* ─── 8 RICHTUNGEN ─────────────────────────── */
+  #directions{
+    display:flex; flex-wrap:wrap; gap:6px;
+    padding:8px 16px;
+    background:rgba(0,0,0,0.25);
+    border-radius:12px;
+    border:1px solid rgba(120,220,150,0.04);
+    justify-content:center;
+  }
+  .dir-item{
+    padding:4px 14px; border-radius:20px;
+    font-size:11px; letter-spacing:1px;
+    color:#5a7a6a;
+    background:rgba(20,28,20,0.3);
+    border:1px solid rgba(120,220,150,0.04);
+    transition:0.2s; cursor:pointer;
+  }
+  .dir-item:hover{ color:#d0e8e0; }
+  .dir-item.active{
+    color:#f0d080;
+    border-color:rgba(240,208,128,0.2);
+    background:rgba(240,208,128,0.04);
+  }
+  .dir-item .sym{ color:#7ee0a0; margin-right:4px; }
+
+  /* ─── WORKSPACE: SCHACHBRETT + TOOLATOR ────── */
+  #workspace{
     display:grid;
-    grid-template-columns: 1.15fr 1fr 1fr;
-    gap:12px;
-    align-items:start;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
   }
-  @media(max-width:1200px){
-    #main{grid-template-columns:1fr 1fr;}
-  }
-  @media(max-width:820px){
-    #main{grid-template-columns:1fr;}
+  @media (max-width:1000px){
+    #workspace{ grid-template-columns:1fr; }
   }
 
   .box{
     background:var(--panel);
-    backdrop-filter:blur(12px);
+    backdrop-filter:blur(10px);
     border:1px solid var(--line);
     border-radius:16px;
-    padding:14px;
-    margin-bottom:12px;
+    padding:16px;
   }
   .box h2{
-    font-size:12px; font-weight:400; letter-spacing:3px;
+    font-size:13px; font-weight:400; letter-spacing:3px;
     color:var(--gold); margin-bottom:10px;
     text-transform:uppercase;
     display:flex; justify-content:space-between; align-items:center;
-    font-family:var(--serif);
   }
   .box h2 .badge{
-    font-size:9px; color:#5a7a8a; font-weight:400;
-    letter-spacing:1px; font-family:var(--mono);
+    font-size:10px; color:#5a7a8a; font-weight:400;
+    letter-spacing:1px;
   }
 
-  /* ── TMP BLOCK-GRID (10×10) ─────────────── */
-  #tmpGrid{
-    display:grid;
-    grid-template-columns:repeat(10,1fr);
-    grid-template-rows:repeat(10,1fr);
-    gap:2px;
-    aspect-ratio:1;
-    background:#050a12;
-    padding:8px;
-    border-radius:10px;
-    border:1px solid rgba(108,204,255,0.2);
-    width:100%;
-    max-width:520px;
-    margin:0 auto;
-    position:relative;
+  /* ─── SCHACHBRETT ──────────────────────────── */
+  #chessWrap{
+    display:flex; justify-content:center; align-items:center;
+    padding:8px 0;
   }
-  .tcell{
-    background:rgba(20,28,40,0.55);
-    border-radius:3px;
+  #chess{
+    display:grid;
+    grid-template-columns:repeat(9,1fr);
+    grid-template-rows:repeat(9,1fr);
+    gap:2px;
+    width:100%;
+    max-width:450px;
+    aspect-ratio:1;
+    background:#0a1018;
+    padding:6px;
+    border-radius:10px;
+    border:1px solid rgba(120,220,150,0.15);
+  }
+  .cell{
+    background:rgba(20,28,20,0.4);
+    border-radius:4px;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:7.5px;
-    color:#3a4a5a;
-    transition:all .25s;
-    position:relative;
-    user-select:none;
-    font-family:var(--mono);
-  }
-  .tcell.done{
-    background:rgba(140,240,208,0.16);
-    color:#8cf0d0;
-    box-shadow:inset 0 0 6px rgba(140,240,208,0.25);
-  }
-  .tcell.user{
-    background:rgba(240,208,128,0.3);
-    color:#ffe9b0;
-    font-weight:bold;
-    box-shadow:inset 0 0 12px rgba(240,208,128,0.6);
-  }
-  .tcell.runner{
-    outline:2px solid #6cf;
-    outline-offset:1px;
-    background:rgba(108,204,255,0.25);
-    color:#fff;
-    z-index:3;
-    animation:runPulse .7s ease-in-out infinite;
-  }
-  @keyframes runPulse{
-    0%,100%{box-shadow:0 0 8px rgba(108,204,255,0.6);}
-    50%{box-shadow:0 0 20px rgba(108,204,255,0.9);}
-  }
-  .tcell .slotn{
-    position:absolute;
-    top:1px; left:2px;
-    font-size:6px;
-    color:#3a4a5a;
-  }
-  .tcell.done .slotn{color:#4a7a6a;}
-  .tcell.user .slotn{color:#7a6a3a;}
-
-  /* ── CONTROLS ──────────────────────────── */
-  .ctrl{
-    display:flex; gap:6px; flex-wrap:wrap;
-    margin-top:10px;
-  }
-  .ctrl button{
-    flex:1; min-width:70px;
-    background:rgba(20,28,40,0.7);
-    border:1px solid rgba(120,220,150,0.22);
-    color:#c8e8d8;
-    padding:6px 8px;
-    border-radius:5px;
-    font-family:inherit; font-size:9.5px;
-    letter-spacing:1.2px; cursor:pointer;
-    text-transform:uppercase;
-    transition:.2s;
-  }
-  .ctrl button:hover{
-    border-color:#8cf0d0;
-    background:rgba(140,240,208,0.12);
-    color:#fff;
-  }
-  .ctrl button.primary{
-    border-color:rgba(108,204,255,0.4);
-    color:var(--cyan);
-  }
-  .ctrl button.primary:hover{
-    background:rgba(108,204,255,0.15);
-    color:#fff;
-    box-shadow:0 0 14px rgba(108,204,255,0.5);
-  }
-  .ctrl button.gold{
-    border-color:rgba(240,208,128,0.4);color:var(--gold);
-  }
-  .ctrl button.gold:hover{
-    background:rgba(240,208,128,0.12);border-color:var(--gold);color:#fff;
-  }
-  .ctrl button.violet{
-    border-color:rgba(179,136,255,0.4);color:var(--violet);
-  }
-  .ctrl button.violet:hover{
-    background:rgba(179,136,255,0.12);border-color:var(--violet);color:#fff;
-  }
-  .ctrl button.red{
-    border-color:rgba(255,102,102,0.4);color:var(--red);
-  }
-  .ctrl button.red:hover{
-    background:rgba(255,102,102,0.12);border-color:var(--red);color:#fff;
-  }
-
-  input[type=range]{
-    -webkit-appearance:none; appearance:none;
-    width:100%; height:3px;
-    background:linear-gradient(90deg,var(--cyan),var(--gold));
-    border-radius:2px; outline:none;
-    margin-top:8px;
-  }
-  input[type=range]::-webkit-slider-thumb{
-    -webkit-appearance:none;
-    width:12px; height:12px; border-radius:50%;
-    background:#fff;
-    border:2px solid var(--cyan);
-    box-shadow:0 0 8px var(--cyan);
+    font-size:15px;
+    color:#4a6a5a;
     cursor:pointer;
+    transition:all 0.2s cubic-bezier(.2,.9,.25,1);
+    user-select:none;
+    position:relative;
   }
+  .cell:hover{
+    background:rgba(120,220,150,0.12);
+    transform:scale(1.05);
+    z-index:2;
+  }
+  .cell.light{ background:rgba(30,40,55,0.5); }
+  .cell.dark{ background:rgba(15,20,30,0.6); }
+  .cell.booked{
+    background:rgba(140,240,208,0.2);
+    color:#8cf0d0;
+    box-shadow:inset 0 0 12px rgba(140,240,208,0.3);
+  }
+  .cell.booked.special{
+    background:rgba(240,208,128,0.2);
+    color:#f0d080;
+    box-shadow:inset 0 0 12px rgba(240,208,128,0.4);
+  }
+  .cell.cluster{
+    outline:1px solid rgba(179,136,255,0.6);
+    outline-offset:1px;
+  }
+  .cell .v{
+    position:absolute;
+    bottom:1px; right:3px;
+    font-size:7px;
+    color:#3a5a4a;
+    font-family:'Consolas',monospace;
+  }
+  .cell.booked .v{ color:#4a9a7a; }
 
-  /* ── METRICS ───────────────────────────── */
-  .metrics{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:5px;
+  /* ─── TOOLATOR (Messgerät) ─────────────────── */
+  #toolator{
+    display:flex; flex-direction:column; gap:10px;
   }
   .metric{
     display:flex; justify-content:space-between;
-    padding:5px 9px;
-    background:rgba(0,0,0,0.35);
-    border-radius:5px;
-    border-left:3px solid var(--cyan);
-    font-size:10px;
-  }
-  .metric.gold{border-left-color:var(--gold);}
-  .metric.violet{border-left-color:var(--violet);}
-  .metric.green{border-left-color:var(--green);}
-  .metric.pink{border-left-color:var(--pink);}
-  .metric .lbl{color:#8aa8a0;}
-  .metric .val{font-weight:bold;color:#d0e8e0;}
-  .metric .val.gold{color:var(--gold);}
-  .metric .val.violet{color:var(--violet);}
-  .metric .val.green{color:var(--green);}
-  .metric .val.cyan{color:var(--cyan);}
-  .metric .val.pink{color:var(--pink);}
-
-  /* ── USER-TREE ─────────────────────────── */
-  #userTree{
-    max-height:180px;
-    overflow-y:auto;
-    padding-right:4px;
-  }
-  .urow{
-    display:flex; justify-content:space-between;
-    padding:5px 9px;
-    background:rgba(240,208,128,0.06);
-    border-left:3px solid var(--gold);
-    border-radius:4px;
-    margin-bottom:4px;
-    font-size:10px;
-    animation:uIn .4s ease-out;
-  }
-  @keyframes uIn{from{opacity:0;transform:translateX(-8px);}to{opacity:1;transform:none;}}
-  .urow .b{color:#8aa8a0;}
-  .urow .v{color:var(--gold);font-weight:bold;}
-  .urow .base{color:#5a7a8a;font-size:9px;}
-
-  /* ── BLOCK-CHAIN ───────────────────────── */
-  #blockChain{
-    display:flex; gap:4px;
-    overflow-x:auto;
-    padding-bottom:6px;
-  }
-  .bchip{
-    flex-shrink:0;
-    width:80px;
-    padding:6px 8px;
-    background:rgba(20,28,40,0.6);
-    border:1px solid rgba(108,204,255,0.15);
-    border-radius:6px;
-    text-align:center;
-    font-size:9px;
-    transition:.25s;
-  }
-  .bchip.active{
-    border-color:var(--cyan);
-    background:rgba(108,204,255,0.12);
-    box-shadow:0 0 12px rgba(108,204,255,0.3);
-  }
-  .bchip.done{
-    border-color:var(--green);
-    background:rgba(140,240,208,0.1);
-  }
-  .bchip.future{opacity:0.35;}
-  .bchip .base{
-    font-weight:bold; color:var(--cyan);
+    align-items:center;
+    padding:6px 10px;
+    background:rgba(0,0,0,0.3);
+    border-radius:8px;
+    border-left:3px solid var(--green);
     font-size:11px;
   }
-  .bchip .bar{
-    height:3px; background:#0a1420; border-radius:2px;
-    margin-top:5px; overflow:hidden;
+  .metric.purple{ border-left-color:var(--purple); }
+  .metric.gold{ border-left-color:var(--gold); }
+  .metric.red{ border-left-color:var(--red); }
+  .metric.cyan{ border-left-color:var(--cyan); }
+  .metric .lbl{ color:#8aa8a0; }
+  .metric .val{
+    font-weight:bold; color:#d0e8e0; font-size:13px;
   }
-  .bchip .bar .fill{
-    height:100%; width:0%;
-    background:linear-gradient(90deg,#3a5a4a,#8cf0d0);
-    transition:width .25s;
+  .metric .val.green{ color:#8cf0d0; }
+  .metric .val.purple{ color:#b388ff; }
+  .metric .val.gold{ color:#f0d080; }
+  .metric .val.red{ color:#ff6666; }
+  .metric .val.cyan{ color:#6cf; }
+
+  .bar{
+    width:100%; height:6px;
+    background:rgba(20,28,20,0.6);
+    border-radius:3px; overflow:hidden;
+    margin-top:3px;
   }
-  .bchip .done-num{
-    font-size:8px; color:#5a7a8a; margin-top:3px;
+  .bar .fill{
+    height:100%;
+    background:linear-gradient(90deg,#7ee0a0,#b388ff);
+    border-radius:3px; transition:width .4s;
+  }
+  .bar .fill.gold{
+    background:linear-gradient(90deg,#f0d080,#ff8c00);
+  }
+  .bar .fill.cyan{
+    background:linear-gradient(90deg,#6cf,#b388ff);
   }
 
-  /* ── UNI-PANEL ─────────────────────────── */
-  #uniPanel{
-    display:flex; flex-direction:column;
-    gap:8px;
+  .toolator-section{
+    margin-top:6px;
+    border-top:1px solid rgba(120,220,150,0.04);
+    padding-top:8px;
   }
-  #uniOrb{
-    width:180px; height:180px;
-    margin:0 auto;
+  .toolator-section h3{
+    font-size:10px; color:var(--gold);
+    letter-spacing:2px; margin-bottom:6px;
+    text-transform:uppercase;
+  }
+
+  /* ─── MACHT PANEL ──────────────────────────── */
+  #macht{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+    gap:10px;
+  }
+  .macht-card{
+    background:rgba(0,0,0,0.3);
+    border:1px solid rgba(120,220,150,0.08);
+    border-radius:10px;
+    padding:10px 12px;
+    font-size:10px;
+  }
+  .macht-card h4{
+    font-size:10px; color:var(--cyan);
+    letter-spacing:2px; margin-bottom:6px;
+    text-transform:uppercase;
+    display:flex; justify-content:space-between;
+  }
+  .macht-card h4 .dot{
+    display:inline-block; width:6px; height:6px;
+    border-radius:50%; background:#3a3a3a;
+  }
+  .macht-card h4 .dot.on{
+    background:#8cf0d0; box-shadow:0 0 6px #8cf0d0;
+  }
+  .macht-card h4 .dot.fail{
+    background:#ff6666; box-shadow:0 0 6px #ff6666;
+  }
+  .macht-card .row{
+    display:flex; justify-content:space-between;
+    padding:2px 0; font-size:10px;
+    border-bottom:1px solid rgba(255,255,255,0.02);
+  }
+  .macht-card .row .lbl{ color:#8aa8a0; }
+  .macht-card .row .val{ font-weight:bold; color:#d0e8e0; }
+  .macht-card .actions{
+    display:flex; gap:5px; margin-top:6px;
+  }
+  .macht-card button{
+    flex:1;
+    background:rgba(20,28,20,0.6);
+    border:1px solid rgba(120,220,150,0.2);
+    color:#d0e8e0; padding:4px 0;
+    border-radius:5px; font-size:9px;
+    font-family:inherit; cursor:pointer;
+    letter-spacing:1px;
+  }
+  .macht-card button:hover{
+    border-color:#7ee0a0;
+    background:rgba(120,220,150,0.1);
+  }
+
+  /* ─── MODULE LINKS ─────────────────────────── */
+  #moduleList{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:10px;
+  }
+  .modul-card{
+    background:rgba(10,14,22,0.7);
+    border:1px solid rgba(120,220,150,0.06);
+    border-radius:12px;
+    padding:12px 12px 10px;
+    cursor:pointer;
+    transition:all 0.3s;
+    text-decoration:none;
+    color:#c0d0d0;
     position:relative;
-    display:flex; align-items:center; justify-content:center;
   }
-  #uniOrb svg{position:absolute;inset:0;overflow:visible;}
-  #uniCore{
-    width:80px; height:80px;
-    border-radius:50%;
-    background:radial-gradient(circle at 40% 35%,
-      #c8f0ff 0%, #6cf 35%, #b388ff 70%, #1a0a2a 100%);
-    box-shadow:
-      0 0 30px rgba(108,204,255,0.6),
-      0 0 60px rgba(179,136,255,0.4),
-      inset 0 0 20px rgba(255,255,255,0.2);
-    display:flex; align-items:center; justify-content:center;
-    font-family:var(--serif);
-    font-size:28px; color:#fff;
-    font-weight:bold;
-    text-shadow:0 0 12px rgba(255,255,255,0.6);
-    z-index:2;
-    transition:transform .4s;
+  .modul-card:hover{
+    transform:translateY(-3px);
+    border-color:rgba(120,220,150,0.25);
+    box-shadow:0 8px 20px rgba(0,0,0,0.5);
+    background:rgba(16,22,34,0.8);
   }
-  #uniCore.pulse{
-    animation:uniPulse 1.8s ease-in-out infinite;
+  .modul-card .icon{
+    font-size:20px; display:block; margin-bottom:4px;
   }
-  @keyframes uniPulse{
-    0%,100%{transform:scale(1);}
-    50%{transform:scale(1.08);}
+  .modul-card .name{
+    font-size:12px; font-weight:600;
+    color:#d0e8e0;
+  }
+  .modul-card .desc{
+    font-size:9px; color:#6a8a7a; margin-top:2px;
   }
 
-  /* ── LOG ──────────────────────────────── */
-  #log{
+  /* ─── LOG ──────────────────────────────────── */
+  #logBox{
     background:rgba(0,0,0,0.5);
     border-radius:12px;
     border:1px solid var(--line);
     padding:8px 12px;
     font-size:9.5px; line-height:1.6;
     color:#8ab0c0;
-    max-height:130px; overflow-y:auto;
+    max-height:110px; overflow-y:auto;
   }
-  #log .entry{padding:1px 0;border-bottom:1px solid rgba(255,255,255,0.02);}
-  #log .time{color:#3a4a5a;margin-right:6px;}
-  #log .tag{color:#6cf;margin-right:4px;}
-  #log .ok{color:#8cf0d0;}
-  #log .warn{color:#f0d080;}
-  #log .err{color:#ff6666;}
-  #log .user{color:#f0d080;font-weight:bold;}
-  #log .uni{color:#b388ff;}
-  #log .gold{color:#f0d080;font-weight:bold;}
+  #logBox .entry{padding:1px 0;border-bottom:1px solid rgba(255,255,255,0.02);}
+  #logBox .time{color:#3a4a5a;margin-right:6px;}
+  #logBox .tag{color:#6cf;margin-right:4px;}
+  #logBox .ok{color:#8cf0d0;}
+  #logBox .warn{color:#f0d080;}
+  #logBox .err{color:#ff6666;}
+  #logBox .gold{color:#f0d080;font-weight:bold;}
 
-  /* ── FOOTER ──────────────────────────── */
+  /* ─── FOOTER ───────────────────────────────── */
   footer{
     text-align:center;
     font-size:9px; color:#3a4a4a;
     padding:8px 16px;
     border-top:1px solid rgba(120,220,150,0.03);
   }
-  footer .gold{color:#f0d080;}
-  footer a{color:var(--cyan);text-decoration:none;}
-  footer a:hover{text-decoration:underline;}
+  footer .gold{ color:#f0d080; }
 
-  /* ── FL76 ────────────────────────────── */
-  #fl76{
+  /* ─── FL76 Monitor ─────────────────────────── */
+  #fl76mon{
     position:fixed; bottom:14px; right:14px;
     padding:6px 12px;
-    background:rgba(6,10,18,0.92);
+    background:rgba(6,8,16,0.9);
     border:1px solid rgba(140,240,208,0.3);
     border-radius:6px;
     font-size:10px; letter-spacing:1.5px;
     color:#8cf0b0; z-index:12;
     text-align:right; min-width:130px;
   }
-  #fl76 .num{font-size:16px;font-weight:bold;color:#8cf0b0;}
-  #fl76.outside{border-color:rgba(255,102,102,0.5);}
-  #fl76.outside .num{color:#ff6666;}
-  #fl76.edge{border-color:rgba(240,208,128,0.5);}
-  #fl76.edge .num{color:#f0d080;}
+  #fl76mon .num{font-size:16px;font-weight:bold;color:#8cf0b0;}
+  #fl76mon.outside{border-color:rgba(255,102,102,0.5);}
+  #fl76mon.outside .num{color:#ff6666;}
+  #fl76mon.edge{border-color:rgba(240,208,128,0.5);}
+  #fl76mon.edge .num{color:#f0d080;}
 
+  /* Responsive */
   @media (max-width:700px){
-    #hub{padding:8px;}
-    header .brand{font-size:16px;letter-spacing:2px;}
-    header .brand .lg{font-size:20px;}
-    .tcell{font-size:6px;}
-    #fl76{bottom:8px;right:8px;font-size:9px;padding:4px 8px;min-width:100px;}
+    #master{padding:10px;}
+    #commander .brand{font-size:16px;}
+    #grid, #moduleList{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+    #chess{max-width:100%;}
+    .cell{font-size:12px;}
+    #fl76mon{bottom:8px;right:8px;font-size:9px;padding:4px 8px;min-width:100px;}
   }
 </style>
 </head>
 <body>
 
-<div id="bg"></div>
+<!-- 9×9 RESPO Hintergrund -->
+<div id="respoBg"></div>
 
-<div id="hub">
+<div id="master">
 
-  <!-- HEADER -->
-  <header>
+  <!-- COMMANDER HEADER -->
+  <header id="commander">
     <div class="brand">
-      <span class="lg">▶</span>
-      LÄUFER · TMP · USER-TREE · UNI
-      <small>1000 → 100er schritte · 1 user / 100 · 99 work</small>
+      ♟️ STAGE · SCHACHBRETT · TOOLATOR
+      <small>MASTER · MAcht · algorithmierter Neustand</small>
     </div>
-    <div class="stats">
-      <span><span class="led cyan pulse"></span> RUN <b class="v-cyan" id="hRun">0</b></span>
-      <span><span class="led gold"></span> USER <b class="v-gold" id="hUser">0</b></span>
-      <span><span class="led green"></span> WORK <b class="v-green" id="hWork">0</b></span>
-      <span><span class="led violet"></span> BLOCK <b class="v-violet" id="hBlock">0</b></span>
-      <span>UNI <b class="v-cyan" id="hUni">0.00</b></span>
-      <span id="hClock" style="color:#4a5a6a;">⏱️ --:--</span>
+    <div class="commander-status">
+      <span><span class="led green"></span> NC‑LIVE</span>
+      <span><span class="led gold pulse"></span> TOOLATOR</span>
+      <span><span class="led purple"></span> MASTER_KERNEL</span>
+      <span>KlicK <b id="hdrKlick" style="color:#f0d080;">0</b></span>
+      <span>Service <b id="hdrService" style="color:#8cf0d0;">0%</b></span>
+      <span id="hdrClock" style="color:#4a5a6a;">⏱️ --:--</span>
     </div>
   </header>
 
-  <!-- MAIN -->
-  <div id="main">
+  <!-- 8 RICHTUNGEN -->
+  <div id="directions">
+    <span class="dir-item active" data-dir="S"><span class="sym">●</span> S · Sonne</span>
+    <span class="dir-item" data-dir="H"><span class="sym">○</span> H · Engine</span>
+    <span class="dir-item" data-dir="B"><span class="sym">◆</span> B · Matrix</span>
+    <span class="dir-item" data-dir="T"><span class="sym">△</span> T · Triangle</span>
+    <span class="dir-item" data-dir="O"><span class="sym">◉</span> O · Orbit</span>
+    <span class="dir-item" data-dir="D"><span class="sym">▣</span> D · DS9</span>
+    <span class="dir-item" data-dir="t"><span class="sym">⚙</span> t · Helper</span>
+    <span class="dir-item" data-dir="sys"><span class="sym">🧠</span> sys · System</span>
+  </div>
 
-    <!-- LEFT: TMP-GRID + CONTROLS -->
-    <div>
-      <div class="box">
-        <h2>
-          ◈ TMP-BLOCK <span class="badge" id="gridBadge">1000–1099</span>
-        </h2>
-        <div id="tmpGrid"></div>
-        <div style="text-align:center;font-size:9px;color:#5a7a8a;margin-top:8px;">
-          <span class="v-cyan">■</span> Runner ·
-          <span class="v-green">■</span> Done ·
-          <span class="v-gold">■</span> USER
-        </div>
+  <!-- WORKSPACE: SCHACHBRETT + TOOLATOR -->
+  <div id="workspace">
+
+    <!-- SCHACHBRETT -->
+    <div class="box">
+      <h2>
+        ♟️ SCHACHBRETT · RESPO‑BUCHUNG
+        <span class="badge" id="chessBadge">0/81 gebucht</span>
+      </h2>
+      <div id="chessWrap">
+        <div id="chess"></div>
       </div>
-
-      <div class="box">
-        <h2>⚙ STEUERUNG <span class="badge" id="ctrlBadge">idle</span></h2>
-        <div class="ctrl">
-          <button id="btnRun" class="primary">▶ RUN</button>
-          <button id="btnStep">⏭ STEP</button>
-          <button id="btnAuto" class="gold">♾ AUTO</button>
-          <button id="btnSkipBlock" class="violet">⏩ SKIP</button>
-          <button id="btnReset" class="red">⟲ RESET</button>
-        </div>
-        <input type="range" id="speed" min="30" max="600" value="180" step="10">
-        <div style="display:flex;justify-content:space-between;font-size:9px;color:#5a7a8a;margin-top:4px;">
-          <span>Speed</span>
-          <span id="speedVal" style="color:var(--cyan);font-weight:bold;">180 ms</span>
-        </div>
+      <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+        <button id="btnBookAll" style="flex:1;min-width:100px;background:rgba(20,28,20,0.6);border:1px solid rgba(120,220,150,0.25);color:#8cf0d0;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">✅ ALLE BUCHEN</button>
+        <button id="btnUnbookAll" style="flex:1;min-width:100px;background:rgba(30,20,20,0.6);border:1px solid rgba(255,102,102,0.25);color:#ff6666;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">⟲ ALLE FREI</button>
+        <button id="btnResetChess" style="flex:1;min-width:100px;background:rgba(20,20,30,0.6);border:1px solid rgba(179,136,255,0.25);color:#b388ff;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">🔄 NEUSTAND</button>
       </div>
+    </div>
 
-      <div class="box">
-        <h2>👤 USER-TREE <span class="badge" id="userBadge">0 gefunden</span></h2>
-        <div id="userTree">
-          <div style="color:#5a7a8a;font-size:10px;text-align:center;padding:12px 0;">
-            Noch keine User im TMP-Lauf ...
+    <!-- TOOLATOR -->
+    <div class="box">
+      <h2>
+        📊 TOOLATOR · RESPO‑SERVICE
+        <span class="badge" id="toolBadge">bereit</span>
+      </h2>
+      <div id="toolator">
+
+        <!-- MATHEMATISCH -->
+        <div class="toolator-section">
+          <h3>· mathematisch ·</h3>
+          <div class="metric">
+            <span class="lbl">Buchungen</span>
+            <span class="val green" id="t-booked">0 / 81</span>
           </div>
+          <div class="bar"><div class="fill" id="t-booked-bar" style="width:0%"></div></div>
+
+          <div class="metric purple">
+            <span class="lbl">Service‑Summe</span>
+            <span class="val purple" id="t-service">0.00</span>
+          </div>
+
+          <div class="metric gold">
+            <span class="lbl">Respo‑Score</span>
+            <span class="val gold" id="t-respo">0.00</span>
+          </div>
+
+          <div class="metric cyan">
+            <span class="lbl">Clusters (zusammenhängend)</span>
+            <span class="val cyan" id="t-clusters">0</span>
+          </div>
+
+          <div class="metric">
+            <span class="lbl">Entropie (Chaos)</span>
+            <span class="val" id="t-entropy">0.00</span>
+          </div>
+        </div>
+
+        <!-- PHYSIKALISCH -->
+        <div class="toolator-section">
+          <h3>· physikalisch ·</h3>
+          <div class="metric gold">
+            <span class="lbl">Masse (Σ Buchung × Wert)</span>
+            <span class="val gold" id="t-mass">0.00 g</span>
+          </div>
+
+          <div class="metric purple">
+            <span class="lbl">Waage (links ↔ rechts)</span>
+            <span class="val purple" id="t-balance">0.00</span>
+          </div>
+          <div class="bar"><div class="fill gold" id="t-balance-bar" style="width:50%"></div></div>
+
+          <div class="metric red">
+            <span class="lbl">Kraft (Cluster‑Gravitation)</span>
+            <span class="val red" id="t-force">0.00</span>
+          </div>
+
+          <div class="metric cyan">
+            <span class="lbl">Energie (E ∝ Masse)</span>
+            <span class="val cyan" id="t-energy">0.00</span>
+          </div>
+        </div>
+
+        <!-- TOOLATOR BUTTONS -->
+        <div style="display:flex; gap:6px; margin-top:8px; flex-wrap:wrap;">
+          <button id="btnMeasure" style="flex:1;min-width:100px;background:rgba(20,28,20,0.6);border:1px solid rgba(120,220,150,0.3);color:#8cf0d0;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">📏 MESSEN</button>
+          <button id="btnAutoMeasure" style="flex:1;min-width:100px;background:rgba(20,20,30,0.6);border:1px solid rgba(179,136,255,0.3);color:#b388ff;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">⏯ AUTO</button>
+          <button id="btnEvalRith" style="flex:1;min-width:100px;background:rgba(30,20,20,0.6);border:1px solid rgba(255,140,0,0.3);color:#ff8c00;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">🔬 RITH</button>
         </div>
       </div>
     </div>
 
-    <!-- MID: METRICS + TOOLS -->
-    <div>
-      <div class="box">
-        <h2>📊 TMP-METRIKEN <span class="badge">LIVE</span></h2>
-        <div class="metrics">
-          <div class="metric"><span class="lbl">Runner-Slot</span><span class="val cyan" id="mSlot">0</span></div>
-          <div class="metric violet"><span class="lbl">Block-Idx</span><span class="val violet" id="mBIdx">0</span></div>
-          <div class="metric green"><span class="lbl">Tools aktiv</span><span class="val green" id="mTools">0</span></div>
-          <div class="metric gold"><span class="lbl">Users gef.</span><span class="val gold" id="mUsers">0</span></div>
-          <div class="metric"><span class="lbl">Läufe total</span><span class="val cyan" id="mRuns">0</span></div>
-          <div class="metric violet"><span class="lbl">Blocks voll</span><span class="val violet" id="mBlocksDone">0</span></div>
-          <div class="metric green"><span class="lbl">TMP-Basis</span><span class="val green" id="mBase">1000</span></div>
-          <div class="metric gold"><span class="lbl">UNI-Level</span><span class="val gold" id="mUni">0.00</span></div>
-        </div>
-      </div>
+  </div>
 
-      <div class="box">
-        <h2>🔧 99 WORK-TOOLS <span class="badge" id="toolBadge">—</span></h2>
-        <div id="toolList" style="
-          display:grid;
-          grid-template-columns:repeat(3,1fr);
-          gap:3px;
-          max-height:220px;
-          overflow-y:auto;
-          font-size:8.5px;
-        ">
-          <!-- wird gefüllt -->
-        </div>
-        <div style="margin-top:8px;font-size:9px;color:#5a7a8a;text-align:center;">
-          Slot <b style="color:var(--gold);" id="curUserSlot">—</b> =
-          <span style="color:var(--gold);">USER</span> ·
-          alle anderen = <span style="color:var(--green);">WORK</span>
-        </div>
-      </div>
+  <!-- MACHT PANEL -->
+  <div class="box">
+    <h2>
+      ⚙️ MASTER · MACHT
+      <span class="badge" id="machtBadge">autostart läuft</span>
+    </h2>
+    <div id="macht">
+      <!-- Wird vom JS gefüllt -->
     </div>
-
-    <!-- RIGHT: UNI + CHAIN -->
-    <div>
-      <div class="box">
-        <h2>◉ UNI · TMP-LAUF <span class="badge" id="uniBadge">idle</span></h2>
-        <div id="uniPanel">
-          <div id="uniOrb">
-            <svg viewBox="-100 -100 200 200" width="180" height="180">
-              <circle cx="0" cy="0" r="84" fill="none"
-                stroke="rgba(108,204,255,0.15)" stroke-width="0.8"/>
-              <circle cx="0" cy="0" r="68" fill="none"
-                stroke="rgba(240,208,128,0.12)" stroke-width="0.5" stroke-dasharray="3 5"/>
-              <circle cx="0" cy="0" r="52" fill="none"
-                stroke="rgba(179,136,255,0.12)" stroke-width="0.5" stroke-dasharray="2 4"/>
-              <line x1="-84" y1="0" x2="84" y2="0"
-                stroke="rgba(108,204,255,0.1)" stroke-width="0.5"/>
-              <line x1="0" y1="-84" x2="0" y2="84"
-                stroke="rgba(108,204,255,0.1)" stroke-width="0.5"/>
-              <g id="uniNodes"></g>
-            </svg>
-            <div id="uniCore">◉</div>
-          </div>
-
-          <div class="metrics" style="margin-top:6px;">
-            <div class="metric"><span class="lbl">Fusion</span><span class="val cyan" id="mFusion">0.00</span></div>
-            <div class="metric green"><span class="lbl">Kohärenz</span><span class="val green" id="mKoh">0.00</span></div>
-            <div class="metric gold"><span class="lbl">Union-Score</span><span class="val gold" id="mUnion">0.00</span></div>
-            <div class="metric violet"><span class="lbl">Orbit-Läufe</span><span class="val violet" id="mOrbit">0</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="box">
-        <h2>⛓ BLOCK-CHAIN <span class="badge" id="chainBadge">0 / 10</span></h2>
-        <div id="blockChain"></div>
-      </div>
+    <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+      <button id="btnStartAll" style="flex:1;min-width:110px;background:rgba(20,30,20,0.6);border:1px solid rgba(120,220,150,0.3);color:#8cf0d0;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">▶ START ALL</button>
+      <button id="btnStopAll" style="flex:1;min-width:110px;background:rgba(30,20,20,0.6);border:1px solid rgba(255,102,102,0.3);color:#ff6666;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">⏸ STOP ALL</button>
+      <button id="btnMasterKernel" style="flex:1;min-width:110px;background:rgba(30,20,30,0.6);border:1px solid rgba(179,136,255,0.3);color:#b388ff;padding:6px;border-radius:6px;font-family:inherit;font-size:10px;cursor:pointer;">🧠 MASTER_KERNEL.start()</button>
     </div>
+  </div>
 
+  <!-- MODULE LINKS -->
+  <div class="box">
+    <h2>
+      🧩 MODULE · EXPLORER
+      <span class="badge">klick auf Karte öffnet Ordner</span>
+    </h2>
+    <div id="moduleList">
+      <!-- Wird vom JS gefüllt -->
+    </div>
   </div>
 
   <!-- LOG -->
-  <div id="log">
-    <div class="entry"><span class="time">[init]</span><span class="tag">läufer</span><span class="gold">▶ LÄUFER · TMP · USER-TREE gestartet bei 1000</span></div>
-    <div class="entry"><span class="time">[init]</span><span class="tag">läufer</span><span class="ok">1 User pro 100er Block · 99 Work-Slots pro Block</span></div>
+  <div id="logBox">
+    <div class="entry"><span class="time">[init]</span><span class="tag">stage</span><span class="ok">STAGE · SCHACHBRETT · TOOLATOR geladen</span></div>
   </div>
 
   <footer>
-    <span class="gold">▶</span> LÄUFER · TMP · USER-TREE · UNI · iki1uc
-    <span class="gold">▶</span> 1000 → ∞ in 100er Schritten · <a href="mind.html">mind.html</a> · <a href="index.html">index.html</a>
+    <span class="gold">✦</span> STAGE · SCHACHBRETT · TOOLATOR · MASTER · iki1uc
+    <span class="gold">✦</span> Buchen · Messen · Verstehen · Neu formen
   </footer>
-
 </div>
 
-<!-- FL76 -->
-<div id="fl76">
+<!-- FL76 Monitor -->
+<div id="fl76mon">
   <div>FL76</div>
   <div class="num" id="fl76num">76</div>
-  <div style="font-size:8px;color:#4a5a5a;">ms · Kaiser</div>
+  <div style="font-size:8px;color:#4a5a5a;">ms · Kaiser‑Fenster</div>
 </div>
 
 <script>
 "use strict";
 // ═══════════════════════════════════════════════════════════════════
-// ▶ LÄUFER · TMP · USER-TREE · UNI
-// 100er Schritte ab 1000 · 1 User pro Block · 99 Work-Slots
+// STAGE · SCHACHBRETT · TOOLATOR · MASTER · iki1uc
+// Das Schachbrett als buchbares Respo-System.
+// Der Toolator misst mathematisch und physikalisch.
+// MASTER_KERNEL orchestriert mit Fallback.
 // ═══════════════════════════════════════════════════════════════════
 
-const N = 100;             // Slots pro Block
-const BLOCK_STEP = 100;    // Basis-Schritt
-const BLOCK_START = 1000;  // Startbasis
-const INIT_BLOCKS = 10;    // Anzahl initialer Blöcke
-
-// ─── 99 WORK-TOOLS (aus Präfix × Domäne) ─────────────────────
-function buildTools() {
-  const prefixes = ['INIT','BOOT','LOAD','SYNC','MOUNT','LINK','BIND','HOOK','PIPE','STREAM','CAST'];
-  const domains  = ['NC','AX','TMP','ROM','RES','ORB','VEC','SYS','GEO'];
-  const tools = [];
-  for (const p of prefixes) {
-    for (const d of domains) {
-      tools.push(`${p}.${d}`);
-      if (tools.length >= 99) return tools;
-    }
-  }
-  return tools;
-}
-const WORK_TOOLS = buildTools(); // 99 Stück
-
-// ─── USER-POSITION (deterministisch pro Block) ───────────────
-// Werte 1–98, damit Slot 0 & 99 frei bleiben
-const USER_SLOTS = [13, 47, 88, 21, 73, 5, 96, 34, 62, 8,
-                    55, 91, 17, 79, 42, 68, 29, 3, 85, 51];
-
-function userSlotFor(blockIdx) {
-  return USER_SLOTS[blockIdx % USER_SLOTS.length];
-}
-
-// ─── BLOCK-KLASSE ────────────────────────────────────────────
-class TMPBlock {
-  constructor(idx) {
-    this.idx = idx;
-    this.base = BLOCK_START + idx * BLOCK_STEP;
-    this.cells = [];
-    this.userSlot = userSlotFor(idx);
-    this.doneCount = 0;
-    this.userFound = false;
-    for (let i = 0; i < N; i++) {
-      const isUser = i === this.userSlot;
-      this.cells.push({
-        slot: i,
-        state: 0,      // 0=idle, 1=done, 2=user
-        tool: isUser ? 'USER' : WORK_TOOLS[(i + idx * 7) % WORK_TOOLS.length],
-        isUser,
-      });
-    }
-  }
-  complete() { return this.doneCount >= N; }
-}
-
-// ─── GLOBALER STATE ─────────────────────────────────────────
-const S = {
-  blocks: [],
-  blockIdx: 0,
-  slot: 0,
-  totalRuns: 0,
-  totalUsers: 0,
-  totalTools: 0,
-  blocksDone: 0,
-  auto: false,
-  speed: 180,
-  timer: null,
-  userLog: [],
-  uniLevel: 0,
-  fusion: 0,
-  koh: 0,
-  union: 0,
-  orbitRuns: 0,
-  // FL76
-  flRaw: 76, flSmooth: 76, lastFrameT: 0,
+// ─── 1. KONSTANTEN ─────────────────────────────────────────────
+const N = 9;                       // 9×9 Schachbrett
+const PIECE_VALUES = {              // Figurenwerte
+  ' ': 1,   // leeres Feld = Basis-Service
+  '·': 1,
+  '♟': 1,   // Bauer
+  '♞': 3,   // Springer
+  '♝': 3,   // Läufer
+  '♜': 5,   // Turm
+  '♛': 9,   // Dame
+  '♚': 12,  // König
+  'Ω': 6,   // Omega (Spezial)
+  '◉': 8,   // Respo-Kern
 };
 
-// ─── INITIALISIERUNG ────────────────────────────────────────
-function initBlocks(n) {
-  S.blocks = [];
-  for (let i = 0; i < n; i++) S.blocks.push(new TMPBlock(i));
-}
+// Symbolisches Ausgangsbrett (wie im ORT-Penthouse-Design)
+const BOARD_SEED = [
+  ['♜','♞','♝','♛','♚','♝','♞','♜','Ω'],
+  ['♟','♟','♟','♟','♟','♟','♟','♟','·'],
+  ['·','·','·','·','·','·','·','·','·'],
+  ['·','·','·','◉','·','◉','·','·','·'],
+  ['·','·','·','·','◉','·','·','·','·'],
+  ['·','·','·','◉','·','◉','·','·','·'],
+  ['·','·','·','·','·','·','·','·','·'],
+  ['♙','♙','♙','♙','♙','♙','♙','♙','·'],
+  ['♖','♘','♗','♕','♔','♗','♘','♖','Ω'],
+];
 
-// ─── TICK (Einzelschritt) ────────────────────────────────────
-function tick() {
-  if (S.blockIdx >= S.blocks.length) {
-    // Erweitern
-    S.blocks.push(new TMPBlock(S.blocks.length));
-  }
-  const block = S.blocks[S.blockIdx];
-  const cell = block.cells[S.slot];
+// ─── 2. STATE ──────────────────────────────────────────────────
+const S = {
+  booked: Array(N*N).fill(false),
+  seed: BOARD_SEED,
+  autoMeasure: true,
+  measureTimer: null,
+  tick: 0,
+  klick: 0,
+  // Metriken
+  bookedCount: 0,
+  serviceSum: 0,
+  respo: 0,
+  clusters: 0,
+  entropy: 0,
+  mass: 0,
+  balance: 0,
+  force: 0,
+  energy: 0,
+  // FL76
+  flRaw: 76, flSmooth: 76,
+  fps: 0, frameCount: 0, lastFpsT: 0, lastFrameT: 0,
+  // Module
+  mods: {},
+  autoChain: [],
+};
 
-  if (cell.state === 0) {
-    cell.state = cell.isUser ? 2 : 1;
-    block.doneCount++;
-    S.totalRuns++;
-    if (cell.isUser) {
-      block.userFound = true;
-      S.totalUsers++;
-      S.userLog.push({
-        blockIdx: block.idx,
-        slot: S.slot,
-        base: block.base + S.slot,
-        blockBase: block.base,
-      });
-      log(`👤 USER aktiviert · Block ${block.idx} · Slot ${S.slot} · Basis ${block.base + S.slot}`, 'läufer', 'user');
-    } else {
-      S.totalTools++;
+// ─── 3. MODULE-DEFINITION ─────────────────────────────────────
+const MODULES = [
+  { id:'kit',     name:'kit.js',     label:'KERNEL · KIT=3',      global:'KIT' },
+  { id:'groub',   name:'groub.js',   label:'GROUP · GROUB=9',     global:'GROUB' },
+  { id:'work',    name:'work.js',    label:'PIPELINE · WORK=81',  global:'WORK' },
+  { id:'zam',     name:'ZaM.js',     label:'GATE · OFFER · PACT', global:'ZaM' },
+  { id:'ui',      name:'ui.js',      label:'UI · PANELS',         global:'UI' },
+  { id:'economy', name:'economy.js', label:'WERTE · KlicK/ZacK',  global:'ECONOMY' },
+];
+
+// Ordner-Module (Links)
+const FOLDERS = [
+  { id:'BOERSE',   icon:'📈', name:'BOERSE',   desc:'Börsen-Daten · Stage',   path:'./BOERSE/index.html' },
+  { id:'DOM',      icon:'🏛', name:'DOM',      desc:'Dom-Struktur · NC',       path:'./DOM/index.html' },
+  { id:'EOS',      icon:'🌌', name:'EOS',      desc:'Ende-of-System · Orbit',  path:'./EOS/index.html' },
+  { id:'EVO',      icon:'🔮', name:'EVO',      desc:'Evolution · Axiom-Map',   path:'./EVO/index.html' },
+  { id:'MARKT',    icon:'🏪', name:'MARKT',    desc:'Markt-Platz · RESPO',     path:'./MARKT/index.html' },
+  { id:'respo',    icon:'🌀', name:'RESPO',    desc:'9×9-Mesh · Live',         path:'./respo/index.html' },
+  { id:'tool48',   icon:'🛠', name:'TOOL48',   desc:'48-Tools · Werkzeug',     path:'./tool48/index.html' },
+  { id:'funktion', icon:'⚙️', name:'FUNKTION', desc:'Funktions-Achse · VEC',   path:'./funktion/index.html' },
+  { id:'orbit',    icon:'👁', name:'ORBIT-VIEWER', desc:'8-Etagen-Orbit · 3D',  path:'./etage-8-orbit-viewer/index.html' },
+  { id:'b',        icon:'📐', name:'Breite (b)', desc:'Breiten-Achse · HDF',   path:'./b/index.html' },
+  { id:'h',        icon:'↗',  name:'Hoch (h)',   desc:'Hoch-Achse · Vektor',   path:'./h/index.html' },
+  { id:'t',        icon:'↕',  name:'Tiefe (t)',  desc:'Tiefen-Achse · NC',     path:'./t/index.html' },
+];
+
+// ─── 4. TOOLATOR: MATHEMATIK ──────────────────────────────────
+function pieceValue(ch){ return PIECE_VALUES[ch] || 1; }
+
+// Union-Find für Cluster-Erkennung
+function computeClusters(){
+  const parent = {};
+  const find = (x) => parent[x] === x ? x : (parent[x] = find(parent[x]));
+  const union = (a,b) => {
+    const ra = find(a), rb = find(b);
+    if (ra !== rb) parent[ra] = rb;
+  };
+  const idx = (r,c) => r*N + c;
+
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++) parent[idx(r,c)] = idx(r,c);
+
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      if (!S.booked[idx(r,c)]) continue;
+      // Nachbar rechts
+      if (c+1 < N && S.booked[idx(r,c+1)]) union(idx(r,c), idx(r,c+1));
+      // Nachbar unten
+      if (r+1 < N && S.booked[idx(r+1,c)]) union(idx(r,c), idx(r+1,c));
     }
-    renderCell(block.idx, S.slot, cell);
   }
 
-  // Vorrücken
-  S.slot++;
-  if (S.slot >= N) {
-    S.slot = 0;
-    if (block.complete()) {
-      S.blocksDone++;
-      log(`✔ Block ${block.idx} (${block.base}–${block.base + 99}) komplett · User gefunden: ${block.userFound}`, 'läufer', 'ok');
+  const groups = {};
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    if (!S.booked[idx(r,c)]) continue;
+    const root = find(idx(r,c));
+    (groups[root] = groups[root] || []).push(idx(r,c));
+  }
+  return Object.values(groups);
+}
+
+// Entropie: -Σ p·log(p), p = gebucht/total pro Zeile
+function computeEntropy(){
+  let entropy = 0;
+  for(let r=0;r<N;r++){
+    let booked = 0;
+    for(let c=0;c<N;c++) if (S.booked[r*N+c]) booked++;
+    const p = booked / N;
+    if (p > 0 && p < 1) entropy -= p * Math.log2(p) + (1-p) * Math.log2(1-p);
+  }
+  return entropy / N; // normalisiert 0..1
+}
+
+// Waage: linke Hälfte vs rechte Hälfte
+function computeBalance(){
+  let left = 0, right = 0;
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      if (!S.booked[r*N+c]) continue;
+      const v = pieceValue(S.seed[r][c]);
+      if (c < N/2) left += v;
+      else right += v;
     }
-    S.blockIdx++;
-    if (S.blockIdx < S.blocks.length) {
-      log(`▶ Block ${S.blockIdx} startet @ Basis ${S.blocks[S.blockIdx].base}`, 'läufer', 'ok');
-      buildGrid(); // neues Grid rendern
-      buildChain();
+  }
+  const total = left + right || 1;
+  return { left, right, ratio: right / total }; // 0 = links, 1 = rechts
+}
+
+// Kraft: Cluster-Gravitation (Summe der paarweisen Kräfte in Clustern)
+function computeForce(clusters){
+  let force = 0;
+  clusters.forEach(cl => {
+    if (cl.length < 2) return;
+    // Für jeden Cluster: alle Paare → Kraft ~ m1*m2/d² (d = Abstand)
+    for(let i=0;i<cl.length;i++){
+      for(let j=i+1;j<cl.length;j++){
+        const ra = Math.floor(cl[i]/N), ca = cl[i]%N;
+        const rb = Math.floor(cl[j]/N), cb = cl[j]%N;
+        const d2 = (ra-rb)**2 + (ca-cb)**2;
+        if (d2 === 0) continue;
+        const ma = pieceValue(S.seed[ra][ca]);
+        const mb = pieceValue(S.seed[rb][cb]);
+        force += (ma * mb) / d2;
+      }
     }
+  });
+  return force * 0.001; // Skalierung
+}
+
+// ─── 5. TOOLATOR: BERECHNEN ───────────────────────────────────
+function measure(){
+  let booked = 0, mass = 0;
+  for(let i=0;i<N*N;i++){
+    if (!S.booked[i]) continue;
+    booked++;
+    const r = Math.floor(i/N), c = i % N;
+    mass += pieceValue(S.seed[r][c]);
   }
+  const clusters = computeClusters();
+  const entropy = computeEntropy();
+  const balance = computeBalance();
+  const force = computeForce(clusters);
 
-  // UNI-Fusion
-  computeUni();
-  renderHeaderAndMetrics();
-  updateRunner();
-  updateToolHighlight();
+  S.bookedCount = booked;
+  S.mass = mass;
+  S.serviceSum = mass;
+  S.respo = mass / (81 * 9);       // Normiert auf Maximum (81 Felder × 9)
+  S.clusters = clusters.length;
+  S.entropy = entropy;
+  S.balance = balance.ratio;
+  S.force = force;
+  S.energy = mass * 0.5;           // E ∝ m (metaphorisch)
+
+  renderToolator(clusters);
+  document.getElementById('chessBadge').textContent = `${booked}/81 gebucht`;
+  document.getElementById('hdrService').textContent = (S.respo * 100).toFixed(0) + '%';
+  document.getElementById('toolBadge').textContent = S.autoMeasure ? 'auto' : 'bereit';
+  document.getElementById('hdrKlick').textContent = S.klick;
 }
 
-// ─── RENDERING: GRID ────────────────────────────────────────
-function buildGrid() {
-  const el = document.getElementById('tmpGrid');
-  el.innerHTML = '';
-  const block = S.blocks[S.blockIdx];
-  if (!block) return;
+// ─── 6. RENDER: TOOLATOR ──────────────────────────────────────
+function renderToolator(clusters){
+  document.getElementById('t-booked').textContent = `${S.bookedCount} / 81`;
+  document.getElementById('t-booked-bar').style.width = (S.bookedCount / 81 * 100) + '%';
+  document.getElementById('t-service').textContent = S.serviceSum.toFixed(2);
+  document.getElementById('t-respo').textContent = S.respo.toFixed(3);
+  document.getElementById('t-clusters').textContent = S.clusters;
+  document.getElementById('t-entropy').textContent = S.entropy.toFixed(3);
+  document.getElementById('t-mass').textContent = S.mass.toFixed(2) + ' g';
+  document.getElementById('t-balance').textContent = S.balance.toFixed(3);
+  document.getElementById('t-balance-bar').style.width = (S.balance * 100) + '%';
+  document.getElementById('t-force').textContent = S.force.toFixed(3);
+  document.getElementById('t-energy').textContent = S.energy.toFixed(2) + ' J';
 
-  document.getElementById('gridBadge').textContent =
-    `${block.base}–${block.base + 99}`;
-
-  for (let i = 0; i < N; i++) {
-    const cell = block.cells[i];
-    const div = document.createElement('div');
-    div.className = 'tcell';
-    div.dataset.slot = i;
-    div.innerHTML = `<span class="slotn">${String(i).padStart(2,'0')}</span>`;
-    if (cell.state === 1) div.classList.add('done');
-    if (cell.state === 2) div.classList.add('user');
-    el.appendChild(div);
-  }
-  updateRunner();
-}
-
-function renderCell(blockIdx, slot, cell) {
-  if (blockIdx !== S.blockIdx) return;
-  const el = document.querySelector(`.tcell[data-slot="${slot}"]`);
-  if (!el) return;
-  el.classList.toggle('done', cell.state === 1);
-  el.classList.toggle('user', cell.state === 2);
-}
-
-function updateRunner() {
-  document.querySelectorAll('.tcell').forEach(el => el.classList.remove('runner'));
-  const el = document.querySelector(`.tcell[data-slot="${S.slot}"]`);
-  if (el) el.classList.add('runner');
-}
-
-// ─── RENDERING: TOOL-LIST ───────────────────────────────────
-function buildToolList() {
-  const el = document.getElementById('toolList');
-  el.innerHTML = '';
-  const block = S.blocks[S.blockIdx];
-  if (!block) return;
-
-  for (let i = 0; i < N; i++) {
-    const cell = block.cells[i];
-    const div = document.createElement('div');
-    div.dataset.tool = i;
-    const color = cell.isUser ? 'var(--gold)' :
-                  cell.state === 1 ? 'var(--green)' :
-                  '#5a7a8a';
-    div.style.cssText = `
-      padding:2px 4px;border-radius:3px;
-      background:${cell.isUser ? 'rgba(240,208,128,0.1)' : cell.state === 1 ? 'rgba(140,240,208,0.08)' : 'rgba(0,0,0,0.25)'};
-      color:${color};
-      text-align:center;
-      font-size:8px;
-      border:1px solid ${cell.isUser ? 'rgba(240,208,128,0.25)' : cell.state === 1 ? 'rgba(140,240,208,0.2)' : 'rgba(255,255,255,0.04)'};
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    `;
-    div.title = `Slot ${i} · ${cell.tool}`;
-    div.textContent = cell.isUser ? '★ USER' : cell.tool;
-    el.appendChild(div);
-  }
-}
-
-function updateToolHighlight() {
-  const block = S.blocks[S.blockIdx];
-  if (!block) return;
-  document.getElementById('curUserSlot').textContent = block.userSlot;
-  document.getElementById('toolBadge').textContent = `Slot ${S.slot} = ${block.cells[S.slot].tool}`;
-
-  document.querySelectorAll('#toolList [data-tool]').forEach(el => {
-    const i = parseInt(el.dataset.tool, 10);
-    const cell = block.cells[i];
-    if (i === S.slot) {
-      el.style.outline = '2px solid #6cf';
-    } else {
-      el.style.outline = 'none';
-    }
-    // Update color/state
-    const color = cell.isUser ? 'var(--gold)' :
-                  cell.state === 1 ? 'var(--green)' :
-                  '#5a7a8a';
-    el.style.color = color;
-    el.style.background = cell.isUser ? 'rgba(240,208,128,0.1)' :
-                          cell.state === 1 ? 'rgba(140,240,208,0.08)' :
-                          'rgba(0,0,0,0.25)';
+  // Cluster-Outline auf dem Brett
+  const clusterCells = new Set();
+  clusters.forEach(cl => {
+    if (cl.length >= 2) cl.forEach(i => clusterCells.add(i));
+  });
+  document.querySelectorAll('.cell').forEach(el => {
+    const i = parseInt(el.dataset.idx, 10);
+    el.classList.toggle('cluster', clusterCells.has(i));
   });
 }
 
-// ─── RENDERING: CHAIN ───────────────────────────────────────
-function buildChain() {
-  const el = document.getElementById('blockChain');
-  el.innerHTML = '';
-  S.blocks.forEach((b, i) => {
-    const chip = document.createElement('div');
-    chip.className = 'bchip';
-    if (i < S.blockIdx) chip.classList.add('done');
-    else if (i === S.blockIdx) chip.classList.add('active');
-    else chip.classList.add('future');
-
-    const pct = (b.doneCount / N) * 100;
-    chip.innerHTML = `
-      <div class="base">${b.base}</div>
-      <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
-      <div class="done-num">${b.doneCount}/100 ${b.userFound ? '★' : ''}</div>
-    `;
-    el.appendChild(chip);
-  });
-  document.getElementById('chainBadge').textContent = `${S.blockIdx} / ${S.blocks.length}`;
+// ─── 7. RENDER: SCHACHBRETT ──────────────────────────────────
+function buildChess(){
+  const chess = document.getElementById('chess');
+  chess.innerHTML = '';
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      const i = r*N + c;
+      const piece = S.seed[r][c];
+      const isLight = (r+c) % 2 === 0;
+      const cell = document.createElement('div');
+      cell.className = 'cell ' + (isLight ? 'light' : 'dark');
+      if (S.booked[i]) cell.classList.add('booked');
+      if (piece === 'Ω' || piece === '◉' || piece === '♚' || piece === '♛') cell.classList.add('special');
+      cell.dataset.idx = i;
+      cell.dataset.r = r;
+      cell.dataset.c = c;
+      cell.title = `${piece} · Wert ${pieceValue(piece)}`;
+      cell.innerHTML = `${piece === ' ' ? '·' : piece}<span class="v">${pieceValue(piece)}</span>`;
+      cell.addEventListener('click', () => toggleCell(i));
+      chess.appendChild(cell);
+    }
+  }
 }
 
-// ─── RENDERING: USER-TREE ───────────────────────────────────
-function renderUserTree() {
-  const el = document.getElementById('userTree');
-  if (S.userLog.length === 0) {
-    el.innerHTML = `<div style="color:#5a7a8a;font-size:10px;text-align:center;padding:12px 0;">
-      Noch keine User im TMP-Lauf ...
-    </div>`;
-    document.getElementById('userBadge').textContent = '0 gefunden';
-    return;
+function toggleCell(i){
+  S.booked[i] = !S.booked[i];
+  S.klick++;
+  const cell = document.querySelector(`.cell[data-idx="${i}"]`);
+  if (cell){
+    cell.classList.toggle('booked', S.booked[i]);
+    // kleine Animation
+    cell.style.transform = 'scale(1.2)';
+    setTimeout(()=>{ cell.style.transform = ''; }, 150);
   }
-  el.innerHTML = '';
-  // Neueste zuerst
-  const sorted = S.userLog.slice().reverse();
-  sorted.forEach(u => {
+  measure();
+}
+
+// ─── 8. SCHACHBRETT-BUTTONS ──────────────────────────────────
+document.getElementById('btnBookAll').addEventListener('click', () => {
+  S.booked.fill(true);
+  buildChess();
+  measure();
+  log('♟️ Alle Zellen gebucht', 'chess', 'gold');
+});
+document.getElementById('btnUnbookAll').addEventListener('click', () => {
+  S.booked.fill(false);
+  buildChess();
+  measure();
+  log('⟲ Alle Zellen freigegeben', 'chess', 'warn');
+});
+document.getElementById('btnResetChess').addEventListener('click', () => {
+  // NEUSTAND: Würfel aus ursprünglichem Seed neu buchen (die Ω, ◉, ♚, ♛, ♜, ♞, ♝)
+  S.booked.fill(false);
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      const p = S.seed[r][c];
+      if (p === 'Ω' || p === '◉' || p === '♚' || p === '♛') {
+        S.booked[r*N+c] = true;
+      }
+    }
+  }
+  buildChess();
+  measure();
+  log('🔄 NEUSTAND · Kernfiguren gebucht', 'chess', 'ok');
+});
+
+// ─── 9. TOOLATOR BUTTONS ─────────────────────────────────────
+document.getElementById('btnMeasure').addEventListener('click', () => {
+  measure();
+  log(`📏 Messung · Service=${S.serviceSum.toFixed(2)} · Respo=${S.respo.toFixed(3)} · Cluster=${S.clusters}`, 'toolator', 'ok');
+});
+
+document.getElementById('btnAutoMeasure').addEventListener('click', (e) => {
+  S.autoMeasure = !S.autoMeasure;
+  e.currentTarget.textContent = S.autoMeasure ? '⏯ AUTO' : '▶ AUTO';
+  e.currentTarget.style.color = S.autoMeasure ? '#b388ff' : '#8cf0d0';
+  if (S.autoMeasure) startAutoMeasure(); else stopAutoMeasure();
+  log(`Toolator AUTO ${S.autoMeasure ? 'an' : 'aus'}`, 'toolator', 'warn');
+});
+
+document.getElementById('btnEvalRith').addEventListener('click', () => {
+  // RITH-Eval auf Basis der aktuellen Buchungen
+  const res = evaluateRith();
+  log(`🔬 RITH · level=${res.rith} · score=${res.score} · emotion=${res.emotion}`, 'rith', 'ok');
+  document.getElementById('toolBadge').textContent = `rith ${res.rith}`;
+});
+
+// Einfache RITH-Eval (aus rith.engine.js nachempfunden)
+function evaluateRith(){
+  const total = 81;
+  const booked = S.bookedCount;
+  const clusters = S.clusters;
+  const entropy = S.entropy;
+  const score = Math.round((booked/total) * 60 + (clusters / 12) * 40);
+  let rith = 0;
+  if (booked > 0) rith++;
+  if (clusters > 0) rith++;
+  if (S.respo > 0.3) rith++;
+  if (S.respo > 0.6 && entropy < 0.7) rith++;
+  const emotion = score >= 70 ? 'FREUDE' : score >= 40 ? 'NEUTRAL' : 'MÜDE';
+  return { rith, score, emotion };
+}
+
+function startAutoMeasure(){
+  if (S.measureTimer) return;
+  S.measureTimer = setInterval(() => {
+    if (!S.autoMeasure) return;
+    // Nur die Cluster/Dynamik neu berechnen (nicht die Buchung)
+    const clusters = computeClusters();
+    const entropy = computeEntropy();
+    const balance = computeBalance();
+    const force = computeForce(clusters);
+    S.clusters = clusters.length;
+    S.entropy = entropy;
+    S.balance = balance.ratio;
+    S.force = force;
+    renderToolator(clusters);
+  }, 800);
+}
+function stopAutoMeasure(){
+  if (S.measureTimer) { clearInterval(S.measureTimer); S.measureTimer = null; }
+}
+
+// ─── 10. MODULE (MASTER · MACHT) ─────────────────────────────
+function makeFallback(id){
+  return {
+    __fallback:true, id,
+    init(){ return true; },
+    run(){ return { ok:false, reason:'fallback' }; },
+    stop(){ return true; },
+    state(){ return { id, present:false }; },
+  };
+}
+
+function detectModules(){
+  MODULES.forEach(m => {
+    const obj = window[m.global];
+    const present = !!(obj && (typeof obj === 'object' || typeof obj === 'function'));
+    S.mods[m.id] = {
+      present,
+      api: present ? obj : makeFallback(m.id),
+    };
+  });
+}
+
+function renderMacht(){
+  const box = document.getElementById('macht');
+  box.innerHTML = '';
+  MODULES.forEach(m => {
+    const mod = S.mods[m.id];
+    const present = mod?.present;
     const div = document.createElement('div');
-    div.className = 'urow';
+    div.className = 'macht-card';
     div.innerHTML = `
-      <span class="b">Block ${u.blockIdx}</span>
-      <span class="v">Slot ${u.slot}</span>
-      <span class="base">Basis ${u.base}</span>
+      <h4><span>${m.label}</span><span class="dot ${present ? 'on' : 'fail'}"></span></h4>
+      <div class="row"><span class="lbl">Modul</span><span class="val">${m.name}</span></div>
+      <div class="row"><span class="lbl">Status</span><span class="val" style="color:${present ? '#8cf0d0' : '#ff6666'};">${present ? 'ok' : 'fallback'}</span></div>
+      <div class="actions">
+        <button data-mod="${m.id}" data-act="run">RUN</button>
+        <button data-mod="${m.id}" data-act="stop">STOP</button>
+      </div>
     `;
-    el.appendChild(div);
+    box.appendChild(div);
   });
-  document.getElementById('userBadge').textContent = `${S.userLog.length} gefunden`;
-}
-
-// ─── UNI-BERECHNUNG ─────────────────────────────────────────
-function computeUni() {
-  // Fusion: wie vollständig ist der aktuelle Block
-  const cur = S.blocks[S.blockIdx];
-  const curPct = cur ? cur.doneCount / N : 0;
-  const blocksPct = S.blocksDone / Math.max(1, S.blocks.length);
-  S.fusion = curPct * 0.4 + blocksPct * 0.6;
-
-  // Kohärenz: User-Rate = gefundene User / erwartete User
-  const expected = S.blockIdx + (S.slot > (cur ? cur.userSlot : 0) ? 1 : 0);
-  S.koh = expected > 0 ? Math.min(1, S.totalUsers / expected) : 0;
-
-  // Union-Score: Arbeit + User
-  S.union = (S.totalTools + S.totalUsers * 5) / Math.max(1, S.totalRuns) / 5;
-
-  // Orbit-Läufe = vollendete Blöcke
-  S.orbitRuns = S.blocksDone;
-
-  // UNI-Level = User / Block
-  S.uniLevel = S.blockIdx > 0
-    ? S.totalUsers / S.blockIdx
-    : (cur && cur.userFound ? 1 : 0);
-}
-
-// ─── HEADER + METRICS ──────────────────────────────────────
-function renderHeaderAndMetrics() {
-  document.getElementById('hRun').textContent = S.totalRuns;
-  document.getElementById('hUser').textContent = S.totalUsers;
-  document.getElementById('hWork').textContent = S.totalTools;
-  document.getElementById('hBlock').textContent = S.blockIdx;
-  document.getElementById('hUni').textContent = S.uniLevel.toFixed(2);
-
-  document.getElementById('mSlot').textContent = S.slot;
-  document.getElementById('mBIdx').textContent = S.blockIdx;
-  document.getElementById('mTools').textContent = S.totalTools;
-  document.getElementById('mUsers').textContent = S.totalUsers;
-  document.getElementById('mRuns').textContent = S.totalRuns;
-  document.getElementById('mBlocksDone').textContent = S.blocksDone;
-  const cur = S.blocks[S.blockIdx];
-  document.getElementById('mBase').textContent = cur ? cur.base : '—';
-  document.getElementById('mUni').textContent = S.uniLevel.toFixed(2);
-
-  document.getElementById('mFusion').textContent = S.fusion.toFixed(2);
-  document.getElementById('mKoh').textContent = S.koh.toFixed(2);
-  document.getElementById('mUnion').textContent = S.union.toFixed(2);
-  document.getElementById('mOrbit').textContent = S.orbitRuns;
-
-  // UNI-Core pulsieren lassen, wenn aktiv
-  const core = document.getElementById('uniCore');
-  core.classList.toggle('pulse', S.auto || S.totalRuns > 0);
-  core.style.transform = `scale(${1 + S.fusion * 0.1})`;
-
-  // Badges
-  const uniBadge = document.getElementById('uniBadge');
-  if (S.auto) uniBadge.textContent = 'RUN';
-  else if (S.totalRuns > 0) uniBadge.textContent = 'pause';
-  else uniBadge.textContent = 'idle';
-
-  const ctrlBadge = document.getElementById('ctrlBadge');
-  ctrlBadge.textContent = S.auto ? 'auto' : (S.totalRuns > 0 ? 'ready' : 'idle');
-}
-
-// ─── AUTO-MODUS ─────────────────────────────────────────────
-function startAuto() {
-  if (S.timer) return;
-  S.auto = true;
-  document.getElementById('btnAuto').textContent = '⏸ STOP';
-  document.getElementById('btnAuto').style.color = '#ff6666';
-  S.timer = setInterval(tick, S.speed);
-}
-
-function stopAuto() {
-  S.auto = false;
-  if (S.timer) { clearInterval(S.timer); S.timer = null; }
-  document.getElementById('btnAuto').textContent = '♾ AUTO';
-  document.getElementById('btnAuto').style.color = '';
-}
-
-// ─── BUTTONS ────────────────────────────────────────────────
-function bindButtons() {
-  document.getElementById('btnRun').addEventListener('click', () => {
-    startAuto();
-    log('▶ LÄUFER gestartet', 'läufer', 'ok');
-  });
-  document.getElementById('btnStep').addEventListener('click', () => {
-    if (S.auto) stopAuto();
-    tick();
-  });
-  document.getElementById('btnAuto').addEventListener('click', () => {
-    if (S.auto) { stopAuto(); log('⏸ AUTO gestoppt', 'läufer', 'warn'); }
-    else { startAuto(); log('♾ AUTO gestartet', 'läufer', 'ok'); }
-  });
-  document.getElementById('btnSkipBlock').addEventListener('click', () => {
-    // Restlichen aktuellen Block bis Slot 99 durchlaufen
-    let safety = 0;
-    while (S.slot !== 0 && safety < 200) { tick(); safety++; }
-    log(`⏩ Skip · Block gewechselt zu ${S.blocks[S.blockIdx]?.base}`, 'läufer', 'violet');
-  });
-  document.getElementById('btnReset').addEventListener('click', () => {
-    stopAuto();
-    S.blockIdx = 0; S.slot = 0;
-    S.totalRuns = 0; S.totalUsers = 0; S.totalTools = 0; S.blocksDone = 0;
-    S.userLog = []; S.uniLevel = 0; S.fusion = 0; S.koh = 0; S.union = 0; S.orbitRuns = 0;
-    initBlocks(INIT_BLOCKS);
-    buildGrid();
-    buildChain();
-    buildToolList();
-    renderUserTree();
-    computeUni();
-    renderHeaderAndMetrics();
-    updateRunner();
-    updateToolHighlight();
-    document.getElementById('log').innerHTML =
-      '<div class="entry"><span class="time">[reset]</span><span class="tag">läufer</span><span class="warn">⟲ LÄUFER zurückgesetzt · Basis 1000</span></div>';
-  });
-
-  document.getElementById('speed').addEventListener('input', (e) => {
-    S.speed = parseInt(e.target.value, 10);
-    document.getElementById('speedVal').textContent = S.speed + ' ms';
-    if (S.auto) {
-      stopAuto();
-      startAuto();
-    }
+  box.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.mod, act = btn.dataset.act;
+      const api = S.mods[id]?.api;
+      if (act === 'run'){
+        try { if (api?.run) api.run(); else if (api?.start) api.start(); log(`▶ ${id} · RUN`, 'macht', 'ok'); }
+        catch(e){ log(`✗ ${id} · ${e.message}`, 'macht', 'err'); }
+      } else {
+        try { if (api?.stop) api.stop(); log(`⏸ ${id} · STOP`, 'macht', 'warn'); }
+        catch(e){ log(`✗ ${id} · ${e.message}`, 'macht', 'err'); }
+      }
+    });
   });
 }
 
-// ─── UNI-ORB NODES ─────────────────────────────────────────
-function buildUniNodes() {
-  const g = document.getElementById('uniNodes');
-  if (!g) return;
-  g.innerHTML = '';
-  const axes = ['ces','in','me','run','sec','u'];
-  const colors = ['#7fdcff','#8cf0d0','#f0d080','#a888ff','#ff9ec4','#c8f0ff'];
-  axes.forEach((a, i) => {
-    const angle = (i / axes.length) * Math.PI * 2 - Math.PI / 2;
-    const x = Math.cos(angle) * 84;
-    const y = Math.sin(angle) * 84;
-    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('cx', x);
-    c.setAttribute('cy', y);
-    c.setAttribute('r', 7);
-    c.setAttribute('fill', 'rgba(6,10,18,0.9)');
-    c.setAttribute('stroke', colors[i]);
-    c.setAttribute('stroke-width', '1.5');
-    c.setAttribute('opacity', '0.85');
-    g.appendChild(c);
+// Auto-Start-Kette: KIT → GROUB → WORK → ZAM → UI → ECONOMY
+const CHAIN = ['kit', 'groub', 'work', 'zam', 'ui', 'economy'];
+
+function autoStart(){
+  log('▶ AUTO-START · Kette beginnt', 'macht', 'gold');
+  CHAIN.forEach((id, idx) => {
+    setTimeout(() => {
+      const m = S.mods[id];
+      const mod = MODULES.find(x => x.id === id);
+      try {
+        if (m?.api?.init) m.api.init();
+        else if (m?.api?.start) m.api.start();
+        S.autoChain.push({ id, ok:true });
+        log(`  ↳ ${mod.name} → ${m.present ? 'geladen' : 'fallback'}`, 'auto', m.present ? 'ok' : 'warn');
+        renderMacht();
+      } catch(e){
+        S.autoChain.push({ id, ok:false });
+        log(`  ✗ ${mod.name} · ${e.message}`, 'auto', 'err');
+      }
+    }, idx * 180);
+  });
+  setTimeout(() => log('✅ AUTO-START abgeschlossen', 'macht', 'ok'), CHAIN.length * 180 + 200);
+}
+
+// ─── 11. MODULE-LINKS ────────────────────────────────────────
+function renderFolders(){
+  const box = document.getElementById('moduleList');
+  box.innerHTML = '';
+  FOLDERS.forEach(f => {
+    const a = document.createElement('a');
+    a.className = 'modul-card';
+    a.href = f.path;
+    a.innerHTML = `
+      <span class="icon">${f.icon}</span>
+      <div class="name">${f.name}</div>
+      <div class="desc">${f.desc}</div>
+    `;
+    box.appendChild(a);
   });
 }
 
-// ─── CLOCK ──────────────────────────────────────────────────
-function updateClock() {
-  document.getElementById('hClock').textContent = '⏱️ ' + new Date().toLocaleTimeString('de-DE');
-}
-setInterval(updateClock, 1000);
+// ─── 12. RENDER: 8 RICHTUNGEN ────────────────────────────────
+document.querySelectorAll('.dir-item').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.dir-item').forEach(d => d.classList.remove('active'));
+    el.classList.add('active');
+    log(`🧭 Richtung: ${el.dataset.dir} aktiviert (Spinnwebe)`, 'dir', 'gold');
+    // Kleine Wirkung auf das Brett: Buchung in dieser Richtung togglen
+    applyDirection(el.dataset.dir);
+  });
+});
 
-// ─── FL76 ──────────────────────────────────────────────────
-function tickFl76(now) {
-  if (S.lastFrameT > 0) {
+function applyDirection(dir){
+  // Jede Richtung ist eine Achse im Schachbrett
+  // Bucht einen Streifen in dieser Richtung
+  const toBook = [];
+  switch(dir){
+    case 'S': // Sonne → alles buchen
+      for(let i=0;i<N*N;i++) S.booked[i] = true;
+      break;
+    case 'H': // Engine → mittlere Zeile
+      for(let c=0;c<N;c++) toBook.push(4*N + c);
+      break;
+    case 'B': // Matrix → mittlere Spalte
+      for(let r=0;r<N;r++) toBook.push(r*N + 4);
+      break;
+    case 'T': // Triangle → Diagonale
+      for(let i=0;i<N;i++) toBook.push(i*N + i);
+      break;
+    case 'O': // Orbit → Kreis um Zentrum
+      for(let r=2;r<7;r++) for(let c=2;c<7;c++) toBook.push(r*N + c);
+      break;
+    case 'D': // DS9 → 4 Ecken
+      toBook.push(0, N-1, (N-1)*N, N*N-1);
+      break;
+    case 't': // Helper → zufällige 10 Felder
+      for(let i=0;i<10;i++) toBook.push(Math.floor(Math.random()*N*N));
+      break;
+    case 'sys': // System → Kernfiguren (Seed)
+      for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+        const p = S.seed[r][c];
+        if (p === 'Ω' || p === '◉' || p === '♚' || p === '♛') toBook.push(r*N + c);
+      }
+      break;
+  }
+  if (dir === 'S'){
+    // S = alle
+    buildChess();
+  } else {
+    toBook.forEach(i => { S.booked[i] = true; });
+    buildChess();
+  }
+  measure();
+}
+
+// ─── 13. MASTER_KERNEL ────────────────────────────────────────
+const MASTER_KERNEL = {
+  init:  () => S.mods.kit?.api?.init?.(),
+  build: () => ({ matrix: S.booked.slice() }),
+  send:  (m) => { /* Broadcast der Matrix */ broadcast('mk:matrix', m); },
+  pipe:  () => { /* Pipeline */ },
+  orbit: () => S.mods.zam?.api?.orbit?.(),
+  ui:    () => S.mods.ui?.api?.init?.(),
+  eco:   () => { /* Eco connect */ },
+  work:  () => S.mods.work?.api?.start?.(),
+  groub: () => S.mods.groub?.api?.start?.(),
+  start(){
+    this.init();
+    const matrix = this.build();
+    this.send(matrix);
+    this.work();
+    this.groub();
+    this.ui();
+    this.eco();
+    this.orbit();
+    log('🧠 MASTER_KERNEL.start() · volle Kette ausgeführt', 'kernel', 'gold');
+    return matrix;
+  }
+};
+window.MASTER_KERNEL = MASTER_KERNEL;
+
+document.getElementById('btnMasterKernel').addEventListener('click', () => MASTER_KERNEL.start());
+document.getElementById('btnStartAll').addEventListener('click', () => {
+  CHAIN.forEach(id => { try { S.mods[id]?.api?.run?.() || S.mods[id]?.api?.start?.(); } catch(_){} });
+  log('▶ START ALL', 'macht', 'gold');
+});
+document.getElementById('btnStopAll').addEventListener('click', () => {
+  CHAIN.forEach(id => { try { S.mods[id]?.api?.stop?.(); } catch(_){} });
+  log('⏸ STOP ALL', 'macht', 'warn');
+});
+
+// ─── 14. BROADCAST ───────────────────────────────────────────
+let BC = null;
+try { BC = new BroadcastChannel('iki1uc-orbit'); } catch(_){}
+function broadcast(type, payload){
+  if (BC) { try { BC.postMessage({ type, from:'STAGE-TOOLATOR', payload, ts:Date.now() }); } catch(_){} }
+}
+
+// ─── 15. 9×9 RESPO Hintergrund ───────────────────────────────
+function initRespoBg(){
+  const bg = document.getElementById('respoBg');
+  for(let i=0;i<81;i++){
+    const c = document.createElement('div');
+    c.dataset.idx = i;
+    bg.appendChild(c);
+  }
+}
+function animateRespoBg(){
+  const now = performance.now() * 0.001;
+  document.querySelectorAll('#respoBg div').forEach((cell,i) => {
+    const val = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(i * 0.2 + now * 0.3 + Math.sin(i * 0.05 + now * 0.2)));
+    const alpha = 0.02 + val * 0.08;
+    cell.style.background = `rgba(120, 220, 150, ${alpha})`;
+  });
+  requestAnimationFrame(animateRespoBg);
+}
+
+// ─── 16. FL76 Monitor ────────────────────────────────────────
+function tickFl76(now){
+  S.frameCount++;
+  if (now - S.lastFpsT > 1000){
+    S.fps = S.frameCount;
+    S.frameCount = 0;
+    S.lastFpsT = now;
+  }
+  if (S.lastFrameT > 0){
     S.flRaw = now - S.lastFrameT;
     S.flSmooth = S.flSmooth * 0.88 + S.flRaw * 0.12;
   }
   S.lastFrameT = now;
   const fl = Math.round(S.flSmooth);
-  const mon = document.getElementById('fl76');
+  const mon = document.getElementById('fl76mon');
   document.getElementById('fl76num').textContent = fl;
   if (fl >= 60 && fl <= 90) mon.className = '';
   else if (fl < 40 || fl > 120) mon.className = 'outside';
@@ -1057,103 +1151,84 @@ function tickFl76(now) {
   requestAnimationFrame(tickFl76);
 }
 
-// ─── LOG ───────────────────────────────────────────────────
-function log(msg, tag = 'läufer', type = '') {
-  const box = document.getElementById('log');
+// ─── 17. LOG ──────────────────────────────────────────────────
+function log(msg, tag = 'stage', type = ''){
+  const box = document.getElementById('logBox');
   const entry = document.createElement('div');
   entry.className = 'entry';
   const t = new Date().toLocaleTimeString('de-DE');
   entry.innerHTML = `<span class="time">[${t}]</span><span class="tag">${tag}</span><span class="${type}">${msg}</span>`;
   box.appendChild(entry);
   box.scrollTop = box.scrollHeight;
-  while (box.children.length > 60) box.removeChild(box.firstChild);
+  while (box.children.length > 80) box.removeChild(box.firstChild);
 }
 
-// ─── KEYBOARD ──────────────────────────────────────────────
-document.addEventListener('keydown', (e) => {
+// ─── 18. CLOCK ────────────────────────────────────────────────
+function clock(){
+  document.getElementById('hdrClock').textContent = '⏱️ ' + new Date().toLocaleTimeString('de-DE');
+}
+setInterval(clock, 1000); clock();
+
+// ─── 19. KEYBOARD ─────────────────────────────────────────────
+document.addEventListener('keydown', e => {
   if (e.target.tagName === 'INPUT') return;
-  if (e.key === ' ') { e.preventDefault(); document.getElementById('btnRun').click(); }
-  if (e.key === 's' || e.key === 'S') document.getElementById('btnStep').click();
-  if (e.key === 'a' || e.key === 'A') document.getElementById('btnAuto').click();
-  if (e.key === 'r' || e.key === 'R') document.getElementById('btnReset').click();
-  if (e.key === 'k' || e.key === 'K') document.getElementById('btnSkipBlock').click();
+  // 1-8 für Richtungen
+  const dirMap = { '1':'S', '2':'H', '3':'B', '4':'T', '5':'O', '6':'D', '7':'t', '8':'sys' };
+  if (e.key in dirMap) {
+    const el = document.querySelector(`.dir-item[data-dir="${dirMap[e.key]}"]`);
+    if (el) el.click();
+  }
+  // M = Messen
+  if (e.key === 'm' || e.key === 'M') document.getElementById('btnMeasure').click();
+  // Leertaste = KlicK (eine zufällige Zelle togglen)
+  if (e.key === ' '){
+    e.preventDefault();
+    const i = Math.floor(Math.random() * N * N);
+    toggleCell(i);
+  }
 });
 
-// ─── BG-GRID ──────────────────────────────────────────────
-function buildBG() {
-  const bg = document.getElementById('bg');
-  for (let i = 0; i < 100; i++) {
-    bg.appendChild(document.createElement('div'));
+// ─── 20. INIT ─────────────────────────────────────────────────
+function init(){
+  // Respo-Hintergrund
+  initRespoBg();
+  animateRespoBg();
+
+  // Schachbrett: Kernfiguren sind initial gebucht
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      const p = S.seed[r][c];
+      if (p === 'Ω' || p === '◉' || p === '♚' || p === '♛') {
+        S.booked[r*N+c] = true;
+      }
+    }
   }
-}
+  buildChess();
+  measure();
+  startAutoMeasure();
 
-// ─── INIT ─────────────────────────────────────────────────
-function init() {
-  buildBG();
-  buildUniNodes();
-  initBlocks(INIT_BLOCKS);
-  buildGrid();
-  buildChain();
-  buildToolList();
-  renderUserTree();
-  computeUni();
-  renderHeaderAndMetrics();
-  updateRunner();
-  updateToolHighlight();
-  bindButtons();
+  // Module erkennen + rendern
+  detectModules();
+  renderMacht();
+  renderFolders();
 
-  log('▶ LÄUFER · TMP · USER-TREE · UNI bereit', 'init', 'gold');
-  log('→ 100er Schritte ab 1000 · 1 User / 100 · 99 Work', 'init', 'ok');
-  log('→ Tasten: Space=Run · S=Step · A=Auto · K=Skip · R=Reset', 'init', 'warn');
+  // Auto-Start
+  autoStart();
 
+  // FL76
+  S.lastFpsT = performance.now();
   requestAnimationFrame(tickFl76);
+
+  log('♟️ STAGE · SCHACHBRETT · TOOLATOR bereit', 'init', 'gold');
+  log('Buchen · Messen · Verstehen', 'init', 'ok');
+  log('MASTER_KERNEL · window.MASTER_KERNEL.start()', 'init', 'gold');
 }
 
-if (document.readyState === 'loading') {
+if (document.readyState === 'loading'){
   document.addEventListener('DOMContentLoaded', init);
 } else {
   init();
 }
-
-// ─── PUBLIC API ───────────────────────────────────────────
-window.LAEUFER = {
-  run: () => document.getElementById('btnRun').click(),
-  step: () => document.getElementById('btnStep').click(),
-  auto: () => document.getElementById('btnAuto').click(),
-  skip: () => document.getElementById('btnSkipBlock').click(),
-  reset: () => document.getElementById('btnReset').click(),
-  state: () => ({
-    blockIdx: S.blockIdx,
-    slot: S.slot,
-    base: S.blocks[S.blockIdx]?.base,
-    totalRuns: S.totalRuns,
-    totalUsers: S.totalUsers,
-    totalTools: S.totalTools,
-    blocksDone: S.blocksDone,
-    userLog: S.userLog.slice(),
-    uniLevel: S.uniLevel,
-    fusion: S.fusion,
-    koh: S.koh,
-    union: S.union,
-  }),
-  blocks: () => S.blocks.map(b => ({
-    idx: b.idx, base: b.base,
-    doneCount: b.doneCount, userSlot: b.userSlot,
-    userFound: b.userFound,
-  })),
-  jumpToBlock: (idx) => {
-    S.blockIdx = Math.min(idx, S.blocks.length - 1);
-    S.slot = 0;
-    while (S.blocks.length <= S.blockIdx) S.blocks.push(new TMPBlock(S.blocks.length));
-    buildGrid(); buildChain(); buildToolList(); renderHeaderAndMetrics();
-  },
-};
-window.L = window.LAEUFER;
-
-console.log('%c▶ LÄUFER · TMP · USER-TREE · UNI geladen',
-  'color:#6cf;font-weight:bold;font-size:14px;');
-console.log('→ window.L.run() · .step() · .auto() · .skip() · .state()');
-console.log('→ 1000 → 1099 → 1100 → 1199 → ... · 1 USER / 100 · 99 WORK');
 </script>
 </body>
 </html>
