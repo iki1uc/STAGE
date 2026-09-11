@@ -98,6 +98,8 @@ aber **essentiell für die Navigation**.
 - `ID.html` → STAGE‑Identität  
 - `README.md`
 
+
+LICENSE.md
 Dieses Projekt ist urheberrechtlich geschützt.
 
 Kein Clone. Kein Fork. Keine Nutzung. Keine Weitergabe.
