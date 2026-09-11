@@ -97,3 +97,15 @@ aber **essentiell für die Navigation**.
 - `index.html` → STAGE‑Bühne  
 - `ID.html` → STAGE‑Identität  
 - `README.md`
+
+Dieses Projekt ist urheberrechtlich geschützt.
+
+Kein Clone. Kein Fork. Keine Nutzung. Keine Weitergabe.
+
+Alle Rechte liegen bei wieimmer iki1uc.
+
+@iki1uc
+Security Policy
+Dieses Projekt akzeptiert keine externen Beiträge, Analysen oder Sicherheitsmeldungen.
+
+Alle Rechte liegen bei iki1uc.
